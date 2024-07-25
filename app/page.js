@@ -1,5 +1,5 @@
 'use client'
-import ColorAnalysis from "./X";
+import ColorAnalysis from "./ColorAnalysis";
 
 export default function Home() {
   return (
