@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import ColorThief from "colorthief";
 import { calculateBrightness, closeToWhite, isColorEqual, nearestColorFromPalette } from "@/utils/color";
 import FileUpload from "@/Components/FileUpload";
-import Canvas from "@/Components/Canvas";
+import Canvas, { removeTransparentPixels } from "@/Components/Canvas";
 import PaletteDisplay from "@/Components/PaletteDisplay";
 import MaskedCanvas from "@/Components/MaskedCanvas";
 import NextImage from "next/image";
@@ -20,6 +20,9 @@ const ColorAnalysis = () => {
     const [invertMask, setInvertMask] = useState(false);
 
     const [maskDataUrl, setMaskDataUrl] = useState(null);
+
+    const [uploadedUrl, setUploadedUrl] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     const onPaletteColorHover = (color) => {
         highlightColor(color);
@@ -99,6 +102,37 @@ const ColorAnalysis = () => {
         analyzeColors(myImage);
     };
 
+    const handleUpload = async (event) => {
+        setIsUploading(true);
+        const { canvas: croppedCanvas } = removeTransparentPixels(canvasRef.current);
+        const imageDataUrl = croppedCanvas.toDataURL();
+
+        try {
+            const response = await fetch('/api/upload-canvas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ imageDataUrl }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const data = await response.json();
+            setUploadedUrl(data.secure_url);
+
+            console.log('image upload success:>> ');
+            console.log('data.secure_url :>> ', data.secure_url);
+        } catch (err) {
+            console.error('Error:', err);
+            // setError('Failed to upload image. Please try again.');
+            console.log('Failed to upload image. Please try again.');
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     return (
         <div className="p-4">
@@ -122,7 +156,9 @@ const ColorAnalysis = () => {
 
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => saveAndExitMask()}>Find Mask </button>
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => reAnalysis()}>Update analysis color </button>
-
+            <button onClick={handleUpload} disabled={isUploading} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                {isUploading ? 'Uploading...' : 'Upload Canvas Image'}
+            </button>
             <div>
                 <input type="checkbox" checked={enableMask} onChange={() => setEnableMask(!enableMask)} />Enable mask
             </div>
