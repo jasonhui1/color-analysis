@@ -6,6 +6,11 @@ import Canvas, { removeTransparentPixels } from "@/Components/Canvas";
 import PaletteDisplay from "@/Components/PaletteDisplay";
 import MaskedCanvas from "@/Components/MaskedCanvas";
 import NextImage from "next/image";
+import GoogleLogin from "@/Components/Auth/GoogleLogin";
+import { getUserId } from "@/api/supabase";
+import { uploadPalette } from "@/api/palette";
+import { uploadImage } from "@/api/image";
+
 
 const ColorAnalysis = () => {
     const canvasRef = useRef(null);
@@ -65,6 +70,7 @@ const ColorAnalysis = () => {
     }
 
     const highlightColor = (color) => {
+        // TODO: use new filter canvas instead?
         if (!color) return
 
         const canvas = canvasRef.current;
@@ -116,26 +122,16 @@ const ColorAnalysis = () => {
     const handleUpload = async (event) => {
         setIsUploading(true);
         const { canvas: croppedCanvas } = removeTransparentPixels(canvasRef.current);
-        const imageDataUrl = croppedCanvas.toDataURL();
+        const canvasImageUrl = croppedCanvas.toDataURL();
+
+        //TODO: Wrap this in context  when refactor
+        const id = await getUserId()
 
         try {
-            const response = await fetch('/api/upload-canvas', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ imageDataUrl }),
-            });
+            const imageURL = await uploadImage(canvasImageUrl);
+            await uploadPalette({ palette: colorPalette, userId: id, imageURL });
+            console.log('upload success :>> ');
 
-            if (!response.ok) {
-                throw new Error('Upload failed');
-            }
-
-            const data = await response.json();
-            setUploadedUrl(data.secure_url);
-
-            console.log('image upload success:>> ');
-            console.log('data.secure_url :>> ', data.secure_url);
         } catch (err) {
             console.error('Error:', err);
             // setError('Failed to upload image. Please try again.');
@@ -147,6 +143,7 @@ const ColorAnalysis = () => {
 
     return (
         <div className="p-4">
+            <GoogleLogin />
             <h1 className="text-2xl font-bold mb-4">
                 Color Analysis
             </h1>
@@ -164,7 +161,7 @@ const ColorAnalysis = () => {
 
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => saveAndExitMask()}> {maskMode ? 'Exit Mask' : 'Enter Mask'} </button>
             <button onClick={handleUpload} disabled={isUploading} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                {isUploading ? 'Uploading...' : 'Upload Canvas Image'}
+                {isUploading ? 'Uploading...' : 'Upload '}
             </button>
             <div>
                 <input type="checkbox" checked={enableMask} onChange={() => setEnableMask(!enableMask)} />Enable mask
