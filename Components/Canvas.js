@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 
-export default function Canvas({ canvasRef, image, reset, maskedImage, maskMode, enableMask, invertMask }) {
+export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage, maskMode, enableMask, invertMask }) {
     useEffect(() => {
         if (image && canvasRef.current) {
+            console.log('drawing :>> ',);
             const canvas = canvasRef.current;
             let ctx = canvas.getContext("2d");
             canvas.width = image.width;
@@ -20,9 +21,9 @@ export default function Canvas({ canvasRef, image, reset, maskedImage, maskMode,
 
                 ctx.drawImage(maskedImage, 0, 0, image.width, image.height);
             }
-
+            setDrawingComplete(true)
         }
-    }, [image, reset, maskedImage, maskMode, enableMask, invertMask]);
+    }, [image, reset, maskMode, maskedImage, enableMask, invertMask]);
 
     return (<canvas ref={canvasRef} className="max-w-full h-auto" />);
 }

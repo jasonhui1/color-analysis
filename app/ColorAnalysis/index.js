@@ -8,32 +8,42 @@ import MaskedCanvas from "@/Components/MaskedCanvas";
 import NextImage from "next/image";
 
 const ColorAnalysis = () => {
-    const [image, setImage] = useState(null);
-    const [colorPalette, setColorPalette] = useState([]);
     const canvasRef = useRef(null);
     const maskedCanvasRef = useRef(null);
 
+    const [image, setImage] = useState(null);
+    const [colorPalette, setColorPalette] = useState([]);
+
     const [reset, setReset] = useState(false);
     const [maskReset, setMaskReset] = useState(false);
+
     const [maskMode, setMaskMode] = useState(false);
     const [enableMask, setEnableMask] = useState(false);
     const [invertMask, setInvertMask] = useState(false);
 
-    const [maskDataUrl, setMaskDataUrl] = useState(null);
+    const [drawingComplete, setDrawingComplete] = useState(false);
 
+    // const [maskDataUrl, setMaskDataUrl] = useState(null);
     const [uploadedUrl, setUploadedUrl] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+
+    useEffect(() => {
+        if (drawingComplete) {
+            setDrawingComplete(false); // Reset the flag for future drawings
+            if (!maskMode) reAnalysis();
+        }
+    }, [drawingComplete]);
+
+    const redraw = () => {
+        setReset(!reset);
+    };
 
     const onPaletteColorHover = (color) => {
         highlightColor(color);
     };
 
-    const resetImage = () => {
-        setReset(!reset);
-    };
-
     const onPaletteColorUnHover = () => {
-        resetImage();
+        redraw();
     };
 
     const analyzeColors = (img) => {
@@ -48,11 +58,9 @@ const ColorAnalysis = () => {
         }
     };
 
-    // const onImageSelected = (img) => {
     const onImageSelected = (img) => {
         setImage(img);
-        analyzeColors(img)
-
+        // analyzeColors(img)
     }
 
     const highlightColor = (color) => {
@@ -87,19 +95,20 @@ const ColorAnalysis = () => {
     };
 
     const saveAndExitMask = () => {
-        setReset(!reset)
         setMaskMode(!maskMode)
-
-
     };
 
     const reAnalysis = () => {
+        if (!canvasRef.current) return
+
         const url = canvasRef.current.toDataURL();
         const myImage = new Image();
         myImage.src = url;
 
-        setMaskDataUrl(url);
-        analyzeColors(myImage);
+        // setMaskDataUrl(url);
+        myImage.onload = () => {
+            analyzeColors(myImage);
+        };
     };
 
     const handleUpload = async (event) => {
@@ -144,18 +153,14 @@ const ColorAnalysis = () => {
 
             {/* {image && ( */}
             <div className="mb-4 relative " >
-                <Canvas canvasRef={canvasRef} image={image} reset={reset} maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask} />
+                <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={reset}
+                    maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
+                />
                 <MaskedCanvas canvasRef={maskedCanvasRef} image={image} reset={maskReset} brushSize={10} maskMode={maskMode} />
             </div>
 
-            <PaletteDisplay
-                colorPalette={colorPalette}
-                onPaletteColorHover={onPaletteColorHover}
-                onPaletteColorUnHover={onPaletteColorUnHover}
-            />
 
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => saveAndExitMask()}>Find Mask </button>
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => reAnalysis()}>Update analysis color </button>
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => saveAndExitMask()}> {maskMode ? 'Exit Mask' : 'Enter Mask'} </button>
             <button onClick={handleUpload} disabled={isUploading} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                 {isUploading ? 'Uploading...' : 'Upload Canvas Image'}
             </button>
@@ -163,6 +168,12 @@ const ColorAnalysis = () => {
                 <input type="checkbox" checked={enableMask} onChange={() => setEnableMask(!enableMask)} />Enable mask
             </div>
             <input type="checkbox" checked={invertMask} onChange={() => setInvertMask(!invertMask)} />Invert mask
+            <PaletteDisplay
+                colorPalette={colorPalette}
+                onPaletteColorHover={onPaletteColorHover}
+                onPaletteColorUnHover={onPaletteColorUnHover}
+            />
+
             {/* {maskDataUrl &&
                 <NextImage
                     src={maskDataUrl} alt="Masked Image"
