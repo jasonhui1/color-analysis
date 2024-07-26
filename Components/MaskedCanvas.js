@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     const [isDrawing, setIsDrawing] = useState(false);
     const [isErasing, setIsErasing] = useState(false);
-    const [brushSize, setBrushSize] = useState(20);
+    const [brushSize, setBrushSize] = useState(100);
 
     useEffect(() => {
         if (image && canvasRef.current) {
@@ -12,7 +12,7 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
             const ctx = canvas.getContext('2d');
             canvas.width = image.width;
             canvas.height = image.height;
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
     }, [image, reset]);
@@ -72,7 +72,7 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
                 onMouseOut={stopDrawing}
                 onMouseMove={draw}
                 onContextMenu={(e) => e.preventDefault()}
-                style={{ opacity: maskMode ? 0.5 : 0 }}
+                style={{ opacity: maskMode ? 0.6 : 0 }}
             />
             {maskMode && <div className=" bg-white p-4 rounded shadow w-96">
                 <input

@@ -22,6 +22,7 @@ const ColorAnalysis = () => {
     const [invertMask, setInvertMask] = useState(false);
 
     const [drawingComplete, setDrawingComplete] = useState(false);
+    const [maskSelectDrawingComplete, setMaskSelectDrawingComplete] = useState(false);
 
     // const [maskDataUrl, setMaskDataUrl] = useState(null);
     const [uploadedUrl, setUploadedUrl] = useState('');
@@ -96,6 +97,7 @@ const ColorAnalysis = () => {
 
     const saveAndExitMask = () => {
         setMaskMode(!maskMode)
+        if (maskMode) setEnableMask(true)
     };
 
     const reAnalysis = () => {

@@ -2,8 +2,9 @@ import { useEffect } from "react";
 
 export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage, maskMode, enableMask, invertMask }) {
     useEffect(() => {
+        // if (maskMode) return
+        //TODO: add a filter canvas instead?, so only need to draw base image once
         if (image && canvasRef.current) {
-            console.log('drawing :>> ',);
             const canvas = canvasRef.current;
             let ctx = canvas.getContext("2d");
             canvas.width = image.width;
