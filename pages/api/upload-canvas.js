@@ -6,6 +6,14 @@ cloudinary.config({
     api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET,
 });
 
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '5mb' // Set desired value here
+        }
+    }
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
@@ -19,12 +27,6 @@ export default async function handler(req, res) {
 
     try {
         const result = await cloudinary.uploader.upload(imageDataUrl);
-
-        // const result = await cloudinary.uploader.upload(imageDataUrl, {
-        //     transformation: [
-        //         { background: "auto:predominant", crop: "trim" },
-        //     ]
-        // });
 
         res.status(200).json({ secure_url: result.secure_url });
     } catch (error) {

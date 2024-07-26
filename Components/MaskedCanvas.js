@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 const MaskedCanvas = ({ canvasRef, image, reset, brushSize = 100, maskMode = true }) => {
     const [isDrawing, setIsDrawing] = useState(false);
+    const [isErasing, setIsErasing] = useState(false);
 
     useEffect(() => {
         if (image && canvasRef.current) {
@@ -15,16 +16,20 @@ const MaskedCanvas = ({ canvasRef, image, reset, brushSize = 100, maskMode = tru
     }, [image, reset]);
 
     const startDrawing = (e) => {
-        setIsDrawing(true);
+        if (e.button === 2) {
+            setIsErasing(true);
+        } else {
+            setIsDrawing(true);
+        }
         draw(e);
     };
 
     const stopDrawing = () => {
         setIsDrawing(false);
+        setIsErasing(false);
     };
-
     const draw = (e) => {
-        if (!isDrawing || !maskMode) return;
+        if ((!isDrawing && !isErasing) || !maskMode) return;
 
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -32,7 +37,7 @@ const MaskedCanvas = ({ canvasRef, image, reset, brushSize = 100, maskMode = tru
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        ctx.globalCompositeOperation = 'destination-out';
+        ctx.globalCompositeOperation = isErasing ? 'source-over' : 'destination-out';
         ctx.beginPath();
         ctx.arc(x, y, 50, 0, Math.PI * 2);
         ctx.fill();
@@ -46,6 +51,7 @@ const MaskedCanvas = ({ canvasRef, image, reset, brushSize = 100, maskMode = tru
             onMouseUp={stopDrawing}
             onMouseOut={stopDrawing}
             onMouseMove={draw}
+            onContextMenu={(e) => e.preventDefault()}
             style={{ opacity: maskMode ? 0.5 : 0 }}
         />
     );
