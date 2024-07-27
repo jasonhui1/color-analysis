@@ -7,6 +7,7 @@ import { TbPencilCancel } from "react-icons/tb";
 export default function PaletteDisplay({ colorPalette, setColorPalette,
     onPaletteColorHover,
     onPaletteColorUnHover,
+    onPaletteColorDelete,
     selectedColor, setSelectedColor
 }) {
 
@@ -31,17 +32,6 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
             setHoveringColor([]);
         }
         onPaletteColorUnHover();
-    };
-
-    const startEditing = () => {
-        setIsEditing(true)
-        // const newPalette = colorPalette.map((c) => (isColorEqual(c, color) ? color : c));
-        // setColorPalette(newPalette);
-    };
-
-    const deleteColor = (color) => {
-        const newPalette = colorPalette.filter((c) => !isColorEqual(c, color));
-        setColorPalette(newPalette);
     };
 
     return (
@@ -76,7 +66,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
 
                                         {!isEditing && <MdOutlineEdit className=" cursor-pointer w-6 h-6" color="blue" onClick={() => setIsEditing(true)} />}
                                         {isEditing && <TbPencilCancel className="cursor-pointer w-6 h-6" color="red" onClick={() => setIsEditing(false)} />}
-                                        <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => deleteColor(color)} />
+                                        <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => onPaletteColorDelete(color)} />
                                     </div>
                                 )}
                             </div>

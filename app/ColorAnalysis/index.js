@@ -11,10 +11,12 @@ import { getUserId } from "@/api/supabase";
 import { uploadPalette } from "@/api/palette";
 import { uploadImage } from "@/api/image";
 import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
+import HighlightHoveringColorCanvas from "../../Components/FilterCanvas";
 
 const ColorAnalysis = () => {
     const canvasRef = useRef(null);
     const maskedCanvasRef = useRef(null);
+    const highlightCanvasRef = useRef(null);
 
     const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
 
@@ -23,6 +25,7 @@ const ColorAnalysis = () => {
 
     const [reset, setReset] = useState(false);
     const [maskReset, setMaskReset] = useState(false);
+    const [highlightReset, setHighlightReset] = useState(false);
 
     const [maskMode, setMaskMode] = useState(false);
     const [enableMask, setEnableMask] = useState(false);
@@ -35,6 +38,8 @@ const ColorAnalysis = () => {
     const [uploadedUrl, setUploadedUrl] = useState('');
     const [isUploading, setIsUploading] = useState(false);
 
+    const [hoveringColor, setHoveringColor] = useState();
+
     useEffect(() => {
         if (drawingComplete) {
             setDrawingComplete(false); // Reset the flag for future drawings
@@ -42,16 +47,20 @@ const ColorAnalysis = () => {
         }
     }, [drawingComplete]);
 
-    const redraw = () => {
-        setReset(!reset);
-    };
-
     const onPaletteColorHover = (color) => {
-        highlightColor(color);
+        // highlightColor(color);
+        setHoveringColor(color);
     };
 
     const onPaletteColorUnHover = () => {
-        redraw();
+        setHighlightReset(!highlightReset);
+        setHoveringColor(null);
+    };
+
+    const onPaletteColorDelete = (color) => {
+        const newPalette = colorPalette.filter((c) => !isColorEqual(c, color));
+        setColorPalette(newPalette);
+        setHoveringColor(null);
     };
 
     const analyzeColors = (img) => {
@@ -70,38 +79,6 @@ const ColorAnalysis = () => {
         setImage(img);
         // analyzeColors(img)
     }
-
-    const highlightColor = (color) => {
-        // TODO: use new filter canvas instead?
-        if (!color) return
-
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        const step = 4; //rgba
-
-        for (let i = 0; i < data.length; i += step) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-
-            const nearestColor = nearestColorFromPalette([r, g, b], colorPalette);
-            if (isColorEqual(color, nearestColor)) {
-                // Highlight matching colors
-                data[i] = color[0];
-                data[i + 1] = color[1];
-                data[i + 2] = color[2];
-                // data[i + 3] = 255; // Full opacity
-            } else {
-                // Dim non-matching colors
-                data[i] = Math.floor(r * 0.2);
-                data[i + 1] = Math.floor(g * 0.2);
-                data[i + 2] = Math.floor(b * 0.2);
-            }
-        }
-        ctx.putImageData(imageData, 0, 0);
-    };
 
     const saveAndExitMask = () => {
         setMaskMode(!maskMode)
@@ -162,6 +139,7 @@ const ColorAnalysis = () => {
                         setSelectedColor={setSelectedColor}
                     />
                     <MaskedCanvas canvasRef={maskedCanvasRef} image={image} reset={maskReset} brushSize={10} maskMode={maskMode} />
+                    <HighlightHoveringColorCanvas baseCanvasRef={canvasRef} reset={highlightReset} canvasRef={highlightCanvasRef} image={image} color={hoveringColor} colorPalette={colorPalette} />
                 </div>
                 {<TriangularColorPickerDisplayColors colors={[selectedColor]} normalised={true} />}
 
@@ -181,6 +159,7 @@ const ColorAnalysis = () => {
                 setColorPalette={setColorPalette}
                 onPaletteColorHover={onPaletteColorHover}
                 onPaletteColorUnHover={onPaletteColorUnHover}
+                onPaletteColorDelete={onPaletteColorDelete}
                 selectedColor={selectedColor}
                 setSelectedColor={setSelectedColor}
             />
