@@ -3,7 +3,6 @@ import ColorThief from "colorthief";
 import { calculateBrightness, closeToWhite, isColorEqual, nearestColorFromPalette } from "@/utils/color";
 import FileUpload from "@/Components/FileUpload";
 import Canvas, { removeTransparentPixels } from "@/Components/Canvas";
-import PaletteDisplay from "@/Components/PaletteDisplay";
 import MaskedCanvas from "@/Components/MaskedCanvas";
 import NextImage from "next/image";
 import GoogleLogin from "@/Components/Auth/GoogleLogin";
@@ -12,6 +11,8 @@ import { uploadPalette } from "@/api/palette";
 import { uploadImage } from "@/api/image";
 import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
 import HighlightHoveringColorCanvas from "../../Components/FilterCanvas";
+import CheckBox from "../../Components/General/CheckBox";
+import PaletteDisplay from "../../Components/Color/PaletteDisplay";
 
 const ColorAnalysis = () => {
     const canvasRef = useRef(null);
@@ -30,20 +31,22 @@ const ColorAnalysis = () => {
     const [maskMode, setMaskMode] = useState(false);
     const [enableMask, setEnableMask] = useState(false);
     const [invertMask, setInvertMask] = useState(false);
+    const [autoAnalysis, setAutoAnalysis] = useState(true);
 
     const [drawingComplete, setDrawingComplete] = useState(false);
     const [maskSelectDrawingComplete, setMaskSelectDrawingComplete] = useState(false);
 
     // const [maskDataUrl, setMaskDataUrl] = useState(null);
     const [uploadedUrl, setUploadedUrl] = useState('');
-    const [isUploading, setIsUploading] = useState(false);
+
 
     const [hoveringColor, setHoveringColor] = useState();
+    const [tags, setTags] = useState('');
 
     useEffect(() => {
         if (drawingComplete) {
             setDrawingComplete(false); // Reset the flag for future drawings
-            if (!maskMode) reAnalysis();
+            if (!maskMode && autoAnalysis) reAnalysis();
         }
     }, [drawingComplete]);
 
@@ -98,28 +101,6 @@ const ColorAnalysis = () => {
         };
     };
 
-    const handleUpload = async (event) => {
-        setIsUploading(true);
-        const { canvas: croppedCanvas } = removeTransparentPixels(canvasRef.current);
-        const canvasImageUrl = croppedCanvas.toDataURL();
-
-        //TODO: Wrap this in context  when refactor
-        const id = await getUserId()
-
-        try {
-            const imageURL = await uploadImage(canvasImageUrl);
-            await uploadPalette({ palette: colorPalette, userId: id, imageURL });
-            console.log('upload success :>> ');
-
-        } catch (err) {
-            console.error('Error:', err);
-            // setError('Failed to upload image. Please try again.');
-            console.log('Failed to upload image. Please try again.');
-        } finally {
-            setIsUploading(false);
-        }
-    };
-
     return (
         <div className="p-4">
             <GoogleLogin />
@@ -145,28 +126,36 @@ const ColorAnalysis = () => {
 
             </div>
 
+            <div className="flex flex-col gap-4">
 
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => saveAndExitMask()}> {maskMode ? 'Exit Mask' : 'Enter Mask'} </button>
-            <button onClick={handleUpload} disabled={isUploading} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                {isUploading ? 'Uploading...' : 'Upload '}
-            </button>
-            <div>
-                <input type="checkbox" checked={enableMask} onChange={() => setEnableMask(!enableMask)} />Enable mask
-            </div>
-            <input type="checkbox" checked={invertMask} onChange={() => setInvertMask(!invertMask)} />Invert mask
-            <PaletteDisplay
-                colorPalette={colorPalette}
-                setColorPalette={setColorPalette}
-                onPaletteColorHover={onPaletteColorHover}
-                onPaletteColorUnHover={onPaletteColorUnHover}
-                onPaletteColorDelete={onPaletteColorDelete}
-                selectedColor={selectedColor}
-                setSelectedColor={setSelectedColor}
-            />
 
-            {colorPalette && <TriangularColorPickerDisplayColors colors={colorPalette} normalised={true} />}
+                <MaskUI maskMode={maskMode} onExitMaskMode={saveAndExitMask}
+                    enableMask={enableMask} setEnableMask={setEnableMask}
+                    invertMask={invertMask} setInvertMask={setInvertMask} />
 
-            {/* {maskDataUrl &&
+                <div className="flex gap-4 items-center">
+                    <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
+                    <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" />
+                </div>
+
+                <PaletteDisplay
+                    colorPalette={colorPalette} setColorPalette={setColorPalette}
+                    onPaletteColorHover={onPaletteColorHover}
+                    onPaletteColorUnHover={onPaletteColorUnHover}
+                    onPaletteColorDelete={onPaletteColorDelete}
+                    selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+                />
+
+                {colorPalette && <TriangularColorPickerDisplayColors colors={colorPalette} normalised={true} />}
+                <div>
+
+                    <label className="mr-4">Tags:</label>
+                    <input type="text" className="w-48 border-black border" value={tags} onChange={(e) => setTags(e.target.value)} />
+                </div>
+
+
+
+                {/* {maskDataUrl &&
                 <NextImage
                     src={maskDataUrl} alt="Masked Image"
                     width={0}
@@ -175,9 +164,58 @@ const ColorAnalysis = () => {
                     style={{ width: 'auto', height: 'auto' }} // optional
                 />
             } */}
+
+                <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} tags={tags} />
+
+            </div>
+
         </div>
     );
 };
 export default ColorAnalysis;
 
+function MaskUI({ maskMode,
+    enableMask, setEnableMask,
+    invertMask, setInvertMask,
+    onExitMaskMode
+}) {
 
+    return (
+        <div className="flex gap-4 items-center">
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => onExitMaskMode()}> {maskMode ? 'Exit Mask' : 'Enter Mask'} </button>
+            <CheckBox label="Enable mask" checked={enableMask} onChange={() => setInvertMask(!enableMask)} />
+            <CheckBox label="Invert mask" checked={invertMask} onChange={() => setInvertMask(!invertMask)} />
+        </div>
+    )
+}
+
+function UploadButton({ colorPalette, canvasRef, tags }) {
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleUpload = async (event) => {
+        setIsUploading(true);
+        const { canvas: croppedCanvas } = removeTransparentPixels(canvasRef.current);
+        const canvasImageUrl = croppedCanvas.toDataURL();
+
+        //TODO: Wrap this in context  when refactor
+        const id = await getUserId()
+
+        try {
+            const imageURL = await uploadImage(canvasImageUrl);
+            await uploadPalette({ palette: colorPalette, userId: id, imageURL, tags });
+            console.log('upload success :>> ');
+
+        } catch (err) {
+            console.error('Error:', err);
+            // setError('Failed to upload image. Please try again.');
+            console.log('Failed to upload image. Please try again.');
+        } finally {
+            setIsUploading(false);
+        }
+    };
+    return (
+        <button onClick={handleUpload} disabled={isUploading} className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+            {isUploading ? 'Uploading...' : 'Upload '}
+        </button>
+    );
+}

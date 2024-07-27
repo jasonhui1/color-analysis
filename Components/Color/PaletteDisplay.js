@@ -1,7 +1,7 @@
 import { MdOutlineEdit } from "react-icons/md";
 import { FaDeleteLeft } from "react-icons/fa6";
 import { useEffect, useState } from "react";
-import { hslToRgb, isColorEqual } from "../utils/color";
+import { hslToRgb, isColorEqual } from "../../utils/color";
 import { TbPencilCancel } from "react-icons/tb";
 
 export default function PaletteDisplay({ colorPalette, setColorPalette,
@@ -60,15 +60,13 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
                   {index + 1}
                 </span> */}
                                 </div>
-                                {isColorEqual(color, hoveringColor) && (
 
-                                    <div className="flex justify-between">
+                                    <div className={`flex justify-between ${!isColorEqual(color, hoveringColor) ? 'opacity-0' : ''}`}>
 
                                         {!isEditing && <MdOutlineEdit className=" cursor-pointer w-6 h-6" color="blue" onClick={() => setIsEditing(true)} />}
                                         {isEditing && <TbPencilCancel className="cursor-pointer w-6 h-6" color="red" onClick={() => setIsEditing(false)} />}
                                         <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => onPaletteColorDelete(color)} />
                                     </div>
-                                )}
                             </div>
                         ))}
                     </div>
