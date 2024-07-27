@@ -1,7 +1,11 @@
+
 {
   "compilerOptions": {
-    "paths": {
-      "@/*": ["./*"]
-    }
-  }
+    "module": "ES6",
+    "jsx": "preserve",
+    //Type checks, useful for checking before pushing
+    // "checkJs": true
+  },
+  
+   "exclude": ["node_modules", "**/node_modules/*",]
 }

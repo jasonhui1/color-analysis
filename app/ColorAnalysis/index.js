@@ -10,6 +10,7 @@ import GoogleLogin from "@/Components/Auth/GoogleLogin";
 import { getUserId } from "@/api/supabase";
 import { uploadPalette } from "@/api/palette";
 import { uploadImage } from "@/api/image";
+import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
 
 
 const ColorAnalysis = () => {
@@ -172,6 +173,8 @@ const ColorAnalysis = () => {
                 onPaletteColorHover={onPaletteColorHover}
                 onPaletteColorUnHover={onPaletteColorUnHover}
             />
+
+            {colorPalette && <TriangularColorPickerDisplayColors colors={colorPalette} />}
 
             {/* {maskDataUrl &&
                 <NextImage
