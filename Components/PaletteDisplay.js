@@ -1,25 +1,67 @@
-export default function PaletteDisplay({ colorPalette,
+import { MdOutlineEdit } from "react-icons/md";
+import { FaDeleteLeft } from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { hslToRgb, isColorEqual } from "../utils/color";
+import { TbPencilCancel } from "react-icons/tb";
+
+export default function PaletteDisplay({ colorPalette, setColorPalette,
     onPaletteColorHover,
     onPaletteColorUnHover,
-    setSelectedColor
+    selectedColor, setSelectedColor
 }) {
+
+    const [hoveringColor, setHoveringColor] = useState([]);
+    const [isEditing, setIsEditing] = useState(false);
+
+    useEffect(() => {
+        if (selectedColor && isEditing) {
+            const newPalette = colorPalette.map((c) => (isColorEqual(c, hoveringColor) ? selectedColor : c));
+            setColorPalette(newPalette);
+            setHoveringColor(selectedColor);
+        }
+    }, [selectedColor]);
+
+    const handleHover = (color) => {
+        setHoveringColor(color);
+        onPaletteColorHover(color)
+    };
+
+    const handleUnHover = () => {
+        if (!isEditing) {
+            setHoveringColor([]);
+        }
+        onPaletteColorUnHover();
+    };
+
+    const startEditing = () => {
+        setIsEditing(true)
+        // const newPalette = colorPalette.map((c) => (isColorEqual(c, color) ? color : c));
+        // setColorPalette(newPalette);
+    };
+
+    const deleteColor = (color) => {
+        const newPalette = colorPalette.filter((c) => !isColorEqual(c, color));
+        setColorPalette(newPalette);
+    };
+
     return (
         <>
             {colorPalette.length > 0 && (
                 <div className="mt-4">
                     <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex gap-4">
                         {colorPalette.map((color, index) => (
-                            <div
-                                key={index}
-                                className="w-16 h-16 rounded-full cursor-pointer shadow-md flex items-center justify-center"
-                                style={{ backgroundColor: `rgb(${color.join(",")})` }}
-                                onMouseEnter={() => onPaletteColorHover(color)}
-                                onMouseLeave={() => onPaletteColorUnHover()}
-                                onMouseDown={() => setSelectedColor(color)}
-                                onContextMenu={(e) => e.preventDefault()}
-                            >
-                                {/* <span
+                            <div onMouseEnter={() => handleHover(color)} onMouseLeave={() => handleUnHover()}    >
+                                <div
+                                    key={index}
+                                    className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
+                                    style={{ backgroundColor: `rgb(${color.join(",")})` }}
+
+                                    onMouseDown={() => setSelectedColor(color)}
+                                    onContextMenu={(e) => e.preventDefault()}
+                                >
+
+                                    {/* <span
                   className="text-xs font-semibold"
                   style={{
                     color: getLuminance(color) > 0.5 ? "black" : "white",
@@ -27,6 +69,16 @@ export default function PaletteDisplay({ colorPalette,
                 >
                   {index + 1}
                 </span> */}
+                                </div>
+                                {isColorEqual(color, hoveringColor) && (
+
+                                    <div className="flex justify-between">
+
+                                        {!isEditing && <MdOutlineEdit className=" cursor-pointer w-6 h-6" color="blue" onClick={() => setIsEditing(true)} />}
+                                        {isEditing && <TbPencilCancel className="cursor-pointer w-6 h-6" color="red" onClick={() => setIsEditing(false)} />}
+                                        <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => deleteColor(color)} />
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

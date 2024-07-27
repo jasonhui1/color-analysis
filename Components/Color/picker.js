@@ -256,16 +256,15 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
     }
     const w = bb.y2 - bb.y1
 
-    if (colorisRGB && colors) {
-        colors = colors.map(([r, g, b]) => rgbToHsl(r, g, b))
+    if (colorisRGB && colors.length > 0) {
+        colors = colors.map(([r, g, b]) => rgbToHsl(r, g, b, false, false))
         colors = colors.map(([h, s, l]) => ({ h, s, l }));
     }
+    if (colors.length > 0) hue = colors[0].h
 
-    const SVPosition = colors.map(({ s, l }) => getPositionFromSV({ s, v: l, w, bb, normalised: true }))
-    const HuePosition = colors.map(({ h }) => getPositionFromHue(h + defaultHueShift / 360, radius, center, center, true))
-
-    if (colors.length > 0) hue = colors[0].h * 360
-
+    const SVPosition = colors.map(({ s, l }) => getPositionFromSV({ s, v: l, w, bb }))
+    const HuePosition = colors.map(({ h }) => getPositionFromHue(h + defaultHueShift, radius, center, center))
+    
     return (
         <div className={`w-[${size}px] h-[${size}px] relative`}>
             <Image className='absolute' src={color_wheel} alt="color_wheel" width={size} height={size} draggable={false} style={{
@@ -292,8 +291,8 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
 
             {HuePosition.map((position, index) => (
                 <div key={index}>
-                    <RectIndicator position={position} width={10} height={22} color="white" border_width={2} rotation={colors[index].h * 360 + 90 + defaultHueShift} />
-                    <RectIndicator position={position} width={12} height={24} color="black" rotation={colors[index].h * 360 + 90 + defaultHueShift} />
+                    <RectIndicator position={position} width={10} height={22} color="white" border_width={2} rotation={colors[index].h + 90 + defaultHueShift} />
+                    <RectIndicator position={position} width={12} height={24} color="black" rotation={colors[index].h + 90 + defaultHueShift} />
                 </div>
             ))}
         </div>

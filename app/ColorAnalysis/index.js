@@ -12,7 +12,6 @@ import { uploadPalette } from "@/api/palette";
 import { uploadImage } from "@/api/image";
 import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
 
-
 const ColorAnalysis = () => {
     const canvasRef = useRef(null);
     const maskedCanvasRef = useRef(null);
@@ -58,7 +57,7 @@ const ColorAnalysis = () => {
     const analyzeColors = (img) => {
         try {
             const colorThief = new ColorThief();
-            const palette = colorThief.getPalette(img, 8, 10);
+            let palette = colorThief.getPalette(img, 8, 10);
 
             palette.sort((a, b) => calculateBrightness(b) - calculateBrightness(a));
             setColorPalette(palette);
@@ -164,7 +163,7 @@ const ColorAnalysis = () => {
                     />
                     <MaskedCanvas canvasRef={maskedCanvasRef} image={image} reset={maskReset} brushSize={10} maskMode={maskMode} />
                 </div>
-                {<TriangularColorPickerDisplayColors colors={[selectedColor]} />}
+                {<TriangularColorPickerDisplayColors colors={[selectedColor]} normalised={true} />}
 
             </div>
 
@@ -179,12 +178,14 @@ const ColorAnalysis = () => {
             <input type="checkbox" checked={invertMask} onChange={() => setInvertMask(!invertMask)} />Invert mask
             <PaletteDisplay
                 colorPalette={colorPalette}
+                setColorPalette={setColorPalette}
                 onPaletteColorHover={onPaletteColorHover}
                 onPaletteColorUnHover={onPaletteColorUnHover}
+                selectedColor={selectedColor}
                 setSelectedColor={setSelectedColor}
             />
 
-            {colorPalette && <TriangularColorPickerDisplayColors colors={colorPalette} />}
+            {colorPalette && <TriangularColorPickerDisplayColors colors={colorPalette} normalised={true} />}
 
             {/* {maskDataUrl &&
                 <NextImage
