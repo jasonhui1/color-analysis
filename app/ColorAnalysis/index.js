@@ -83,7 +83,7 @@ const ColorAnalysis = () => {
         // analyzeColors(img)
     }
 
-    const saveAndExitMask = () => {
+    const onChangeMaskMode = () => {
         setMaskMode(!maskMode)
         if (maskMode) setEnableMask(true)
     };
@@ -129,7 +129,7 @@ const ColorAnalysis = () => {
             <div className="flex flex-col gap-4">
 
 
-                <MaskUI maskMode={maskMode} onExitMaskMode={saveAndExitMask}
+                <MaskUI maskMode={maskMode} onChangeMaskMode={onChangeMaskMode}
                     enableMask={enableMask} setEnableMask={setEnableMask}
                     invertMask={invertMask} setInvertMask={setInvertMask} />
 
@@ -174,16 +174,15 @@ const ColorAnalysis = () => {
 };
 export default ColorAnalysis;
 
-function MaskUI({ maskMode,
+function MaskUI({ maskMode, onChangeMaskMode,
     enableMask, setEnableMask,
     invertMask, setInvertMask,
-    onExitMaskMode
 }) {
 
     return (
         <div className="flex gap-4 items-center">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => onExitMaskMode()}> {maskMode ? 'Exit Mask' : 'Enter Mask'} </button>
-            <CheckBox label="Enable mask" checked={enableMask} onChange={() => setInvertMask(!enableMask)} />
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => onChangeMaskMode()}> {maskMode ? 'Exit Mask' : 'Enter Mask'} </button>
+            <CheckBox label="Enable mask" checked={enableMask} onChange={() => setEnableMask(!enableMask)} />
             <CheckBox label="Invert mask" checked={invertMask} onChange={() => setInvertMask(!invertMask)} />
         </div>
     )
@@ -214,7 +213,9 @@ function UploadButton({ colorPalette, canvasRef, tags }) {
         }
     };
     return (
-        <button onClick={handleUpload} disabled={isUploading} className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+        <button onClick={handleUpload} 
+        // disabled={isUploading} 
+        className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
             {isUploading ? 'Uploading...' : 'Upload '}
         </button>
     );

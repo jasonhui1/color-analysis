@@ -31,6 +31,7 @@ async function addPalette({ palette, userId, imageURL = null }) {
         .select();
 
     if (error) {
+        console.error('Error inserting palette:', error);
         throw error;
     }
 
@@ -38,17 +39,61 @@ async function addPalette({ palette, userId, imageURL = null }) {
     return data[0].id;
 }
 
+async function addTagsToPalette({ userId, tags }) {
+    if (tags && tags.length > 0) {
+        const uniqueTags = [...new Set(tags)]; // Remove duplicates
+        console.log('uniqueTags :>> ', uniqueTags);
+
+        // Upsert all tags at once
+        const { data: tagData, error: tagError } = await supabase
+            .from('tags')
+            .upsert(
+                uniqueTags.map(tag => ({ tag, userId })),
+                { onConflict: ['tag', 'userId']}
+            )
+            .select();
+
+        if (tagError) {
+            console.error('Error upserting tags:', tagError);
+        }
+
+        return tagData;
+    }
+
+}
+
+async function linkPaletteTags({ paletteId, tags }) {
+    const paletteTagsToInsert = tags.map(tag => ({
+        paletteId,
+        tagId: tag.id
+    }));
+
+    const { error: linkError } = await supabase
+        .from('palette_tags')
+        .insert(paletteTagsToInsert);
+
+    if (linkError) {
+        console.error('Error linking tags to palette:', linkError);
+    } else {
+        console.log('link success :>> ');
+    }
+}
+
+
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { palette, imageURL, userId } = req.body;
+        const { palette, imageURL, userId, tags } = req.body;
         if (!palette) {
             return res.status(400).json({ error: 'palette is required' });
         }
 
         try {
-            const id = addPalette({ palette, imageURL, userId });
+            const paletteId = await addPalette({ palette, imageURL, userId });
+            const tags_ = await addTagsToPalette({ userId, tags });
+            await linkPaletteTags({ paletteId, tags: tags_ });
+
             console.log('upload palette success :>> ');
-            res.status(200).json({ id });
+            res.status(200).json({ paletteId });
 
         } catch (error) {
             console.error('Upload palette error:', error);

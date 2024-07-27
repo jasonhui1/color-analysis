@@ -4,7 +4,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 export async function getUserId() {
     const { data: { user } } = await supabase.auth.getUser()
 
-    return user.id
+    return user?.id
 }
 
 export async function googleSignIn(token) {

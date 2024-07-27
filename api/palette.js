@@ -1,10 +1,12 @@
-export async function uploadPalette({ palette, userId, imageURL = null }) {
+export async function uploadPalette({ palette, userId, imageURL = null, tags = '' }) {
+
+    const tagsArray = tags.split(' ').map(tag => tag.trim());
     const response = await fetch('/api/palette', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ palette, userId, imageURL }),
+        body: JSON.stringify({ palette, userId, imageURL, tags: tagsArray }),
     });
 
     if (!response.ok) {
