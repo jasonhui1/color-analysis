@@ -17,6 +17,8 @@ const ColorAnalysis = () => {
     const canvasRef = useRef(null);
     const maskedCanvasRef = useRef(null);
 
+    const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
+
     const [image, setImage] = useState(null);
     const [colorPalette, setColorPalette] = useState([]);
 
@@ -151,12 +153,19 @@ const ColorAnalysis = () => {
 
             <FileUpload onImageSelected={onImageSelected} />
 
+
             {/* {image && ( */}
-            <div className="mb-4 relative " >
-                <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={reset}
-                    maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
-                />
-                <MaskedCanvas canvasRef={maskedCanvasRef} image={image} reset={maskReset} brushSize={10} maskMode={maskMode} />
+            <div className="flex flex-row gap-6 " >
+
+                <div className="mb-4 relative " >
+                    <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={reset}
+                        maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
+                        setSelectedColor={setSelectedColor}
+                    />
+                    <MaskedCanvas canvasRef={maskedCanvasRef} image={image} reset={maskReset} brushSize={10} maskMode={maskMode} />
+                </div>
+                {<TriangularColorPickerDisplayColors colors={[selectedColor]} />}
+
             </div>
 
 
@@ -172,6 +181,7 @@ const ColorAnalysis = () => {
                 colorPalette={colorPalette}
                 onPaletteColorHover={onPaletteColorHover}
                 onPaletteColorUnHover={onPaletteColorUnHover}
+                setSelectedColor={setSelectedColor}
             />
 
             {colorPalette && <TriangularColorPickerDisplayColors colors={colorPalette} />}

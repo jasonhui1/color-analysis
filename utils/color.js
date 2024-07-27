@@ -58,6 +58,29 @@ export const rgbToHsv = (r, g, b, normalised = false) => {
     return [h, s, v];
 };
 
+export const rgbToHsl = (r, g, b, normalised = false) => {
+    if (!normalised) r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    const d = max - min;
+    s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+
+    if (max === min) {
+        h = 0;
+    } else {
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+
+    return [h, s, l];
+};
+
 // Helper function to convert HSV to RGB
 export const hsvToRgb = (h, s, v) => {
     let r, g, b;

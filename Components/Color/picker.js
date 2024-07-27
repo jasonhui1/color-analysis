@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import color_wheel from "../../public/color_wheel.png";
 import Image from 'next/image';
 import HueShiftImage from './HueShiftImage';
@@ -6,6 +6,7 @@ import { FaRegCircle } from 'react-icons/fa';
 import { rgbToHsv } from '@/utils/color';
 import { getPositionFromHue } from '@/utils/color_picker_calculation';
 import { getPositionFromSV, withinTriangle_strict, withinCircle, getSVFromPosition, getHueFromPosition } from '../../utils/color_picker_calculation';
+import { rgbToHsl } from '../../utils/color';
 
 const defaultHueShift = 30 //by CSP
 const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor }) => {
@@ -242,7 +243,7 @@ const HSLControl = ({ selectedColor, label, value, min, max, onChange }) => {
 }
 
 
-export const TriangularColorPickerDisplayColors = ({ hue = 30, size = 300, colors = [], colorisRGB = true }) => {
+export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, colors = [], colorisRGB = true }) => {
     const center = size / 2
     const ratio = size / 300
     ///////////////////////////Cirlce///////////////////////
@@ -256,22 +257,24 @@ export const TriangularColorPickerDisplayColors = ({ hue = 30, size = 300, color
     const w = bb.y2 - bb.y1
 
     if (colorisRGB && colors) {
-        colors = colors.map(([r, g, b]) => rgbToHsv(r, g, b))
+        colors = colors.map(([r, g, b]) => rgbToHsl(r, g, b))
         colors = colors.map(([h, s, l]) => ({ h, s, l }));
     }
 
     const SVPosition = colors.map(({ s, l }) => getPositionFromSV({ s, v: l, w, bb, normalised: true }))
-    const HuePosition = colors.map(({ h }) => getPositionFromHue(h + defaultHueShift/360, radius, center, center, true))
+    const HuePosition = colors.map(({ h }) => getPositionFromHue(h + defaultHueShift / 360, radius, center, center, true))
+
+    if (colors.length > 0) hue = colors[0].h * 360
 
     return (
         <div className={`w-[${size}px] h-[${size}px] relative`}>
-            {/* <Image className='absolute' src={color_wheel} alt="color_wheel" width={size} height={size} draggable={false} style={{
+            <Image className='absolute' src={color_wheel} alt="color_wheel" width={size} height={size} draggable={false} style={{
                 userSelect: 'none',
                 WebkitUserDrag: 'none',
                 KhtmlUserDrag: 'none',
                 MozUserDrag: 'none',
                 OUserDrag: 'none',
-            }} /> */}
+            }} />
             <HueShiftImage
                 src={"https://i.imgur.com/BRVZgWi.png"}
                 width={size}
@@ -279,31 +282,21 @@ export const TriangularColorPickerDisplayColors = ({ hue = 30, size = 300, color
                 alt="color_combined"
                 hueShift={hue}
             />
-            {SVPosition.map(({ x, y }, index) => (
-                <FaRegCircle className='text-black absolute' key={index} style={{
-                    left: `${x}px`,
-                    top: `${y}px`,
-                    transform: `translate(-50%, -50%)`,
-                    mixBlendMode: 'multiply',
 
-                    stroke: 'white',
-                    strokeWidth: '10px'
-                }} />
+            {SVPosition.map((position, index) => (
+                <div key={index}>
+                    <CircleIndicator position={position} width={10} height={10} color="white" border_width={2} />
+                    <CircleIndicator position={position} width={12} height={12} color="black" />
+                </div>
             ))}
 
-            {HuePosition.map(({ x, y }, index) => (
-                <FaRegCircle className='text-black-500 absolute' key={index} style={{
-                    left: `${x}px`,
-                    top: `${y}px`,
-                    transform: `translate(-50%, -50%)`,
-                    mixBlendMode: 'multiply',
-                    stroke: 'white',
-                    strokeWidth: '10px'
-                }} />
+            {HuePosition.map((position, index) => (
+                <div key={index}>
+                    <RectIndicator position={position} width={10} height={22} color="white" border_width={2} rotation={colors[index].h * 360 + 90 + defaultHueShift} />
+                    <RectIndicator position={position} width={12} height={24} color="black" rotation={colors[index].h * 360 + 90 + defaultHueShift} />
+                </div>
             ))}
-
-
         </div>
 
     );
-};
+});

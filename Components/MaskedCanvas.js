@@ -21,8 +21,6 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     }, [image, reset]);
 
     const startDrawing = (e) => {
-        if (!maskMode) return
-
         if (e.button === 2) {
             isErasingRef.current = true;
         } else {
@@ -32,7 +30,6 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     };
 
     const stopDrawing = () => {
-        if (!maskMode) return
         isDrawingRef.current = false;
         isErasingRef.current = false;
     };
@@ -40,7 +37,7 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     const draw = (e) => {
         const isDrawing = isDrawingRef.current;
         const isErasing = isErasingRef.current;
-        if ((!isDrawing && !isErasing) || !maskMode) return;
+        if ((!isDrawing && !isErasing)) return;
 
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -55,7 +52,6 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     }
 
     const handleWheel = (e) => {
-        if (!maskMode) return
         e.preventDefault()
         const speed = 1 / 10
         setBrushSize(prevSize => Math.floor(Math.max(10, Math.min(200, prevSize - e.deltaY * speed))));
@@ -64,7 +60,6 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     // Only trigger when maskMode, so other canvas can listen too
     useEffect(() => {
         if (maskMode) {
-            console.log('mounting :>> ',);
             const canvas = canvasRef.current;
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mouseup', stopDrawing);
@@ -72,12 +67,9 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('contextmenu', (e) => e.preventDefault());
             // Need to set to passive to false to prevent scrolling
-
             canvas.addEventListener('wheel', handleWheel, { passive: false });
 
             return () => {
-                console.log('demounting :>> ',);
-
                 canvas.removeEventListener('mousedown', startDrawing);
                 canvas.removeEventListener('mouseup', stopDrawing);
                 canvas.removeEventListener('mouseout', stopDrawing);
@@ -93,7 +85,7 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
         <>
             <canvas
                 ref={canvasRef}
-                className="max-w-full h-auto cursor-crosshair absolute top-0 left-0"
+                className={`max-w-full h-auto cursor-crosshair absolute top-0 left-0 ${!maskMode ? 'pointer-events-none' : ''}`}
                 // onMouseDown={startDrawing}
                 // onMouseUp={stopDrawing}
                 // onMouseOut={stopDrawing}

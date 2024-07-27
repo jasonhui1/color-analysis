@@ -1,6 +1,7 @@
 export default function PaletteDisplay({ colorPalette,
     onPaletteColorHover,
     onPaletteColorUnHover,
+    setSelectedColor
 }) {
     return (
         <>
@@ -15,6 +16,8 @@ export default function PaletteDisplay({ colorPalette,
                                 style={{ backgroundColor: `rgb(${color.join(",")})` }}
                                 onMouseEnter={() => onPaletteColorHover(color)}
                                 onMouseLeave={() => onPaletteColorUnHover()}
+                                onMouseDown={() => setSelectedColor(color)}
+                                onContextMenu={(e) => e.preventDefault()}
                             >
                                 {/* <span
                   className="text-xs font-semibold"
