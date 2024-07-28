@@ -16,3 +16,30 @@ export async function uploadPaletteClient({ palette, userId, imageURL = null, ta
     const data = await response.json();
     return data
 }
+
+
+export async function getPaletteClient({ userId, withTags = false, limit = 50 }) {
+
+    const options = { userId, limit, withTags }
+    const queryParams = new URLSearchParams(options).toString();
+    const url = `/api/palette?${queryParams}`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Failed to fetch palettes:', error);
+    }
+}
+

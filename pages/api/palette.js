@@ -22,9 +22,26 @@ export default async function handler(req, res) {
         }
 
     } else if (req.method === 'GET') {
+        const { limit, userId, withTags } = req.query;
 
-        const data = await getPalette();
-        res.status(200).json({ data });
+        if (!userId) {
+            return res.status(400).json({ error: 'Not login' });
+        }
+
+        const options = {
+            limit: limit ? parseInt(limit) : Infinity,
+            userId: userId,
+            withTags: withTags === 'true'
+        };
+
+        try {
+            const data = await getPalette(options);
+            res.status(200).json(data);
+        } catch (error) {
+            console.error('Get palette error:', error);
+            res.status(500).json({ error: 'Failed to get palette from supabase' });
+        }
+
     } else {
         res.status(405).json({ error: 'Method Not Allowed' });
     }

@@ -61,12 +61,36 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
                 </span> */}
                                 </div>
 
-                                    <div className={`flex justify-between ${!isColorEqual(color, hoveringColor) ? 'opacity-0' : ''}`}>
+                                <div className={`flex justify-between ${!isColorEqual(color, hoveringColor) ? 'opacity-0' : ''}`}>
 
-                                        {!isEditing && <MdOutlineEdit className=" cursor-pointer w-6 h-6" color="blue" onClick={() => setIsEditing(true)} />}
-                                        {isEditing && <TbPencilCancel className="cursor-pointer w-6 h-6" color="red" onClick={() => setIsEditing(false)} />}
-                                        <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => onPaletteColorDelete(color)} />
-                                    </div>
+                                    {!isEditing && <MdOutlineEdit className=" cursor-pointer w-6 h-6" color="blue" onClick={() => setIsEditing(true)} />}
+                                    {isEditing && <TbPencilCancel className="cursor-pointer w-6 h-6" color="red" onClick={() => setIsEditing(false)} />}
+                                    <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => onPaletteColorDelete(color)} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}
+
+
+export function PaletteDisplaySimple({ colorPalette }) {
+    return (
+        <>
+            {colorPalette.length > 0 && (
+                <div className="mt-4">
+                    <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
+                    <div className="flex gap-4">
+
+                        {colorPalette.map((color, index) => (
+                            <div
+                                key={index}
+                                className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
+                                style={{ backgroundColor: `rgb(${color.join(",")})` }}
+                            >
                             </div>
                         ))}
                     </div>
