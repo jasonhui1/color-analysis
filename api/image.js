@@ -1,4 +1,4 @@
-export async function uploadImage(imageURL) {
+export async function uploadImageClient(imageURL) {
     let response = await fetch('/api/upload-image', {
         method: 'POST',
         headers: {

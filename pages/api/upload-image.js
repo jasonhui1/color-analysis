@@ -1,10 +1,4 @@
-import { v2 as cloudinary } from 'cloudinary';
-
-cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-    api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET,
-});
+import { uploadImage } from "../../lib/cloudinary/image";
 
 export const config = {
     api: {
@@ -26,7 +20,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const result = await cloudinary.uploader.upload(imageURL);
+        const result = await uploadImage(imageURL);
 
         res.status(200).json({ secure_url: result.secure_url });
     } catch (error) {

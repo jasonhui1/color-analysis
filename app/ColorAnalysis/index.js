@@ -4,9 +4,9 @@ import ColorThief from "colorthief";
 import HighlightHoveringColorCanvas from "../../Components/FilterCanvas";
 import CheckBox from "../../Components/General/CheckBox";
 import PaletteDisplay from "../../Components/Color/PaletteDisplay";
-import { uploadImage } from "../../api/image";
-import { uploadPalette } from "../../api/palette";
-import { getUserId } from "../../api/supabase";
+import { uploadImageClient } from "../../api/image";
+import { uploadPaletteClient } from "../../api/palette";
+import { getUserId } from "../../api/supabaseClient";
 import GoogleLogin from "../../Components/Auth/GoogleLogin";
 import Canvas, { removeTransparentPixels } from "../../Components/Canvas";
 import { TriangularColorPickerDisplayColors } from "../../Components/Color/picker";
@@ -200,8 +200,8 @@ function UploadButton({ colorPalette, canvasRef, tags }) {
         const id = await getUserId()
 
         try {
-            const imageURL = await uploadImage(canvasImageUrl);
-            await uploadPalette({ palette: colorPalette, userId: id, imageURL, tags });
+            const imageURL = await uploadImageClient(canvasImageUrl);
+            await uploadPaletteClient({ palette: colorPalette, userId: id, imageURL, tags });
             console.log('upload success :>> ');
 
         } catch (err) {
@@ -213,9 +213,9 @@ function UploadButton({ colorPalette, canvasRef, tags }) {
         }
     };
     return (
-        <button onClick={handleUpload} 
-        // disabled={isUploading} 
-        className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+        <button onClick={handleUpload}
+            // disabled={isUploading} 
+            className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
             {isUploading ? 'Uploading...' : 'Upload '}
         </button>
     );
