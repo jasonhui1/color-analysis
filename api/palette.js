@@ -18,9 +18,11 @@ export async function uploadPaletteClient({ palette, userId, imageURL = null, ta
 }
 
 
-export async function getPaletteClient({ userId, withTags = false, limit = 50 }) {
+export async function getPaletteClient({ userId, withTags = false, searchTerm = '', limit = 50, }) {
 
     const options = { userId, limit, withTags }
+    if (searchTerm !== '') options.searchTerm = searchTerm
+
     const queryParams = new URLSearchParams(options).toString();
     const url = `/api/palette?${queryParams}`;
 
