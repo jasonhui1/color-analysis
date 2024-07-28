@@ -1,18 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import ColorThief from "colorthief";
-import { calculateBrightness, closeToWhite, isColorEqual, nearestColorFromPalette } from "@/utils/color";
-import FileUpload from "@/Components/FileUpload";
-import Canvas, { removeTransparentPixels } from "@/Components/Canvas";
-import MaskedCanvas from "@/Components/MaskedCanvas";
-import NextImage from "next/image";
-import GoogleLogin from "@/Components/Auth/GoogleLogin";
-import { getUserId } from "@/api/supabase";
-import { uploadPalette } from "@/api/palette";
-import { uploadImage } from "@/api/image";
-import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
+
 import HighlightHoveringColorCanvas from "../../Components/FilterCanvas";
 import CheckBox from "../../Components/General/CheckBox";
 import PaletteDisplay from "../../Components/Color/PaletteDisplay";
+import { uploadImage } from "../../api/image";
+import { uploadPalette } from "../../api/palette";
+import { getUserId } from "../../api/supabase";
+import GoogleLogin from "../../Components/Auth/GoogleLogin";
+import Canvas, { removeTransparentPixels } from "../../Components/Canvas";
+import { TriangularColorPickerDisplayColors } from "../../Components/Color/picker";
+import FileUpload from "../../Components/FileUpload";
+import MaskedCanvas from "../../Components/MaskedCanvas";
+import { isColorEqual, calculateBrightness } from "../../utils/color";
 
 const ColorAnalysis = () => {
     const canvasRef = useRef(null);
