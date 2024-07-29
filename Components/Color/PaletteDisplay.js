@@ -3,6 +3,7 @@ import { FaDeleteLeft } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { hslToRgb, isColorEqual } from "../../utils/color";
 import { TbPencilCancel } from "react-icons/tb";
+import { IoMdAdd } from "react-icons/io";
 
 export default function PaletteDisplay({ colorPalette, setColorPalette,
     onPaletteColorHover,
@@ -11,37 +12,48 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
     selectedColor, setSelectedColor
 }) {
 
-    const [hoveringColor, setHoveringColor] = useState([]);
+    const [hoveringIndex, setHoveringIndex] = useState(-1);
     const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
         if (selectedColor && isEditing) {
-            const newPalette = colorPalette.map((c) => (isColorEqual(c, hoveringColor) ? selectedColor : c));
+            const newPalette = [...colorPalette];
+            newPalette[hoveringIndex] = selectedColor;
             setColorPalette(newPalette);
-            setHoveringColor(selectedColor);
+            setIsEditing(false);
+            setHoveringIndex(-1);
+
         }
     }, [selectedColor]);
 
-    const handleHover = (color) => {
-        setHoveringColor(color);
+    const handleHover = (color, index) => {
+        if (isEditing) return;
+        setHoveringIndex(index);
         onPaletteColorHover(color)
     };
 
     const handleUnHover = () => {
         if (!isEditing) {
-            setHoveringColor([]);
+            setHoveringIndex(-1);
         }
         onPaletteColorUnHover();
     };
 
+    const addPaletteColor = () => {
+        const newPalette = [...colorPalette, [0, 0, 0]];
+        setColorPalette(newPalette);
+        setHoveringIndex(newPalette.length - 1);
+        setIsEditing(true);
+    };
+
     return (
         <>
-            {colorPalette.length > 0 && (
+            {(
                 <div className="mt-4">
                     <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
                     <div className="flex gap-4">
                         {colorPalette.map((color, index) => (
-                            <div key={index} onMouseEnter={() => handleHover(color)} onMouseLeave={() => handleUnHover()}    >
+                            <div key={index} onMouseEnter={() => handleHover(color, index)} onMouseLeave={() => handleUnHover()}    >
                                 <div
 
                                     className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
@@ -61,7 +73,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
                 </span> */}
                                 </div>
 
-                                <div className={`flex justify-between ${!isColorEqual(color, hoveringColor) ? 'opacity-0' : ''}`}>
+                                <div className={`flex justify-between ${hoveringIndex !== index ? 'opacity-0' : ''}`}>
 
                                     {!isEditing && <MdOutlineEdit className=" cursor-pointer w-6 h-6" color="blue" onClick={() => setIsEditing(true)} />}
                                     {isEditing && <TbPencilCancel className="cursor-pointer w-6 h-6" color="red" onClick={() => setIsEditing(false)} />}
@@ -69,6 +81,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
                                 </div>
                             </div>
                         ))}
+                        <button onClick={addPaletteColor} className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center"><IoMdAdd size={25}/></button>
                     </div>
                 </div>
             )}
