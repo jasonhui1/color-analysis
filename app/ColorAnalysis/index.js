@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ColorThief from "colorthief";
 
-import HighlightHoveringColorCanvas from "../../Components/FilterCanvas";
+import HighlightHoveringColorCanvas, { processImageColors } from "../../Components/FilterCanvas";
 import CheckBox from "../../Components/General/CheckBox";
 import PaletteDisplay from "../../Components/Color/PaletteDisplay";
 import { uploadImageClient } from "../../api/image";
@@ -23,6 +23,7 @@ const ColorAnalysis = () => {
 
     const [image, setImage] = useState(null);
     const [colorPalette, setColorPalette] = useState([]);
+    const [colorPalettePercentage, setColorPalettePercentage] = useState([]);
 
     const [reset, setReset] = useState(false);
     const [maskReset, setMaskReset] = useState(false);
@@ -100,6 +101,23 @@ const ColorAnalysis = () => {
         };
     };
 
+    const onCalculatePercentage = () => {
+        const image = canvasRef.current
+        if (!image) return
+
+        const counter = {}
+        let totalPixels = 0
+        processImageColors(image, colorPalette, ({ nearestColor, alpha }) => {
+            if (alpha === 0) return
+            totalPixels += 1
+            counter[nearestColor] = (counter[nearestColor] || 0) + 1
+        });
+
+        setColorPalettePercentage(colorPalette.map((color) => (
+            Math.round((counter[color] / totalPixels) * 100)
+        )))
+    }
+
     return (
         <div className="p-4">
             <GoogleLogin />
@@ -136,12 +154,13 @@ const ColorAnalysis = () => {
                 <div className="flex gap-4 items-center">
                     <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
                     <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" />
+                    <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onCalculatePercentage()}> Calculate Percentage</button>
                 </div>
 
 
 
                 <PaletteDisplay
-                    colorPalette={colorPalette} setColorPalette={setColorPalette}
+                    colorPalette={colorPalette} setColorPalette={setColorPalette} colorPalettePercentage={colorPalettePercentage}
                     onPaletteColorHover={onPaletteColorHover}
                     onPaletteColorUnHover={onPaletteColorUnHover}
                     onPaletteColorDelete={onPaletteColorDelete}
@@ -162,7 +181,7 @@ const ColorAnalysis = () => {
                 />
             } */}
 
-                <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} tags={tags} />
+                <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} tags={tags} percentage={colorPalettePercentage} />
 
             </div>
 
@@ -185,7 +204,7 @@ function MaskUI({ maskMode, onChangeMaskMode,
     )
 }
 
-function UploadButton({ colorPalette, canvasRef, tags }) {
+function UploadButton({ colorPalette, canvasRef, tags, percentage }) {
     const [isUploading, setIsUploading] = useState(false);
 
     const handleUpload = async (event) => {
@@ -198,7 +217,7 @@ function UploadButton({ colorPalette, canvasRef, tags }) {
 
         try {
             const imageURL = await uploadImageClient(canvasImageUrl);
-            await uploadPaletteClient({ palette: colorPalette, userId: id, imageURL, tags });
+            await uploadPaletteClient({ palette: { palette: colorPalette, percentage }, userId: id, imageURL, tags });
             console.log('upload success :>> ');
 
         } catch (err) {

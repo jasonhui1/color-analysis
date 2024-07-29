@@ -8,6 +8,7 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     // const [isDrawing, setIsDrawing] = useState(false);
     // const [isErasing, setIsErasing] = useState(false);
     const [brushSize, setBrushSize] = useState(100);
+    const brushSizeRef = useRef(brushSize);
 
     useEffect(() => {
         if (image && canvasRef.current) {
@@ -18,7 +19,11 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
-    }, [image, reset]);
+    }, [image?.width, image?.height, reset]);
+
+    useEffect(() => {
+        brushSizeRef.current = brushSize;
+    }, [brushSize]);
 
     const startDrawing = (e) => {
         if (e.button === 2) {
@@ -47,14 +52,16 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
 
         ctx.globalCompositeOperation = isErasing ? 'source-over' : 'destination-out';
         ctx.beginPath();
-        ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+        ctx.arc(x, y, brushSizeRef.current / 2, 0, Math.PI * 2);
         ctx.fill();
     }
 
     const handleWheel = (e) => {
         e.preventDefault()
         const speed = 1 / 10
-        setBrushSize(prevSize => Math.floor(Math.max(10, Math.min(200, prevSize - e.deltaY * speed))));
+        const newBrushSize = Math.floor(Math.max(10, Math.min(200, brushSizeRef.current - e.deltaY * speed)))
+        brushSizeRef.current = newBrushSize
+        setBrushSize(newBrushSize)
     };
 
     // Only trigger when maskMode, so other canvas can listen too
@@ -66,7 +73,6 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
             canvas.addEventListener('mouseout', stopDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-            // Need to set to passive to false to prevent scrolling
             canvas.addEventListener('wheel', handleWheel, { passive: false });
 
             return () => {

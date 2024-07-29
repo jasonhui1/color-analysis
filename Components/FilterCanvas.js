@@ -11,17 +11,13 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
-    }, [imageCanvas, reset]);
+    }, [imageCanvas?.width, imageCanvas?.height, reset]);
 
 
     useEffect(() => {
         if (!enable) return
         if (imageCanvas) {
             if (!color) return
-            // Image canvas
-            const imagectx = imageCanvas.getContext("2d");
-            const imageData = imagectx.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
-            const data = imageData.data;
 
             // Current canvas
             const canvas = canvasRef.current;
@@ -29,21 +25,31 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
             const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const currentData = currentImageData.data;
 
-            for (let i = 0; i < data.length; i += 4) {
-                const r = data[i];
-                const g = data[i + 1];
-                const b = data[i + 2];
-                const a = data[i + 3];
-
-                const nearestColor = nearestColorFromPalette([r, g, b], colorPalette);
-                if (isColorEqual(color, nearestColor) || a === 0) {
+            processImageColors(imageCanvas, colorPalette, ({ nearestColor, alpha, i }) => {
+                if (isColorEqual(color, nearestColor) || alpha === 0) {
                     // set current to transparent
                     currentData[i + 3] = 0;
                 }
-            }
+            })
             ctx.putImageData(currentImageData, 0, 0);
         }
     }, [color]);
 
     return (<canvas ref={canvasRef} className="max-w-full h-auto pointer-events-none absolute top-0 left-0 mix-blend-multiply" style={{ opacity: (color && enable) ? 0.8 : 0 }} />);
+}
+
+export const processImageColors = (imageCanvas, colorPalette, applyColorFunction) => {
+    const imagectx = imageCanvas.getContext("2d");
+    const imageData = imagectx.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const alpha = data[i + 3];
+
+        const nearestColor = nearestColorFromPalette([r, g, b], colorPalette);
+        applyColorFunction({ nearestColor, alpha, i })
+    }
 }

@@ -1,11 +1,11 @@
 import { MdOutlineEdit } from "react-icons/md";
 import { FaDeleteLeft } from "react-icons/fa6";
 import { useEffect, useState } from "react";
-import { hslToRgb, isColorEqual } from "../../utils/color";
+import { calculateBrightness } from "../../utils/color";
 import { TbPencilCancel } from "react-icons/tb";
 import { IoMdAdd } from "react-icons/io";
 
-export default function PaletteDisplay({ colorPalette, setColorPalette,
+export default function PaletteDisplay({ colorPalette, setColorPalette, colorPalettePercentage = [],
     onPaletteColorHover,
     onPaletteColorUnHover,
     onPaletteColorDelete,
@@ -20,7 +20,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
             const newPalette = [...colorPalette];
             newPalette[hoveringIndex] = selectedColor;
             setColorPalette(newPalette);
-            setIsEditing(false);
+            // setIsEditing(false);
             setHoveringIndex(-1);
 
         }
@@ -63,14 +63,14 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
                                     onContextMenu={(e) => e.preventDefault()}
                                 >
 
-                                    {/* <span
-                  className="text-xs font-semibold"
-                  style={{
-                    color: getLuminance(color) > 0.5 ? "black" : "white",
-                  }}
-                >
-                  {index + 1}
-                </span> */}
+                                    {colorPalettePercentage.length > 0 && <span
+                                        className="text-xs font-semibold"
+                                        style={{
+                                            color: calculateBrightness(color) > 127 ? "black" : "white",
+                                        }}
+                                    >
+                                        {colorPalettePercentage[index]}%
+                                    </span>}
                                 </div>
 
                                 <div className={`flex justify-between ${hoveringIndex !== index ? 'opacity-0' : ''}`}>
@@ -81,7 +81,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
                                 </div>
                             </div>
                         ))}
-                        <button onClick={addPaletteColor} className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center"><IoMdAdd size={25}/></button>
+                        <button onClick={addPaletteColor} className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center"><IoMdAdd size={25} /></button>
                     </div>
                 </div>
             )}
@@ -90,63 +90,52 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
 }
 
 
-export function PaletteDisplaySimple({ colorPalette }) {
+export function PaletteDisplaySimple({ colorPalette, }) {
     return (
-        <>
-            {colorPalette.length > 0 && (
-                <div className="mt-4">
-                    <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
-                    <div className="flex gap-4">
+        <div className="mt-4">
+            <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
+            <div className="flex gap-4">
 
-                        {colorPalette.map((color, index) => (
-                            <div
-                                key={index}
-                                className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
-                                style={{ backgroundColor: `rgb(${color.join(",")})` }}
-                            >
-                            </div>
-                        ))}
+                {colorPalette.map((color, index) => (
+                    <div
+                        key={index}
+                        className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
+                        style={{ backgroundColor: `rgb(${color.join(",")})` }}
+                    >
                     </div>
-                </div>
-            )}
-        </>
+                ))}
+            </div>
+        </div>
     );
 }
 
 
-export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPaletteColorUnHover, }) {
-
-    const [hoveringColor, setHoveringColor] = useState([]);
-
-    const handleHover = (color) => {
-        setHoveringColor(color);
-        onPaletteColorHover(color)
-    };
-
-    const handleUnHover = () => {
-        onPaletteColorUnHover();
-    };
+export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPaletteColorUnHover, colorPalettePercentage = [] }) {
 
     return (
-        <>
-            {colorPalette.length > 0 && (
-                <div className="mt-4">
-                    <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
-                    <div className="flex gap-4">
-                        {colorPalette.map((color, index) => (
-                            <div key={index} onMouseEnter={() => handleHover(color)} onMouseLeave={() => handleUnHover()}    >
-                                <div
+        <div className="mt-4">
+            <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
+            <div className="flex gap-4">
+                {colorPalette.map((color, index) => (
+                    <div key={index} onMouseEnter={() => onPaletteColorHover(color)} onMouseLeave={() => onPaletteColorUnHover()}    >
+                        <div
 
-                                    className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
-                                    style={{ backgroundColor: `rgb(${color.join(",")})` }}
-                                >
-                                </div>
+                            className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
+                            style={{ backgroundColor: `rgb(${color.join(",")})` }}
+                        >
+                        </div>
 
-                            </div>
-                        ))}
+                        {colorPalettePercentage.length > 0 && <span
+                            className="text-xs font-semibold"
+                            style={{
+                                color: calculateBrightness(color) > 127 ? "black" : "white",
+                            }}
+                        >
+                            {colorPalettePercentage[index]}%
+                        </span>}
                     </div>
-                </div>
-            )}
-        </>
+                ))}
+            </div>
+        </div>
     );
 }
