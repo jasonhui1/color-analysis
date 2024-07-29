@@ -1,5 +1,6 @@
 import { Calistoga } from 'next/font/google';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { CircleIndicator } from './Color/picker';
 
 const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
 
@@ -9,6 +10,8 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     // const [isErasing, setIsErasing] = useState(false);
     const [brushSize, setBrushSize] = useState(100);
     const brushSizeRef = useRef(brushSize);
+
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
         if (image && canvasRef.current) {
@@ -42,13 +45,16 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     const draw = (e) => {
         const isDrawing = isDrawingRef.current;
         const isErasing = isErasingRef.current;
-        if ((!isDrawing && !isErasing)) return;
 
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+        setMousePosition({ x, y });
+
+        if ((!isDrawing && !isErasing)) return;
+
+        const ctx = canvas.getContext('2d');
 
         ctx.globalCompositeOperation = isErasing ? 'source-over' : 'destination-out';
         ctx.beginPath();
@@ -99,6 +105,9 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
                 // onContextMenu={(e) => e.preventDefault()}
                 style={{ opacity: maskMode ? 0.6 : 0 }}
             />
+            {/* <div className='absolute' style={{ top: mousePosition.y, left: mousePosition.x }}></div> */}
+            {maskMode && <CircleIndicator position={mousePosition} diameter={brushSize} color={'white'} border_width={1} />}
+            {maskMode && <CircleIndicator position={mousePosition} diameter={brushSize+2} color={'black'} />}
             {maskMode && <div className=" bg-white p-4 rounded shadow w-96">
                 <input
                     type="range"

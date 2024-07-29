@@ -126,8 +126,8 @@ const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor }) 
             />
 
             {/* Indictator, one with white outline, one with black outline */}
-            <CircleIndicator position={selectedColorPosition} width={10} height={10} color="white" border_width={2} />
-            <CircleIndicator position={selectedColorPosition} width={12} height={12} color="black" />
+            <CircleIndicator position={selectedColorPosition} diameter={10} color="white" border_width={2} />
+            <CircleIndicator position={selectedColorPosition} diameter={12} color="black" />
             <RectIndicator position={selectedHuePosition} width={10} height={22} color="white" border_width={2} rotation={selectedColor.h + 90 + defaultHueShift} />
             <RectIndicator position={selectedHuePosition} width={12} height={24} color="black" rotation={selectedColor.h + 90 + defaultHueShift} />
         </div>
@@ -135,13 +135,13 @@ const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor }) 
     );
 };
 
-const CircleIndicator = ({ position, width, height, color, border_width = 1 }) => {
+export const CircleIndicator = ({ position, diameter, color, border_width = 1 }) => {
     return <div style={{
         position: 'absolute',
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: width + 'px',
-        height: height + 'px',
+        width: diameter + 'px',
+        height: diameter + 'px',
         borderRadius: '50%',
         border: border_width + 'px solid ' + color,
         transform: 'translate(-50%, -50%)',
@@ -262,7 +262,7 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
 
     const SVPosition = colors.map(({ s, l }) => getPositionFromSV({ s, v: l, w, bb }))
     const HuePosition = colors.map(({ h }) => getPositionFromHue(h + defaultHueShift, radius, center, center))
-    
+
     return (
         <div className={`w-[${size}px] h-[${size}px] relative`}>
             <Image className='absolute' src={color_wheel} alt="color_wheel" width={size} height={size} draggable={false} style={{
@@ -282,8 +282,8 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
 
             {SVPosition.map((position, index) => (
                 <div key={index}>
-                    <CircleIndicator position={position} width={10} height={10} color="white" border_width={2} />
-                    <CircleIndicator position={position} width={12} height={12} color="black" />
+                    <CircleIndicator position={position} diameter={10} color="white" border_width={2} />
+                    <CircleIndicator position={position} diameter={12} color="black" />
                 </div>
             ))}
 
