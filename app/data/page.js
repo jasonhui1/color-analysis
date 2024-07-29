@@ -21,17 +21,29 @@ export default function DataPage() {
   const [hoveringColor, setHoveringColor] = useState([0, 0, 0]);
   const [hoveringRowIndex, setHoveringRowIndex] = useState(-1);
 
-  const [canvasRefs, setCanvasRefs] = useState([]);
-  const [imageRefs, setImageRefs] = useState([]);
-  const [canvasHLRefs, setCanvasHLRefs] = useState([]);
+  const [canvasRefs, setCanvasRefs] = useState({});
+  const [imageRefs, setImageRefs] = useState({});
+  const [canvasHLRefs, setCanvasHLRefs] = useState({});
   const [resets, setResets] = useState([]);
 
   useEffect(() => {
     // add or remove refs
     if (!data) return
-    setCanvasRefs(() => Array(data.length).fill().map((_, i) => createRef()));
-    setImageRefs(() => Array(data.length).fill().map((_, i) => createRef()));
-    setCanvasHLRefs(() => Array(data.length).fill().map((_, i) => createRef()));
+
+    const newCanvasRefs = {};
+    const newImageRefs = {};
+    const newCanvasHLRefs = {};
+
+    data.forEach(({ id }) => {
+      newCanvasRefs[id] = createRef();
+      newImageRefs[id] = createRef();
+      newCanvasHLRefs[id] = createRef();
+    });
+
+    setCanvasRefs(newCanvasRefs);
+    setImageRefs(newImageRefs);
+    setCanvasHLRefs(newCanvasHLRefs);
+    setResets(new Array(data.length).fill(true));
   }, [data]);
 
   async function getData() {
@@ -72,23 +84,22 @@ export default function DataPage() {
   // console.log('data :>> ', data);
   // const searchTags = finalSearchTerm.trim().split(' ').map(tag => tag.trim())
 
-  // console.log('hoveringColor :>> ', hoveringColor);
-  console.log('hoveringRowIndex :>> ', hoveringRowIndex);
-
   return (
     <div className='flex flex-col gap-4'>
       <h1>DATA</h1>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
 
-      {data && data.map(({ palette, imageURL, tags }, index) => {
+      {data && data.map(({ id, palette, imageURL, tags }, index) => {
 
         return (
-          <div className='flex gap-4 items-center' key={index}>
+          <div className='flex gap-4 items-center' key={id}>
 
             <div className='flex flex-col gap-1 relative'>
-              {imageURL && <Image ref={imageRefs[index]} src={imageURL} alt={imageURL} width={200} height={200} />}
-              <CanvasNoMask canvasRef={canvasRefs[index]} image={imageRefs[index]?.current} />
-              <HighlightHoveringColorCanvas baseCanvasRef={canvasRefs[index]} reset={resets[index]} enable={hoveringRowIndex === index} canvasRef={canvasHLRefs[index]} image={imageRefs[index]?.current} color={hoveringColor} colorPalette={palette} />
+              {imageURL && <Image ref={imageRefs[id]} src={imageURL} alt={imageURL} width={200} height={200} />}
+              <CanvasNoMask canvasRef={canvasRefs[id]} image={imageRefs[id]?.current} />
+              <HighlightHoveringColorCanvas baseCanvasRef={canvasRefs[id]} canvasRef={canvasHLRefs[id]} image={imageRefs[id]?.current}
+                color={hoveringColor} colorPalette={palette}
+                reset={resets[index]} enable={hoveringRowIndex === index} />
               <TagsDisplay tags={tags} onClickTag={onClickTag} />
 
             </div>

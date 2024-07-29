@@ -9,7 +9,6 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
 
     useEffect(() => {
         // if (maskMode) return
-        //TODO: add a filter canvas instead?, so only need to draw base image once
         if (image && canvasRef.current) {
             const canvas = canvasRef.current;
             let ctx = canvas.getContext("2d");
@@ -30,7 +29,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
             }
             setDrawingComplete(true)
         }
-    }, [image, reset, maskMode, maskedImage, enableMask, invertMask]);
+    }, [canvasRef, image, reset, maskMode, maskedImage, enableMask, invertMask]);
 
 
     const startSelecting = (e) => {
@@ -97,8 +96,7 @@ export function CanvasNoMask({ canvasRef, image, setDrawingComplete, setSelected
             ctx.drawImage(image, 0, 0, image.width, image.height);
             // setDrawingComplete(true)
         }
-    }, [image]);
-
+    }, [canvasRef, image]);
 
     const startSelecting = (e) => {
         // if (e.button === 2) {
