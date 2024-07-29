@@ -1,26 +1,24 @@
 import { useEffect, useRef } from "react";
 import { closeToWhite, isColorEqual, nearestColorFromPalette } from "../utils/color";
 
-export default function HighlightHoveringColorCanvas({ canvasRef, reset, baseCanvasRef, image, color, colorPalette, enable = true }) {
+export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCanvas = null, color, colorPalette, enable = true }) {
     useEffect(() => {
-        if (image && canvasRef.current) {
+        if (imageCanvas && canvasRef.current) {
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');
-            canvas.width = image.width;
-            canvas.height = image.height;
+            canvas.width = imageCanvas.width;
+            canvas.height = imageCanvas.height;
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
-    }, [image, reset]);
+    }, [imageCanvas, reset]);
 
 
     useEffect(() => {
         if (!enable) return
-        if (canvasRef && canvasRef.current) {
+        if (imageCanvas) {
             if (!color) return
-
             // Image canvas
-            const imageCanvas = baseCanvasRef.current;
             const imagectx = imageCanvas.getContext("2d");
             const imageData = imagectx.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
             const data = imageData.data;
@@ -39,7 +37,7 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, baseCan
 
                 const nearestColor = nearestColorFromPalette([r, g, b], colorPalette);
                 if (isColorEqual(color, nearestColor) || a === 0) {
-                    // set to transparent
+                    // set current to transparent
                     currentData[i + 3] = 0;
                 }
             }

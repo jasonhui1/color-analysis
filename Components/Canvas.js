@@ -1,31 +1,56 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 
 export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage,
     maskMode, enableMask, invertMask,
-    setSelectedColor
+    setSelectedColor,
+    maxSize = 360,
 }) {
 
     const isSelectingRef = useRef(false);
+
+    const calculateCanvasSize = (image, maxSize) => {
+        // Calculate new dimensions
+        let width = image.width;
+        let height = image.height;
+
+        if (width > height) {
+            const aspectRatio = image.height / image.width;
+            width = maxSize;
+            height = maxSize * aspectRatio;
+        } else {
+            const aspectRatio = image.width / image.height;
+            height = maxSize;
+            width = maxSize * aspectRatio;
+        }
+
+        return { width, height };
+
+    }
 
     useEffect(() => {
         // if (maskMode) return
         if (image && canvasRef.current) {
             const canvas = canvasRef.current;
             let ctx = canvas.getContext("2d");
-            canvas.width = image.width;
-            canvas.height = image.height;
+
+            // Set maximum width
+            const { width, height } = calculateCanvasSize(image, maxSize);
+
+            canvas.width = width;
+            canvas.height = height;
 
             ctx.globalCompositeOperation = 'source-over';
-            ctx.drawImage(image, 0, 0, image.width, image.height);
+            ctx.drawImage(image, 0, 0, width, height);
 
-            if (enableMask && !maskMode && maskedImage ) {
+            if (enableMask && !maskMode && maskedImage) {
                 if (invertMask) {
                     ctx.globalCompositeOperation = 'destination-in';
                 } else {
                     ctx.globalCompositeOperation = 'destination-out';
                 }
 
-                ctx.drawImage(maskedImage, 0, 0, image.width, image.height);
+                ctx.drawImage(maskedImage, 0, 0, maskedImage.width, maskedImage.height);
             }
             setDrawingComplete(true)
         }
@@ -43,19 +68,20 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
         isSelectingRef.current = false;
     };
 
-    const selectColor = (e) => {
+    const selectColor = useCallback((e) => {
         const isSelecting = isSelectingRef.current;
         if ((!isSelecting)) return;
 
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+
         const color = ctx.getImageData(x, y, 1, 1).data;
         const [r, g, b] = color.slice(0, 3);
         setSelectedColor([r, g, b]);
-    }
+    }, [image])
 
     useEffect(() => {
         if (!maskMode) {
@@ -73,7 +99,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
                 canvas.removeEventListener('contextMenu', (e) => e.preventDefault());
             };
         }
-    }, [maskMode, canvasRef]);
+    }, [maskMode, canvasRef, image]);
 
     return (<canvas ref={canvasRef} className="max-w-full h-auto cursor-crosshair" />);
 }

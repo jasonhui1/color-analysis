@@ -97,7 +97,7 @@ export default function DataPage() {
             <div className='flex flex-col gap-1 relative'>
               {imageURL && <Image ref={imageRefs[id]} src={imageURL} alt={imageURL} width={200} height={200} />}
               <CanvasNoMask canvasRef={canvasRefs[id]} image={imageRefs[id]?.current} />
-              <HighlightHoveringColorCanvas baseCanvasRef={canvasRefs[id]} canvasRef={canvasHLRefs[id]} image={imageRefs[id]?.current}
+              <HighlightHoveringColorCanvas imageCanvas={canvasRefs[id]?.current} canvasRef={canvasHLRefs[id]}
                 color={hoveringColor} colorPalette={palette}
                 reset={resets[index]} enable={hoveringRowIndex === index} />
               <TagsDisplay tags={tags} onClickTag={onClickTag} />

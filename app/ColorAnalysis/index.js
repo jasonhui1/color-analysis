@@ -110,6 +110,7 @@ const ColorAnalysis = () => {
             <FileUpload onImageSelected={onImageSelected} />
 
 
+
             {/* {image && ( */}
             <div className="flex flex-row gap-6 " >
 
@@ -118,10 +119,10 @@ const ColorAnalysis = () => {
                         maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
                         setSelectedColor={setSelectedColor}
                     />
-                    <MaskedCanvas canvasRef={maskedCanvasRef} image={image} reset={maskReset} brushSize={10} maskMode={maskMode} />
-                    <HighlightHoveringColorCanvas baseCanvasRef={canvasRef} reset={highlightReset} canvasRef={highlightCanvasRef} image={image} color={hoveringColor} colorPalette={colorPalette} />
+                    <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} reset={maskReset} maskMode={maskMode} />
+                    <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current} reset={highlightReset} color={hoveringColor} colorPalette={colorPalette} />
                 </div>
-                {<TriangularColorPickerDisplayColors colors={[selectedColor]} normalised={true} />}
+                {<TriangularColorPickerDisplayColors colors={[selectedColor]} />}
 
             </div>
 
@@ -137,6 +138,8 @@ const ColorAnalysis = () => {
                     <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" />
                 </div>
 
+
+
                 <PaletteDisplay
                     colorPalette={colorPalette} setColorPalette={setColorPalette}
                     onPaletteColorHover={onPaletteColorHover}
@@ -144,14 +147,9 @@ const ColorAnalysis = () => {
                     onPaletteColorDelete={onPaletteColorDelete}
                     selectedColor={selectedColor} setSelectedColor={setSelectedColor}
                 />
+                {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} />}
 
-                {colorPalette && <TriangularColorPickerDisplayColors colors={colorPalette} normalised={true} />}
-                <div>
-
-                    <label className="mr-4">Tags:</label>
-                    <input type="text" className="w-48 border-black border" value={tags} onChange={(e) => setTags(e.target.value)} />
-                </div>
-
+                <TagsInput tags={tags} setTags={setTags} />
 
 
                 {/* {maskDataUrl &&
@@ -217,5 +215,16 @@ function UploadButton({ colorPalette, canvasRef, tags }) {
             className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
             {isUploading ? 'Uploading...' : 'Upload '}
         </button>
+    );
+}
+
+
+
+function TagsInput({ tags, setTags }) {
+    return (
+        <div>
+            <label className="mr-4">Tags:</label>
+            <input type="text" className="w-48 border-black border" value={tags} onChange={(e) => setTags(e.target.value)} />
+        </div>
     );
 }
