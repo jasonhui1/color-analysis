@@ -41,9 +41,9 @@ export default function PaletteDisplay({ colorPalette, setColorPalette,
                     <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
                     <div className="flex gap-4">
                         {colorPalette.map((color, index) => (
-                            <div onMouseEnter={() => handleHover(color)} onMouseLeave={() => handleUnHover()}    >
+                            <div key={index} onMouseEnter={() => handleHover(color)} onMouseLeave={() => handleUnHover()}    >
                                 <div
-                                    key={index}
+
                                     className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
                                     style={{ backgroundColor: `rgb(${color.join(",")})` }}
 
@@ -91,6 +91,44 @@ export function PaletteDisplaySimple({ colorPalette }) {
                                 className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
                                 style={{ backgroundColor: `rgb(${color.join(",")})` }}
                             >
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}
+
+
+export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPaletteColorUnHover, }) {
+
+    const [hoveringColor, setHoveringColor] = useState([]);
+
+    const handleHover = (color) => {
+        setHoveringColor(color);
+        onPaletteColorHover(color)
+    };
+
+    const handleUnHover = () => {
+        onPaletteColorUnHover();
+    };
+
+    return (
+        <>
+            {colorPalette.length > 0 && (
+                <div className="mt-4">
+                    <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
+                    <div className="flex gap-4">
+                        {colorPalette.map((color, index) => (
+                            <div key={index} onMouseEnter={() => handleHover(color)} onMouseLeave={() => handleUnHover()}    >
+                                <div
+
+                                    className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
+                                    style={{ backgroundColor: `rgb(${color.join(",")})` }}
+                                >
+                                </div>
+
                             </div>
                         ))}
                     </div>

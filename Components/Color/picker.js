@@ -3,9 +3,7 @@ import color_wheel from "../../public/color_wheel.png";
 import Image from 'next/image';
 import HueShiftImage from './HueShiftImage';
 import { FaRegCircle } from 'react-icons/fa';
-import { rgbToHsv } from '@/utils/color';
-import { getPositionFromHue } from '@/utils/color_picker_calculation';
-import { getPositionFromSV, withinTriangle_strict, withinCircle, getSVFromPosition, getHueFromPosition } from '../../utils/color_picker_calculation';
+import { getPositionFromSV, withinTriangle_strict, withinCircle, getSVFromPosition, getHueFromPosition, getPositionFromHue } from '../../utils/color_picker_calculation';
 import { rgbToHsl } from '../../utils/color';
 
 const defaultHueShift = 30 //by CSP

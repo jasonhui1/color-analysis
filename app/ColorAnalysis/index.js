@@ -39,7 +39,6 @@ const ColorAnalysis = () => {
     // const [maskDataUrl, setMaskDataUrl] = useState(null);
     const [uploadedUrl, setUploadedUrl] = useState('');
 
-
     const [hoveringColor, setHoveringColor] = useState();
     const [tags, setTags] = useState('');
 

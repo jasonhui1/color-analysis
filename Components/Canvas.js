@@ -19,7 +19,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
             ctx.globalCompositeOperation = 'source-over';
             ctx.drawImage(image, 0, 0, image.width, image.height);
 
-            if (!maskMode && maskedImage && enableMask) {
+            if (enableMask && !maskMode && maskedImage ) {
                 if (invertMask) {
                     ctx.globalCompositeOperation = 'destination-in';
                 } else {
@@ -35,7 +35,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
 
     const startSelecting = (e) => {
         // if (e.button === 2) {
-            isSelectingRef.current = true;
+        isSelectingRef.current = true;
         // }
         selectColor(e);
     };
@@ -77,6 +77,73 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
     }, [maskMode, canvasRef]);
 
     return (<canvas ref={canvasRef} className="max-w-full h-auto cursor-crosshair" />);
+}
+
+
+export function CanvasNoMask({ canvasRef, image, setDrawingComplete, setSelectedColor = null }) {
+
+    const isSelectingRef = useRef(false);
+
+    useEffect(() => {
+        // if (maskMode) return
+        //TODO: add a filter canvas instead?, so only need to draw base image once
+        if (image && canvasRef.current) {
+            const canvas = canvasRef.current;
+            let ctx = canvas.getContext("2d");
+            canvas.width = image.width;
+            canvas.height = image.height;
+
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.drawImage(image, 0, 0, image.width, image.height);
+            // setDrawingComplete(true)
+        }
+    }, [image]);
+
+
+    const startSelecting = (e) => {
+        // if (e.button === 2) {
+        isSelectingRef.current = true;
+        // }
+        selectColor(e);
+    };
+
+    const stopSelecting = (e) => {
+        isSelectingRef.current = false;
+    };
+
+    const selectColor = (e) => {
+        const isSelecting = isSelectingRef.current;
+        if ((!isSelecting)) return;
+
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const color = ctx.getImageData(x, y, 1, 1).data;
+        const [r, g, b] = color.slice(0, 3);
+        setSelectedColor([r, g, b]);
+    }
+
+    useEffect(() => {
+        if (setSelectedColor) {
+            const canvas = canvasRef.current;
+            canvas.addEventListener('mousedown', startSelecting);
+            canvas.addEventListener('mouseup', stopSelecting);
+            canvas.addEventListener('mouseout', stopSelecting);
+            canvas.addEventListener('mousemove', selectColor);
+            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            return () => {
+                canvas.removeEventListener('mousedown', startSelecting);
+                canvas.removeEventListener('mouseup', startSelecting);
+                canvas.removeEventListener('mouseout', startSelecting);
+                canvas.removeEventListener('mousemove', selectColor);
+                canvas.removeEventListener('contextMenu', (e) => e.preventDefault());
+            };
+        }
+    }, [canvasRef]);
+
+    return (<canvas ref={canvasRef} className="max-w-full h-auto cursor-crosshair absolute top-0 left-0" />);
 }
 
 export const removeTransparentPixels = (canvas) => {

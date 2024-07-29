@@ -1,5 +1,5 @@
-import { hsvToRgb, rgbToHsv } from '@/utils/color';
 import React, { useEffect, useRef } from 'react';
+import { rgbToHsv, hsvToRgb } from '../../utils/color';
 
 const HueShiftImage = ({ src, width, height, alt, hueShift }) => {
   const canvasRef = useRef(null);
