@@ -24,6 +24,7 @@ const ColorAnalysis = () => {
 
     const [image, setImage] = useState(null);
     const [colorPalette, setColorPalette] = useState([]);
+    const [ignorePalette, setIgnorePalette] = useState([]);
     const [colorPalettePercentage, setColorPalettePercentage] = useState([]);
 
     const [reset, setReset] = useState(false);
@@ -61,9 +62,9 @@ const ColorAnalysis = () => {
         setHoveringColor(null);
     };
 
-    const onPaletteColorDelete = (color) => {
-        const newPalette = colorPalette.filter((c) => !isColorEqual(c, color));
-        setColorPalette(newPalette);
+    const onPaletteColorDelete = (palette, setPalette) => (color) => {
+        const newPalette = palette.filter((c) => !isColorEqual(c, color));
+        setPalette(newPalette);
         setHoveringColor(null);
     };
 
@@ -110,8 +111,8 @@ const ColorAnalysis = () => {
 
         const counter = {}
         let totalPixels = 0
-        processImageColors(image, colorPalette, ({ nearestColor, alpha }) => {
-            if (alpha === 0) return
+        processImageColors(image, [...colorPalette, ignorePalette], ({ nearestColor, alpha }) => {
+            if (alpha === 0 || (ignorePalette.includes(nearestColor))) return
             totalPixels += 1
             counter[nearestColor] = (counter[nearestColor] || 0) + 1
         });
@@ -141,7 +142,7 @@ const ColorAnalysis = () => {
             </h1>
 
             {/* {image && ( */}
-            <div className="flex flex-row gap-6 items-end relative mb-3 " >
+            <div className="flex flex-row gap-6 relative mb-3 " >
                 <div className="mb-4 relative  " ref={fileDropRef}  >
 
                     {/* Drag and drop within the same dimension as canvas */}
@@ -155,43 +156,46 @@ const ColorAnalysis = () => {
                                 setSelectedColor={setSelectedColor}
                             />
                             <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} reset={maskReset} maskMode={maskMode} />
-                            <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current} reset={highlightReset} color={hoveringColor} colorPalette={colorPalette} />
+                            <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current}
+                                reset={highlightReset}
+                                color={hoveringColor} colorPalette={colorPalette} ignorePalette={ignorePalette} />
                         </>
                     }
                 </div>
                 {<TriangularColorPickerDisplayColors colors={[selectedColor]} />}
 
-            </div>
-
-            <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4">
 
 
-                <MaskUI maskMode={maskMode} onChangeMaskMode={onChangeMaskMode}
-                    enableMask={enableMask} setEnableMask={setEnableMask}
-                    invertMask={invertMask} setInvertMask={setInvertMask}
-                    onApplyMask={onApplyMask} />
-
-                <div className="flex gap-4 items-center">
-                    <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
-                    <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" />
-                    <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onCalculatePercentage()}> Calculate Percentage</button>
-                </div>
+                    <div className="flex gap-4 items-center">
+                        <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
+                        <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" />
+                        <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onCalculatePercentage()}> Calculate Percentage</button>
+                    </div>
 
 
 
-                <PaletteDisplay
-                    colorPalette={colorPalette} setColorPalette={setColorPalette} colorPalettePercentage={colorPalettePercentage}
-                    onPaletteColorHover={onPaletteColorHover}
-                    onPaletteColorUnHover={onPaletteColorUnHover}
-                    onPaletteColorDelete={onPaletteColorDelete}
-                    selectedColor={selectedColor} setSelectedColor={setSelectedColor}
-                />
-                {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} />}
+                    <PaletteDisplay
+                        colorPalette={colorPalette} setColorPalette={setColorPalette} colorPalettePercentage={colorPalettePercentage}
+                        onPaletteColorHover={onPaletteColorHover}
+                        onPaletteColorUnHover={onPaletteColorUnHover}
+                        onPaletteColorDelete={onPaletteColorDelete(colorPalette, setColorPalette)}
+                        selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+                    />
 
-                <TagsInput tags={tags} setTags={setTags} />
+                    <PaletteDisplay
+                        colorPalette={ignorePalette} setColorPalette={setIgnorePalette}
+                        onPaletteColorHover={onPaletteColorHover}
+                        onPaletteColorUnHover={onPaletteColorUnHover}
+                        onPaletteColorDelete={onPaletteColorDelete(ignorePalette, setIgnorePalette)}
+                        selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+                    />
+                    {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} />}
+
+                    <TagsInput tags={tags} setTags={setTags} />
 
 
-                {/* {maskDataUrl &&
+                    {/* {maskDataUrl &&
                 <NextImage
                     src={maskDataUrl} alt="Masked Image"
                     width={0}
@@ -201,9 +205,17 @@ const ColorAnalysis = () => {
                 />
             } */}
 
-                <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} image={image} tags={tags} percentage={colorPalettePercentage} />
+                    <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} image={image} tags={tags} percentage={colorPalettePercentage} ignorePalette={ignorePalette} />
+
+                </div>
+
 
             </div>
+            <MaskUI maskMode={maskMode} onChangeMaskMode={onChangeMaskMode}
+                enableMask={enableMask} setEnableMask={setEnableMask}
+                invertMask={invertMask} setInvertMask={setInvertMask}
+                onApplyMask={onApplyMask} />
+
 
         </div>
     );
@@ -226,7 +238,7 @@ function MaskUI({ maskMode, onChangeMaskMode,
     )
 }
 
-function UploadButton({ colorPalette, canvasRef, image, tags, percentage }) {
+function UploadButton({ colorPalette, canvasRef, image, tags, percentage, ignorePalette }) {
     const [isUploading, setIsUploading] = useState(false);
 
     const handleUpload = async (event) => {
@@ -237,8 +249,8 @@ function UploadButton({ colorPalette, canvasRef, image, tags, percentage }) {
         const id = await getUserId()
 
         try {
-            const imageURL = await uploadImageClient(croppedImageURL);
-            await uploadPaletteClient({ palette: { palette: colorPalette, percentage }, userId: id, imageURL, tags });
+            const uploadedImageURL = await uploadImageClient(croppedImageURL);
+            await uploadPaletteClient({ palette: { palette: colorPalette, percentage, ignorePalette }, userId: id, imageURL: uploadedImageURL, tags });
             console.log('upload success :>> ');
 
         } catch (err) {

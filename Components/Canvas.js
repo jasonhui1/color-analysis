@@ -233,6 +233,8 @@ export const removedTransparentPixelsURL = (canvas, image) => {
     const croppedCtx = croppedCanvas.getContext('2d');
     croppedCtx.drawImage(image, minX, minY, width, height, 0, 0, width, height);
 
+    //TODO?: keep masked pixel transparent, currently only extract bounding box
+
     return croppedCanvas.toDataURL()
 };
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import { closeToWhite, isColorEqual, nearestColorFromPalette } from "../utils/color";
+import { calculateBrightness, closeToWhite, isColorEqual, nearestColorFromPalette } from "../utils/color";
 
-export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCanvas = null, color, colorPalette, enable = true }) {
+export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCanvas = null, color = [0, 0, 0], colorPalette, ignorePalette, enable = true }) {
     useEffect(() => {
         if (imageCanvas && canvasRef.current) {
             const canvas = canvasRef.current;
@@ -24,9 +24,10 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
             const ctx = canvas.getContext('2d');
             const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const currentData = currentImageData.data;
+            const combinedPalette = [...colorPalette, ...ignorePalette];
 
-            processImageColors(imageCanvas, colorPalette, ({ nearestColor, alpha, i }) => {
-                if (isColorEqual(color, nearestColor) || alpha === 0) {
+            processImageColors(imageCanvas, combinedPalette, ({ nearestColor, alpha, i }) => {
+                if (alpha === 0 || (isColorEqual(color, nearestColor))) {
                     // set current to transparent
                     currentData[i + 3] = 0;
                 }
@@ -35,7 +36,10 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
         }
     }, [color]);
 
-    return (<canvas ref={canvasRef} className="max-w-full h-auto pointer-events-none absolute top-0 left-0 mix-blend-multiply" style={{ opacity: (color && enable) ? 0.8 : 0 }} />);
+    let opacity = (color && enable) ? 0.8 : 0;
+    if (color) opacity = (calculateBrightness(color) / 255 > 0.3) ? 0.8 : 0.95;
+
+    return (<canvas ref={canvasRef} className={`max-w-full h-auto pointer-events-none absolute top-0 left-0 mix-blend-multiply`} style={{ opacity: opacity }} />);
 }
 
 export const processImageColors = (imageCanvas, colorPalette, applyColorFunction) => {
