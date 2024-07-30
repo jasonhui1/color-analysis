@@ -94,8 +94,8 @@ export default function DataPage() {
         return (
           <div className='flex gap-4 items-center' key={id}>
 
-            <div className='flex flex-col gap-1 relative'>
-              {imageURL && <Image ref={imageRefs[id]} src={imageURL} alt={imageURL} width={200} height={200} />}
+            <div className='flex flex-col gap-1 relative w-[250px]'>
+              {imageURL && <Image ref={imageRefs[id]} src={imageURL} alt={imageURL} width={250} height={250} />}
               <CanvasNoMask canvasRef={canvasRefs[id]} image={imageRefs[id]?.current} />
               <HighlightHoveringColorCanvas imageCanvas={canvasRefs[id]?.current} canvasRef={canvasHLRefs[id]}
                 color={hoveringColor} colorPalette={palette}
@@ -104,7 +104,7 @@ export default function DataPage() {
 
             </div>
             <TriangularColorPickerDisplayColors colors={palette} size={200} />
-            <PaletteDisplaySimpleV2 colorPalette={palette}
+            <PaletteDisplaySimpleV2 colorPalette={palette} showHeading={false}
               onPaletteColorHover={(color) => onPaletteColorHover(color, index)}
               onPaletteColorUnHover={() => onPaletteColorUnHover()}
             />
@@ -119,13 +119,17 @@ export default function DataPage() {
 const SearchBar = ({ searchTerm, setSearchTerm, setFinalSearchTerm }) => {
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
-      setFinalSearchTerm(searchTerm)
+      search(searchTerm)
     }
+  }
+
+  const search = (searchTerm) => {
+    setFinalSearchTerm(searchTerm)
   }
 
   return (
     <div className='flex gap-2 items-center border bg-gray-100 w-fit p-2'>
-      <IoSearchOutline size={20} />
+      <IoSearchOutline size={20} onClick={() => search(searchTerm)}  cursor='pointer'/>
       <input className=' bg-inherit w-96 outline-none ' type='text' value={searchTerm} placeholder='Search Tags' onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyPress} />
       {searchTerm && <CiCircleRemove size={20} cursor='pointer' onClick={() => { setSearchTerm(''); setFinalSearchTerm('') }} />}
     </div>
@@ -135,13 +139,13 @@ const SearchBar = ({ searchTerm, setSearchTerm, setFinalSearchTerm }) => {
 
 const TagDisplay = ({ tag, onClick }) => {
   return (
-    <div className='bg-gray-200 px-2 py-1 rounded-md cursor-pointer' onClick={onClick}>{tag}</div>
+    <div className='bg-gray-200 px-2 py-1 rounded-md cursor-pointer text-sm' onClick={onClick}>{tag}</div>
   )
 }
 
 const TagsDisplay = ({ tags, onClickTag }) => {
   return (
-    <div className='flex gap-2'>
+    <div className='flex gap-2 flex-wrap'>
       {tags && tags.map((tag, index) =>
         <TagDisplay key={index} tag={tag} onClick={() => onClickTag(tag)} />)
       }

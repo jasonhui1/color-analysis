@@ -21,7 +21,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
             newPalette[hoveringIndex] = selectedColor;
             setColorPalette(newPalette);
             // setIsEditing(false);
-            setHoveringIndex(-1);
+            // setHoveringIndex(-1);
 
         }
     }, [selectedColor]);
@@ -110,11 +110,11 @@ export function PaletteDisplaySimple({ colorPalette, }) {
 }
 
 
-export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPaletteColorUnHover, colorPalettePercentage = [] }) {
+export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPaletteColorUnHover, colorPalettePercentage = [], showHeading = true }) {
 
     return (
         <div className="mt-4">
-            <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
+            {showHeading && <h2 className="text-xl font-semibold mb-2">Color Palette</h2>}
             <div className="flex gap-4">
                 {colorPalette.map((color, index) => (
                     <div key={index} onMouseEnter={() => onPaletteColorHover(color)} onMouseLeave={() => onPaletteColorUnHover()}    >

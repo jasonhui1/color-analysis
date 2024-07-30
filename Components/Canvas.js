@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage,
     maskMode, enableMask, invertMask,
     setSelectedColor,
-    maxSize = 360,
+    maxSize = 720,
 }) {
 
     const isSelectingRef = useRef(false);
@@ -54,7 +54,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
             }
             setDrawingComplete(true)
         }
-    }, [canvasRef, image, reset, maskMode, maskedImage, enableMask, invertMask]);
+    }, [canvasRef, image, reset, maskMode, maskedImage?.width, maskedImage?.height, enableMask, invertMask]);
 
 
     const startSelecting = (e) => {

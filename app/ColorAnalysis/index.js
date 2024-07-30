@@ -18,6 +18,7 @@ const ColorAnalysis = () => {
     const canvasRef = useRef(null);
     const maskedCanvasRef = useRef(null);
     const highlightCanvasRef = useRef(null);
+    const fileDropRef = useRef(null);
 
     const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
 
@@ -80,6 +81,8 @@ const ColorAnalysis = () => {
 
     const onImageSelected = (img) => {
         setImage(img);
+        setMaskMode(false);
+        setEnableMask(false);
         // analyzeColors(img)
     }
 
@@ -125,20 +128,24 @@ const ColorAnalysis = () => {
                 Color Analysis
             </h1>
 
-            <FileUpload onImageSelected={onImageSelected} />
-
-
-
             {/* {image && ( */}
-            <div className="flex flex-row gap-6 " >
+            <div className="flex flex-row gap-6 items-end relative mb-3 " >
+                <div className="mb-4 relative  " ref={fileDropRef}  >
 
-                <div className="mb-4 relative " >
-                    <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={reset}
-                        maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
-                        setSelectedColor={setSelectedColor}
-                    />
-                    <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} reset={maskReset} maskMode={maskMode} />
-                    <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current} reset={highlightReset} color={hoveringColor} colorPalette={colorPalette} />
+                    {/* Drag and drop within the same dimension as canvas */}
+                    <div className={`${image ? 'absolute inset-0  pointer-events-none ' : ''} `} style={{ width: canvasRef?.current?.width ?? '720' + 'px', height: canvasRef?.current?.height ?? '720' + 'px' }}>
+                        <FileUpload onImageSelected={onImageSelected} imageSelected={image !== null} fileDropRef={fileDropRef} />
+                    </div>
+                    {image &&
+                        <>
+                            <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={reset}
+                                maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
+                                setSelectedColor={setSelectedColor}
+                            />
+                            <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} reset={maskReset} maskMode={maskMode} />
+                            <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current} reset={highlightReset} color={hoveringColor} colorPalette={colorPalette} />
+                        </>
+                    }
                 </div>
                 {<TriangularColorPickerDisplayColors colors={[selectedColor]} />}
 
@@ -181,7 +188,7 @@ const ColorAnalysis = () => {
                 />
             } */}
 
-                <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} tags={tags} percentage={colorPalettePercentage} />
+                <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} image={image} tags={tags} percentage={colorPalettePercentage} />
 
             </div>
 
@@ -204,7 +211,7 @@ function MaskUI({ maskMode, onChangeMaskMode,
     )
 }
 
-function UploadButton({ colorPalette, canvasRef, tags, percentage }) {
+function UploadButton({ colorPalette, canvasRef, image, tags, percentage }) {
     const [isUploading, setIsUploading] = useState(false);
 
     const handleUpload = async (event) => {

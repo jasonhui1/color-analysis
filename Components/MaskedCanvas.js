@@ -43,15 +43,14 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
     };
 
     const draw = (e) => {
-        const isDrawing = isDrawingRef.current;
-        const isErasing = isErasingRef.current;
-
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         setMousePosition({ x, y });
 
+        const isDrawing = isDrawingRef.current;
+        const isErasing = isErasingRef.current;
         if ((!isDrawing && !isErasing)) return;
 
         const ctx = canvas.getContext('2d');
@@ -107,7 +106,7 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
             />
             {/* <div className='absolute' style={{ top: mousePosition.y, left: mousePosition.x }}></div> */}
             {maskMode && <CircleIndicator position={mousePosition} diameter={brushSize} color={'white'} border_width={1} />}
-            {maskMode && <CircleIndicator position={mousePosition} diameter={brushSize+2} color={'black'} />}
+            {maskMode && <CircleIndicator position={mousePosition} diameter={brushSize + 2} color={'black'} />}
             {maskMode && <div className=" bg-white p-4 rounded shadow w-96">
                 <input
                     type="range"
