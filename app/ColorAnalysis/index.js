@@ -8,7 +8,7 @@ import { uploadImageClient } from "../../api/image";
 import { uploadPaletteClient } from "../../api/palette";
 import { getUserId } from "../../api/supabaseClient";
 import GoogleLogin from "../../Components/Auth/GoogleLogin";
-import Canvas, { removeTransparentPixels } from "../../Components/Canvas";
+import Canvas, { removedTransparentPixelsURL } from "../../Components/Canvas";
 import { TriangularColorPickerDisplayColors } from "../../Components/Color/picker";
 import FileUpload from "../../Components/FileUpload";
 import MaskedCanvas from "../../Components/MaskedCanvas";
@@ -121,6 +121,18 @@ const ColorAnalysis = () => {
         )))
     }
 
+    const onApplyMask = () => {
+        const url = removedTransparentPixelsURL(canvasRef.current, image);
+        const croppedImage = new Image();
+        croppedImage.src = url;
+
+        // setMaskDataUrl(url);
+        croppedImage.onload = () => {
+            setImage(croppedImage);
+            setEnableMask(false)
+        };
+    }
+
     return (
         <div className="p-4">
             <GoogleLogin />
@@ -156,7 +168,8 @@ const ColorAnalysis = () => {
 
                 <MaskUI maskMode={maskMode} onChangeMaskMode={onChangeMaskMode}
                     enableMask={enableMask} setEnableMask={setEnableMask}
-                    invertMask={invertMask} setInvertMask={setInvertMask} />
+                    invertMask={invertMask} setInvertMask={setInvertMask}
+                    onApplyMask={onApplyMask} />
 
                 <div className="flex gap-4 items-center">
                     <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
@@ -200,13 +213,15 @@ export default ColorAnalysis;
 function MaskUI({ maskMode, onChangeMaskMode,
     enableMask, setEnableMask,
     invertMask, setInvertMask,
+    onApplyMask
 }) {
-
     return (
         <div className="flex gap-4 items-center">
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => onChangeMaskMode()}> {maskMode ? 'Exit Mask' : 'Enter Mask'} </button>
             <CheckBox label="Enable mask" checked={enableMask} onChange={() => setEnableMask(!enableMask)} />
             <CheckBox label="Invert mask" checked={invertMask} onChange={() => setInvertMask(!invertMask)} />
+            <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onApplyMask()}> Apply Mask</button>
+
         </div>
     )
 }
@@ -216,14 +231,13 @@ function UploadButton({ colorPalette, canvasRef, image, tags, percentage }) {
 
     const handleUpload = async (event) => {
         setIsUploading(true);
-        const { canvas: croppedCanvas } = removeTransparentPixels(canvasRef.current);
-        const canvasImageUrl = croppedCanvas.toDataURL();
+        const croppedImageURL = removedTransparentPixelsURL(canvasRef.current, image);
 
         //TODO: Wrap this in context  when refactor
         const id = await getUserId()
 
         try {
-            const imageURL = await uploadImageClient(canvasImageUrl);
+            const imageURL = await uploadImageClient(croppedImageURL);
             await uploadPaletteClient({ palette: { palette: colorPalette, percentage }, userId: id, imageURL, tags });
             console.log('upload success :>> ');
 
