@@ -10,8 +10,10 @@ export default async function handler(req, res) {
 
         try {
             const paletteId = await addPalette({ palette, imageURL, userId });
-            const tags_ = await addTagsToPalette({ userId, tags });
-            await linkPaletteTags({ paletteId, tags: tags_ });
+            if (tags) {
+                const tags_ = await addTagsToPalette({ userId, tags });
+                await linkPaletteTags({ paletteId, tags: tags_ });
+            }
 
             console.log('upload palette success :>> ');
             res.status(200).json({ paletteId });
