@@ -9,6 +9,7 @@ import { IoSearchOutline } from "react-icons/io5";
 import { CiCircleRemove } from "react-icons/ci";
 import HighlightHoveringColorCanvas from '../../Components/FilterCanvas';
 import Canvas, { CanvasNoMask } from '../../Components/Canvas';
+import { calculateBrightness } from '../../utils/color';
 
 export default function DataPage() {
 
@@ -18,7 +19,7 @@ export default function DataPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [finalSearchTerm, setFinalSearchTerm] = useState('');
 
-  const [hoveringColor, setHoveringColor] = useState([0, 0, 0]);
+  const [hoveringColor, setHoveringColor] = useState();
   const [hoveringRowIndex, setHoveringRowIndex] = useState(-1);
 
   const [canvasRefs, setCanvasRefs] = useState({});
@@ -50,6 +51,8 @@ export default function DataPage() {
     setLoading(true)
     const userId = await getUserId()
     const data = await getPaletteClient({ userId, withTags: true, searchTerm: finalSearchTerm })
+    if (data && data.palette) {
+    }
     setData(data)
     setLoading(false)
   }
@@ -74,7 +77,7 @@ export default function DataPage() {
 
 
   const onPaletteColorUnHover = () => {
-    setHoveringColor([0, 0, 0])
+    setHoveringColor(null);
     setHoveringRowIndex(-1)
     const newReset = [...resets]
     newReset[hoveringRowIndex] = !newReset[hoveringRowIndex]
@@ -89,7 +92,9 @@ export default function DataPage() {
       <h1>DATA</h1>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
 
-      {data && data.map(({ id, palette, imageURL, tags }, index) => {
+      {data && data.map(({ id, palette, ignorePalette = [], percentage, imageURL, tags }, index) => {
+
+        const sorted_palette = palette.toSorted((a, b) => calculateBrightness(b) - calculateBrightness(a))
 
         return (
           <div className='flex gap-4 items-center' key={id}>
@@ -98,13 +103,13 @@ export default function DataPage() {
               {imageURL && <Image ref={imageRefs[id]} src={imageURL} alt={imageURL} width={250} height={250} />}
               <CanvasNoMask canvasRef={canvasRefs[id]} image={imageRefs[id]?.current} />
               <HighlightHoveringColorCanvas imageCanvas={canvasRefs[id]?.current} canvasRef={canvasHLRefs[id]}
-                color={hoveringColor} colorPalette={palette}
+                color={hoveringColor} colorPalette={palette} ignorePalette={ignorePalette}
                 reset={resets[index]} enable={hoveringRowIndex === index} />
               <TagsDisplay tags={tags} onClickTag={onClickTag} />
 
             </div>
             <TriangularColorPickerDisplayColors colors={palette} size={200} />
-            <PaletteDisplaySimpleV2 colorPalette={palette} showHeading={false}
+            <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false}
               onPaletteColorHover={(color) => onPaletteColorHover(color, index)}
               onPaletteColorUnHover={() => onPaletteColorUnHover()}
             />
@@ -129,7 +134,7 @@ const SearchBar = ({ searchTerm, setSearchTerm, setFinalSearchTerm }) => {
 
   return (
     <div className='flex gap-2 items-center border bg-gray-100 w-fit p-2'>
-      <IoSearchOutline size={20} onClick={() => search(searchTerm)}  cursor='pointer'/>
+      <IoSearchOutline size={20} onClick={() => search(searchTerm)} cursor='pointer' />
       <input className=' bg-inherit w-96 outline-none ' type='text' value={searchTerm} placeholder='Search Tags' onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyPress} />
       {searchTerm && <CiCircleRemove size={20} cursor='pointer' onClick={() => { setSearchTerm(''); setFinalSearchTerm('') }} />}
     </div>

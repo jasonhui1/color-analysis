@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { calculateBrightness, closeToWhite, isColorEqual, nearestColorFromPalette } from "../utils/color";
 
-export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCanvas = null, color = [0, 0, 0], colorPalette, ignorePalette, enable = true }) {
+export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCanvas = null, color = null, colorPalette, ignorePalette = [], enable = true }) {
     useEffect(() => {
         if (imageCanvas && canvasRef.current) {
             const canvas = canvasRef.current;
@@ -36,8 +36,12 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
         }
     }, [color]);
 
-    let opacity = (color && enable) ? 0.8 : 0;
-    if (color) opacity = (calculateBrightness(color) / 255 > 0.3) ? 0.8 : 0.95;
+    let opacity;
+    if (enable && color) {
+        opacity = (calculateBrightness(color) / 255 > 0.3) ? 0.8 : 0.95;
+    } else {
+        opacity = 0;
+    }
 
     return (<canvas ref={canvasRef} className={`max-w-full h-auto pointer-events-none absolute top-0 left-0 mix-blend-multiply`} style={{ opacity: opacity }} />);
 }

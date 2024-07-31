@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { LuUpload } from "react-icons/lu";
 
-export default function FileUpload({ onImageSelected, imageSelected, fileDropRef }) {
+export default function FileUpload({ onImageSelected, imageSelected, fileDropRef, setImageSourceURL }) {
 
     const [isUploading, setIsUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -25,6 +25,26 @@ export default function FileUpload({ onImageSelected, imageSelected, fileDropRef
         event.preventDefault();
         setIsDragging(false);
         const file = event.dataTransfer.files[0];
+
+        // get source URL
+        for (let item of event.dataTransfer.items) {
+            if (item.kind === 'string' && item.type === 'text/uri-list') {
+                item.getAsString((url) => {
+                    console.log('URL of the dropped image: ', url);
+                    setImageSourceURL(url);
+                });
+            }
+            // if (item.kind === 'file') {
+            //     const file_ = item.getAsFile();
+            //     console.log('file kind :>> ', file_);
+            // } else if (item.kind === 'string') {
+            //     if (item.type === 'text/uri-list' || item.type === 'text/plain' || item.type === 'text/html') {
+            //         item.getAsString((data) => {
+            //             console.log(`Data from item of type ${item.type} :>> `, data);
+            //         });
+            //     }
+            // }
+        }
         handleImageUpload(file)
     };
 

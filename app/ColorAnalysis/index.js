@@ -23,6 +23,8 @@ const ColorAnalysis = () => {
     const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
 
     const [image, setImage] = useState(null);
+    const [imageSourceURL, setImageSourceURL] = useState('');
+
     const [colorPalette, setColorPalette] = useState([]);
     const [ignorePalette, setIgnorePalette] = useState([]);
     const [colorPalettePercentage, setColorPalettePercentage] = useState([]);
@@ -111,11 +113,14 @@ const ColorAnalysis = () => {
 
         const counter = {}
         let totalPixels = 0
-        processImageColors(image, [...colorPalette, ignorePalette], ({ nearestColor, alpha }) => {
-            if (alpha === 0 || (ignorePalette.includes(nearestColor))) return
+        processImageColors(image, [...colorPalette, ...ignorePalette], ({ nearestColor, alpha }) => {
+            if (alpha === 0) return
             totalPixels += 1
             counter[nearestColor] = (counter[nearestColor] || 0) + 1
         });
+
+        // Subtract ignored colors pixels
+        ignorePalette.forEach((color) => totalPixels -= counter[color])
 
         setColorPalettePercentage(colorPalette.map((color) => (
             Math.round((counter[color] / totalPixels) * 100)
@@ -143,24 +148,32 @@ const ColorAnalysis = () => {
 
             {/* {image && ( */}
             <div className="flex flex-row gap-6 relative mb-3 " >
-                <div className="mb-4 relative  " ref={fileDropRef}  >
+                <div className="flex flex-col gap-3">
+                    <div className="mb-4 relative  " ref={fileDropRef}  >
 
-                    {/* Drag and drop within the same dimension as canvas */}
-                    <div className={`${image ? 'absolute inset-0  pointer-events-none ' : ''} `} style={{ width: canvasRef?.current?.width ?? '720' + 'px', height: canvasRef?.current?.height ?? '720' + 'px' }}>
-                        <FileUpload onImageSelected={onImageSelected} imageSelected={image !== null} fileDropRef={fileDropRef} />
+                        {/* Drag and drop within the same dimension as canvas */}
+                        <div className={`${image ? 'absolute inset-0  pointer-events-none ' : ''} `} style={{ width: canvasRef?.current?.width ?? '720' + 'px', height: canvasRef?.current?.height ?? '720' + 'px' }}>
+                            <FileUpload onImageSelected={onImageSelected} imageSelected={image !== null} fileDropRef={fileDropRef} setImageSourceURL={setImageSourceURL} />
+                        </div>
+                        {image &&
+                            <>
+                                <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={reset}
+                                    maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
+                                    setSelectedColor={setSelectedColor}
+                                />
+                                <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} reset={maskReset} maskMode={maskMode} />
+                                <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current}
+                                    reset={highlightReset}
+                                    color={hoveringColor} colorPalette={colorPalette} ignorePalette={ignorePalette} />
+                            </>
+                        }
                     </div>
-                    {image &&
-                        <>
-                            <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={reset}
-                                maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
-                                setSelectedColor={setSelectedColor}
-                            />
-                            <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} reset={maskReset} maskMode={maskMode} />
-                            <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current}
-                                reset={highlightReset}
-                                color={hoveringColor} colorPalette={colorPalette} ignorePalette={ignorePalette} />
-                        </>
-                    }
+                    <MaskUI maskMode={maskMode} onChangeMaskMode={onChangeMaskMode}
+                        enableMask={enableMask} setEnableMask={setEnableMask}
+                        invertMask={invertMask} setInvertMask={setInvertMask}
+                        onApplyMask={onApplyMask} />
+
+
                 </div>
                 {<TriangularColorPickerDisplayColors colors={[selectedColor]} />}
 
@@ -205,17 +218,13 @@ const ColorAnalysis = () => {
                 />
             } */}
 
-                    <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} image={image} tags={tags} percentage={colorPalettePercentage} ignorePalette={ignorePalette} />
+                    <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} image={image} tags={tags}
+                        percentage={colorPalettePercentage} ignorePalette={ignorePalette} imageSourceURL={imageSourceURL} />
 
                 </div>
 
 
             </div>
-            <MaskUI maskMode={maskMode} onChangeMaskMode={onChangeMaskMode}
-                enableMask={enableMask} setEnableMask={setEnableMask}
-                invertMask={invertMask} setInvertMask={setInvertMask}
-                onApplyMask={onApplyMask} />
-
 
         </div>
     );
@@ -238,8 +247,9 @@ function MaskUI({ maskMode, onChangeMaskMode,
     )
 }
 
-function UploadButton({ colorPalette, canvasRef, image, tags, percentage, ignorePalette }) {
+function UploadButton({ colorPalette, canvasRef, image, tags, percentage, ignorePalette, imageSourceURL }) {
     const [isUploading, setIsUploading] = useState(false);
+    console.log('imageSourceURL :>> ', imageSourceURL);
 
     const handleUpload = async (event) => {
         setIsUploading(true);
@@ -250,7 +260,7 @@ function UploadButton({ colorPalette, canvasRef, image, tags, percentage, ignore
 
         try {
             const uploadedImageURL = await uploadImageClient(croppedImageURL);
-            await uploadPaletteClient({ palette: { palette: colorPalette, percentage, ignorePalette }, userId: id, imageURL: uploadedImageURL, tags });
+            await uploadPaletteClient({ palette: { palette: colorPalette, percentage, ignorePalette }, userId: id, imageURL: uploadedImageURL, tags, imageSourceURL });
             console.log('upload success :>> ');
 
         } catch (err) {

@@ -1,4 +1,4 @@
-export async function uploadPaletteClient({ palette, userId, imageURL = null, tags = '' }) {
+export async function uploadPaletteClient({ palette, userId, imageURL = null, tags = '', imageSourceURL = '' }) {
 
     const tagsArray = tags !== '' ? tags.split(' ').map(tag => tag.trim()) : []
     const response = await fetch('/api/palette', {
@@ -6,7 +6,7 @@ export async function uploadPaletteClient({ palette, userId, imageURL = null, ta
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ palette, userId, imageURL, tags: tagsArray }),
+        body: JSON.stringify({ palette, userId, imageURL, tags: tagsArray, imageSourceURL }),
     });
 
     if (!response.ok) {

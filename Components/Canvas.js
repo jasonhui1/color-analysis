@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage,
     maskMode, enableMask, invertMask,
     setSelectedColor,
-    maxSize = 720,
+    maxSize = 640,
 }) {
 
     const isSelectingRef = useRef(false);
@@ -36,12 +36,8 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
             const canvas = canvasRef.current;
             let ctx = canvas.getContext("2d");
 
-            console.log('image.width, image.height :>> ', image.width, image.height);
-
             // Set maximum width
             const { width, height } = calculateCanvasSize(image, maxSize);
-            console.log('width, height :>> ', width, height);
-
 
             canvas.width = width;
             canvas.height = height;
