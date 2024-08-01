@@ -10,6 +10,7 @@ import { CiCircleRemove } from "react-icons/ci";
 import HighlightHoveringColorCanvas from '../../Components/FilterCanvas';
 import Canvas, { CanvasNoMask } from '../../Components/Canvas';
 import { calculateBrightness } from '../../utils/color';
+import { useInView, InView } from 'react-intersection-observer';
 
 export default function DataPage() {
 
@@ -70,7 +71,7 @@ export default function DataPage() {
   // }
 
 
-  const onPaletteColorHover = (color, rowIndex) => {
+  const onPaletteColorHover = (rowIndex) => (color) => {
     setHoveringColor(color)
     setHoveringRowIndex(rowIndex)
   }
@@ -92,32 +93,56 @@ export default function DataPage() {
       <h1>DATA</h1>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
 
-      {data && data.map(({ id, palette, ignorePalette = [], percentage, imageURL, tags }, index) => {
+      {data && data.map((paletteData, index) => {
 
-        const sorted_palette = palette.toSorted((a, b) => calculateBrightness(b) - calculateBrightness(a))
 
         return (
-          <div className='flex gap-4 items-center' key={id}>
-
-            <div className='flex flex-col gap-1 relative w-[250px]'>
-              {imageURL && <Image ref={imageRefs[id]} src={imageURL} alt={imageURL} width={250} height={250} />}
-              <CanvasNoMask canvasRef={canvasRefs[id]} image={imageRefs[id]?.current} />
-              <HighlightHoveringColorCanvas imageCanvas={canvasRefs[id]?.current} canvasRef={canvasHLRefs[id]}
-                color={hoveringColor} colorPalette={palette} ignorePalette={ignorePalette}
-                reset={resets[index]} enable={hoveringRowIndex === index} />
-              <TagsDisplay tags={tags} onClickTag={onClickTag} />
-
-            </div>
-            <TriangularColorPickerDisplayColors colors={palette} size={200} />
-            <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false}
-              onPaletteColorHover={(color) => onPaletteColorHover(color, index)}
-              onPaletteColorUnHover={() => onPaletteColorUnHover()}
-            />
-
-          </div>
+          <Row key={paletteData.id} imageRef={imageRefs[index]} canvasRef={canvasRefs[index]} canvasHLRef={canvasHLRefs[index]}
+            paletteData={paletteData} hoveringColor={hoveringColor} reset={resets[index]} enable={hoveringRowIndex === index}
+            onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover} onPaletteColorUnHover={onPaletteColorUnHover} />
         )
       })}
     </div>
+  )
+}
+
+const Row = ({ imageRef, canvasRef, canvasHLRef, hoveringColor, paletteData, reset, enable, onClickTag, onPaletteColorHover, onPaletteColorUnHover }) => {
+
+  const { palette, ignorePalette = [], tags, percentage, imageURL } = paletteData
+  const sorted_palette = palette.toSorted((a, b) => calculateBrightness(b) - calculateBrightness(a))
+  const { ref, inView, entry } = useInView({
+    /* Optional options */
+    triggerOnce: true,
+    rootMargin: '200px 0px',
+  });
+
+  if (inView) console.log('inView :>> ', inView);
+
+  return (
+    <div ref={ref} className='flex gap-4 items-center' >
+      {inView && (
+        <>
+
+          <div className='flex flex-col gap-1 relative w-[250px]'>
+            {imageURL && <Image ref={imageRef} src={imageURL} alt={imageURL} width={250} height={250} />}
+            <CanvasNoMask canvasRef={canvasRef} image={imageRef?.current} />
+            <HighlightHoveringColorCanvas imageCanvas={canvasRef?.current} canvasRef={canvasHLRef}
+              color={hoveringColor} colorPalette={palette} ignorePalette={ignorePalette}
+              reset={reset} enable={enable} />
+            <TagsDisplay tags={tags} onClickTag={onClickTag} />
+
+          </div>
+
+          <TriangularColorPickerDisplayColors colors={palette} size={200} />
+          <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false}
+            onPaletteColorHover={(color) => onPaletteColorHover(color)}
+            onPaletteColorUnHover={() => onPaletteColorUnHover()}
+          />
+
+        </>
+      )}
+    </div>
+
   )
 }
 

@@ -18,7 +18,7 @@ export async function uploadPaletteClient({ palette, userId, imageURL = null, ta
 }
 
 
-export async function getPaletteClient({ userId, withTags = false, searchTerm = '', limit = 50, }) {
+export async function getPaletteClient({ userId, withTags = false, searchTerm = '', limit = Infinity, }) {
 
     const options = { userId, limit, withTags }
     if (searchTerm.trim() !== '') options.searchTerm = searchTerm.trim()
