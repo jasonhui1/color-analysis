@@ -9,10 +9,10 @@ import { uploadPaletteClient } from "../../api/palette";
 import { getUserId } from "../../api/supabaseClient";
 import GoogleLogin from "../../Components/Auth/GoogleLogin";
 import Canvas, { removedTransparentPixelsURL } from "../../Components/Canvas";
-import { TriangularColorPickerDisplayColors } from "../../Components/Color/picker";
+import { HSLSlider, TriangularColorPickerDisplayColors } from "../../Components/Color/picker";
 import FileUpload from "../../Components/FileUpload";
 import MaskedCanvas from "../../Components/MaskedCanvas";
-import { isColorEqual, calculateBrightness } from "../../utils/color";
+import { isColorEqual, calculateBrightness, rgbToHsl } from "../../utils/color";
 
 const ColorAnalysis = () => {
     const canvasRef = useRef(null);
@@ -175,7 +175,15 @@ const ColorAnalysis = () => {
 
 
                 </div>
-                {<TriangularColorPickerDisplayColors colors={[selectedColor]} />}
+
+                <div className="flex flex-col">
+
+                    {<TriangularColorPickerDisplayColors colors={[selectedColor]} />}
+                    {selectedColor &&
+                        <HSLSlider selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} RGB={true} />
+                    }
+
+                </div>
 
                 <div className="flex flex-col gap-4">
 
@@ -205,7 +213,8 @@ const ColorAnalysis = () => {
                     />
                     {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} />}
 
-                    <TagsInput tags={tags} setTags={setTags} />
+                    <TextInput text={tags} setText={setTags} label='Tags' />
+                    <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' />
 
 
                     {/* {maskDataUrl &&
@@ -249,7 +258,6 @@ function MaskUI({ maskMode, onChangeMaskMode,
 
 function UploadButton({ colorPalette, canvasRef, image, tags, percentage, ignorePalette, imageSourceURL }) {
     const [isUploading, setIsUploading] = useState(false);
-    console.log('imageSourceURL :>> ', imageSourceURL);
 
     const handleUpload = async (event) => {
         setIsUploading(true);
@@ -282,11 +290,11 @@ function UploadButton({ colorPalette, canvasRef, image, tags, percentage, ignore
 
 
 
-function TagsInput({ tags, setTags }) {
+function TextInput({ text, setText, label }) {
     return (
         <div>
-            <label className="mr-4">Tags:</label>
-            <input type="text" className="w-48 border-black border" value={tags} onChange={(e) => setTags(e.target.value)} />
+            <label className="mr-4">{label}:</label>
+            <input type="text" className="min-w-96 border-black border" value={text} onChange={(e) => setText(e.target.value)} />
         </div>
     );
 }

@@ -79,9 +79,9 @@ export const rgbToHsl = (r, g, b, normalisedInput = false, normaliseResult = fal
     }
 
     if (normaliseResult) {
-        return [h, s, l];
+        return { h, s, l };
     } else {
-        return [h * 360, s * 100, l * 100];
+        return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
     }
 };
 

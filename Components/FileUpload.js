@@ -26,14 +26,20 @@ export default function FileUpload({ onImageSelected, imageSelected, fileDropRef
         setIsDragging(false);
         const file = event.dataTransfer.files[0];
 
-        // get source URL
+        let sourceURL = null
+        setImageSourceURL(sourceURL);
+
+        // get source URL, is aschronous
         for (let item of event.dataTransfer.items) {
             if (item.kind === 'string' && item.type === 'text/uri-list') {
                 item.getAsString((url) => {
                     console.log('URL of the dropped image: ', url);
                     setImageSourceURL(url);
+
                 });
             }
+
+            // Extract from html if need to store the url of the image instead of the site
             // if (item.kind === 'file') {
             //     const file_ = item.getAsFile();
             //     console.log('file kind :>> ', file_);
@@ -45,6 +51,7 @@ export default function FileUpload({ onImageSelected, imageSelected, fileDropRef
             //     }
             // }
         }
+
         handleImageUpload(file)
     };
 

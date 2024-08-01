@@ -166,22 +166,33 @@ const RectIndicator = ({ position, width, height, color, border_width = 1, unit 
 
 export const ColorPicker = ({ selectedColor, setSelectedColor }) => {
 
-    const updateColor = (type, value) => {
-        setSelectedColor(prev => ({ ...prev, [type]: value }));
-    };
-
     return (
         <div>
             <TriangularColorPicker size={300} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
 
-            <div className="mt-4">
-                <HSLControl selectedColor={selectedColor} label="H" value={selectedColor.h} min={0} max={360} onChange={(value) => updateColor('h', value)} />
-                <HSLControl selectedColor={selectedColor} label="L" value={selectedColor.l} min={0} max={100} onChange={(value) => updateColor('l', value)} />
-                <HSLControl selectedColor={selectedColor} label="S" value={selectedColor.s} min={0} max={100} onChange={(value) => updateColor('s', value)} />
-            </div>
+            <HSLSlider selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
         </div>
     );
 };
+
+export const HSLSlider = ({ selectedColor, setSelectedColor = null, RGB = false, }) => {
+
+    const updateColor = (type, value) => {
+        setSelectedColor(prev => ({ ...prev, [type]: value }));
+    };
+
+
+    let hls = selectedColor
+    if (RGB) hls = rgbToHsl(selectedColor.r, selectedColor.g, selectedColor.b)
+
+    return (
+        <div className="mt-4">
+            <HSLControl selectedColor={hls} label="H" value={hls.h} min={0} max={360} onChange={setSelectedColor && updateColor('h', hls.h)} />
+            <HSLControl selectedColor={hls} label="L" value={hls.l} min={0} max={100} onChange={setSelectedColor && updateColor('l', hls.l)} />
+            <HSLControl selectedColor={hls} label="S" value={hls.s} min={0} max={100} onChange={setSelectedColor && updateColor('s', hls.s)} />
+        </div>
+    )
+}
 
 const HSLControl = ({ selectedColor, label, value, min, max, onChange }) => {
 
@@ -256,7 +267,6 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
 
     if (colorisRGB && colors.length > 0) {
         colors = colors.map(([r, g, b]) => rgbToHsl(r, g, b, false, false))
-        colors = colors.map(([h, s, l]) => ({ h, s, l }));
     }
     if (colors.length > 0) hue = colors[0].h
 
