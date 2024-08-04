@@ -69,15 +69,10 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
                                     onContextMenu={(e) => e.preventDefault()}
                                 >
 
-                                    {colorPalettePercentage.length > 0 && <span
-                                        className="text-xs font-semibold"
-                                        style={{
-                                            color: calculateBrightness(color) > 127 ? "black" : "white",
-                                        }}
-                                    >
-                                        {colorPalettePercentage[index]}%
-                                    </span>}
+
+                                    {colorPalettePercentage.length > 0 && <PercentageText color={color} percentage={colorPalettePercentage[index]} />}
                                 </div>
+
 
                                 <div className={`flex justify-between ${hoveringIndex !== index ? 'opacity-0' : ''}`}>
 
@@ -94,6 +89,20 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
         </>
     );
 }
+
+const PercentageText = ({ color, percentage }) => {
+    return (
+        <span
+            className="text-xs font-semibold"
+            style={{
+                color: calculateBrightness(color) > 127 ? "black" : "white",
+            }}
+        >
+            {percentage}%
+        </span>
+    )
+}
+
 
 
 export function PaletteDisplaySimple({ colorPalette, }) {
@@ -129,16 +138,9 @@ export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPa
                             className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
                             style={{ backgroundColor: `rgb(${color.join(",")})` }}
                         >
+                            {colorPalettePercentage.length > 0 && <PercentageText color={color} percentage={colorPalettePercentage[index]} />}
                         </div>
 
-                        {colorPalettePercentage.length > 0 && <span
-                            className="text-xs font-semibold"
-                            style={{
-                                color: calculateBrightness(color) > 127 ? "black" : "white",
-                            }}
-                        >
-                            {colorPalettePercentage[index]}%
-                        </span>}
                     </div>
                 ))}
             </div>

@@ -87,19 +87,18 @@ export default function DataPage() {
 
   // console.log('data :>> ', data);
   // const searchTags = finalSearchTerm.trim().split(' ').map(tag => tag.trim())
-
   return (
     <div className='flex flex-col gap-4'>
       <h1>DATA</h1>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
 
       {data && data.map((paletteData, index) => {
-
+        const id = paletteData.id
 
         return (
-          <Row key={paletteData.id} imageRef={imageRefs[index]} canvasRef={canvasRefs[index]} canvasHLRef={canvasHLRefs[index]}
-            paletteData={paletteData} hoveringColor={hoveringColor} reset={resets[index]} enable={hoveringRowIndex === index}
-            onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover} onPaletteColorUnHover={onPaletteColorUnHover} />
+          <Row key={paletteData.id} imageRef={imageRefs[id]} canvasRef={canvasRefs[id]} canvasHLRef={canvasHLRefs[id]}
+            paletteData={paletteData} hoveringColor={hoveringColor} reset={resets[id]} enable={hoveringRowIndex === index}
+            onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover(index)} onPaletteColorUnHover={onPaletteColorUnHover} />
         )
       })}
     </div>
@@ -116,7 +115,6 @@ const Row = ({ imageRef, canvasRef, canvasHLRef, hoveringColor, paletteData, res
     rootMargin: '200px 0px',
   });
 
-  if (inView) console.log('inView :>> ', inView);
 
   return (
     <div ref={ref} className='flex gap-4 items-center' >
@@ -134,7 +132,7 @@ const Row = ({ imageRef, canvasRef, canvasHLRef, hoveringColor, paletteData, res
           </div>
 
           <TriangularColorPickerDisplayColors colors={palette} size={200} />
-          <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false}
+          <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false} colorPalettePercentage={percentage}
             onPaletteColorHover={(color) => onPaletteColorHover(color)}
             onPaletteColorUnHover={() => onPaletteColorUnHover()}
           />

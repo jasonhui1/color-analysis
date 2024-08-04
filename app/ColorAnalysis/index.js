@@ -14,6 +14,8 @@ import FileUpload from "../../Components/FileUpload";
 import MaskedCanvas from "../../Components/MaskedCanvas";
 import { isColorEqual, calculateBrightness, rgbToHsl } from "../../utils/color";
 
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
+
 const ColorAnalysis = () => {
     const canvasRef = useRef(null);
     const maskedCanvasRef = useRef(null);
@@ -86,6 +88,7 @@ const ColorAnalysis = () => {
         setImage(img);
         setMaskMode(false);
         setEnableMask(false);
+        setColorPalettePercentage([]);
         // analyzeColors(img)
     }
 
@@ -245,10 +248,13 @@ function MaskUI({ maskMode, onChangeMaskMode,
     invertMask, setInvertMask,
     onApplyMask
 }) {
+
     return (
         <div className="flex gap-4 items-center">
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => onChangeMaskMode()}> {maskMode ? 'Exit Mask' : 'Enter Mask'} </button>
-            <CheckBox label="Enable mask" checked={enableMask} onChange={() => setEnableMask(!enableMask)} />
+            {enableMask ? <IoMdEye cursor="pointer" onClick={() => setEnableMask(false)} size={24} /> : <IoMdEyeOff size={24} cursor="pointer" onClick={() => setEnableMask(true)} />}
+
+            {/* <CheckBox label="Enable mask" checked={enableMask} onChange={() => setEnableMask(!enableMask)} /> */}
             <CheckBox label="Invert mask" checked={invertMask} onChange={() => setInvertMask(!invertMask)} />
             <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onApplyMask()}> Apply Mask</button>
 

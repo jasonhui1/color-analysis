@@ -30,6 +30,8 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
                 if (alpha === 0 || (isColorEqual(color, nearestColor))) {
                     // set current to transparent
                     currentData[i + 3] = 0;
+                } else {
+                    currentData[i + 3] = 255;
                 }
             })
             ctx.putImageData(currentImageData, 0, 0);
