@@ -1,6 +1,6 @@
 import { Calistoga } from 'next/font/google';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { CircleIndicator } from './Color/picker';
+import { CircleIndicator } from '../Color/picker';
 
 const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
 

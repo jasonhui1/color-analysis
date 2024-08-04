@@ -7,8 +7,8 @@ import { TriangularColorPickerDisplayColors } from '../../Components/Color/picke
 import { getUserId } from '../../api/supabaseClient';
 import { IoSearchOutline } from "react-icons/io5";
 import { CiCircleRemove } from "react-icons/ci";
-import HighlightHoveringColorCanvas from '../../Components/FilterCanvas';
-import Canvas, { CanvasNoMask } from '../../Components/Canvas';
+import HighlightHoveringColorCanvas from '../../Components/Canvas/FilterCanvas';
+import Canvas, { CanvasNoMask } from '../../Components/Canvas/Canvas';
 import { calculateBrightness } from '../../utils/color';
 import { useInView, InView } from 'react-intersection-observer';
 

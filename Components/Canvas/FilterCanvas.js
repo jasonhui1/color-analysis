@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { calculateBrightness, closeToWhite, isColorEqual, nearestColorFromPalette } from "../utils/color";
+import { calculateBrightness, closeToWhite, isColorEqual, nearestColorFromPalette } from "../../utils/color";
 
 export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCanvas = null, color = null, colorPalette, ignorePalette = [], enable = true }) {
     useEffect(() => {
