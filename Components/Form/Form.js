@@ -17,13 +17,13 @@ export function Form({ canvasRef, image,
     formReset
 }) {
 
-    const [tags, setTags] = useState([]);
+    const [tags, setTags] = useState('aaaa');
     const [percentage, setPercentage] = useState([]);
 
 
     useEffect(() => {
         setPercentage([]);
-        setTags([]);
+        setTags('aaa');
         setIgnorePalette([]);
     }, [formReset]);
 
@@ -100,9 +100,9 @@ export function Form({ canvasRef, image,
                 selectedColor={selectedColor} setSelectedColor={setSelectedColor}
             />
             {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} />}
-
+{/* 
             <TextInput text={tags} setText={setTags} label='Tags' />
-            <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' />
+            <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' /> */}
 
 
             {/* {maskDataUrl &&

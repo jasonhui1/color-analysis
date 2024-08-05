@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 
-export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage,
-    maskMode, enableMask, invertMask,
+export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage, SAMImage,
+    maskMode, SAMMode, enableMask, invertMask,
     setSelectedColor,
     maxSize = 640,
 }) {
@@ -54,9 +54,16 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
 
                 ctx.drawImage(maskedImage, 0, 0, maskedImage.width, maskedImage.height);
             }
+
+            if (!SAMMode && SAMImage) {
+                ctx.globalCompositeOperation = 'destination-in';
+                ctx.drawImage(SAMImage, 0, 0, SAMImage.width, SAMImage.height);
+            }
+
             setDrawingComplete(true)
         }
-    }, [canvasRef, image, reset, maskMode, maskedImage?.width, maskedImage?.height, enableMask, invertMask]);
+    }, [canvasRef, image, reset, maskMode, enableMask, invertMask, SAMMode]);
+    // }, [canvasRef, image, reset, maskMode, maskedImage?.width, maskedImage?.height, enableMask, invertMask]);
 
 
     const startSelecting = (e) => {

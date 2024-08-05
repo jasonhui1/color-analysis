@@ -69,7 +69,7 @@ export default function FileUpload({ onImageSelected, imageSelected, fileDropRef
             const img = new Image();
             img.src = e.target.result;
             img.onload = () => {
-                onImageSelected(img)
+                onImageSelected(img , file)
             };
         };
 
