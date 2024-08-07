@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import HighlightHoveringColorCanvas, { processImageColors } from "../../Components/Canvas/FilterCanvas";
 
 import GoogleLogin from "../../Components/Auth/GoogleLogin";
-import Canvas, { removedTransparentPixelsURL } from "../../Components/Canvas/Canvas";
+import Canvas from "../../Components/Canvas/Canvas";
 import { HSLSlider, TriangularColorPickerDisplayColors } from "../../Components/Color/picker";
 import FileUpload from "../../Components/Form/FileUpload";
 import MaskedCanvas from "../../Components/Canvas/MaskedCanvas";
@@ -12,6 +12,7 @@ import { isColorEqual } from "../../utils/color";
 import { Form } from "../../Components/Form/Form";
 import { MaskUI } from "../../Components/Canvas/MaskUI";
 import SAMCanvas from "../../Components/Canvas/SAMCanvas";
+import { invertImageAlpha, removedTransparentPixelsURL } from "../../utils/canvas";
 
 
 const ColorAnalysis = () => {
@@ -24,6 +25,7 @@ const ColorAnalysis = () => {
     const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
 
     const [image, setImage] = useState(null);
+    const [maskImage, setMaskImage] = useState(null);
     const imageFileRef = useRef(null);
     const [imageSourceURL, setImageSourceURL] = useState('');
 
@@ -48,14 +50,14 @@ const ColorAnalysis = () => {
 
     //
     const [drawingComplete, setDrawingComplete] = useState(false);
-    const [maskSelectDrawingComplete, setMaskSelectDrawingComplete] = useState(false);
+    const [maskDrawingComplete, setMaskDrawingComplete] = useState(false);
 
     //
     const [colorPalette, setColorPalette] = useState([]);
     const [ignorePalette, setIgnorePalette] = useState([]);
     const [hoveringColor, setHoveringColor] = useState();
 
-    
+
 
     useEffect(() => {
         if (drawingComplete) {
@@ -65,8 +67,16 @@ const ColorAnalysis = () => {
     }, [drawingComplete]);
 
     useEffect(() => {
+        if (maskDrawingComplete) {
+            setMaskDrawingComplete(false); // Reset the flag for future drawings
+            setReset(state => !state);
+            // if (!maskMode && autoAnalysis) reAnalysis();
+        }
+    }, [maskDrawingComplete]);
+
+    useEffect(() => {
         if (!SAMMode) {
-            setReset(!reset);
+            setReset(state => !state);
         }
     }, [SAMEnableIndex]);
 
@@ -91,35 +101,51 @@ const ColorAnalysis = () => {
         setMaskMode(false);
         setEnableMask(false);
         setFormReset(!reset);
+        setMaskImage(null);
+
+        setReset(state => !state);
+        setMaskReset(state => !state);
 
         imageFileRef.current = file
         setSAMEnableIndex(-1);
         setSAMImages([]);
         setSAMPositions([]);
+        setSAMIgnorePositions([]);
         setSAMReset(state => !state);
     }
-    
+
     const onChangeMaskMode = () => {
         setMaskMode(!maskMode)
         if (maskMode) setEnableMask(true)
     };
 
     const onApplyMask = () => {
-        const url = removedTransparentPixelsURL(canvasRef.current, image);
+
+        const maskUrl = removedTransparentPixelsURL(maskedCanvasRef.current, image, true, true);
+        const croppedMaskImage = new Image();
+        croppedMaskImage.src = maskUrl;
+
+        const url = removedTransparentPixelsURL(canvasRef.current, image, false);
         const croppedImage = new Image();
         croppedImage.src = url;
 
-        // setMaskDataUrl(url);
         croppedImage.onload = () => {
             setImage(croppedImage);
             setEnableMask(false)
-            setReset(!reset);
+            setReset(state => !state);
 
             setSAMEnableIndex(-1);
             setSAMImages([]);
             setSAMPositions([]);
             setSAMIgnorePositions([]);
         };
+
+
+        croppedMaskImage.onload = () => {
+            setMaskImage(croppedMaskImage);
+            setMaskReset(state => !state);
+        };
+
     }
 
     useEffect(() => {
@@ -128,17 +154,24 @@ const ColorAnalysis = () => {
         //     .then(data => console.log(data))
     }, [])
 
-
+    const onClickSAMIndex = async (index) => {
+        setSAMEnableIndex(index);
+        const maskSAMImage = await invertImageAlpha(SAMImages[index]);
+        setMaskImage(maskSAMImage);
+        setMaskReset(state => !state);
+        setEnableMask(true);
+    }
 
     const processSAM = async () => {
         // if (!file) return
         if (!canvasRef.current) return
         if (SAMPositions.length === 0 && SAMIgnorePositions.length === 0) { console.log('SAM: No position selected'); return }
-        // const dataURL = canvasRef.current.toDataURL('image/png');
-        // const file = dataURLtoFile(dataURL, `canvas.png`);
+        const dataURL = canvasRef.current.toDataURL('image/png');
+        const file = dataURLtoFile(dataURL, `canvas.png`);
+        const scale = 1
 
-        const file = imageFileRef.current
-        const scale = image.width / canvasRef.current.width
+        // const file = imageFileRef.current
+        // const scale = image.width / canvasRef.current.width
         const positivePosition = SAMPositions.map(([x, y]) => [x * scale, y * scale])
         const negativePosition = SAMIgnorePositions.map(([x, y]) => [x * scale, y * scale])
 
@@ -194,9 +227,10 @@ const ColorAnalysis = () => {
                                 <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={reset}
                                     maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
                                     setSelectedColor={setSelectedColor}
-                                    SAMImage={SAMCanvasRef.current} SAMMode={SAMMode}
+                                    SAMImage={SAMCanvasRef.current} SAMMode={SAMMode} maskDrawingComplete={maskDrawingComplete}
                                 />
-                                <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} reset={maskReset} maskMode={maskMode}
+                                <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} maskImage={maskImage} reset={maskReset} maskMode={maskMode}
+                                    setDrawingComplete={setMaskDrawingComplete}
                                 />
                                 <SAMCanvas canvasRef={SAMCanvasRef} image={canvasRef?.current} reset={SAMReset} maskMode={SAMMode}
                                     SAMPositions={SAMPositions} setSAMPositions={setSAMPositions}
@@ -212,11 +246,11 @@ const ColorAnalysis = () => {
                     <MaskUI maskMode={maskMode} onChangeMaskMode={onChangeMaskMode}
                         enableMask={enableMask} setEnableMask={setEnableMask}
                         invertMask={invertMask} setInvertMask={setInvertMask}
-                        setSAMEnableIndex={setSAMEnableIndex} SAMImages={SAMImages}
+                        onSAMIndexClick={onClickSAMIndex} SAMImages={SAMImages}
                         processSAM={processSAM}
                         onApplyMask={onApplyMask} />
 
-                    <button onClick={() => setSAMMode(!SAMMode)} className="bg-gray-200 px-2 py-1 rounded-md cursor-pointer text-sm">SAM Mode : {SAMMode ? 'ON' : 'OFF'}</button>
+                    <button onClick={() => setSAMMode(!SAMMode)} className="bg-gray-200 px-2 py-1 rounded-md cursor-pointer text-sm">SAM Mode : {!SAMMode ? 'Enter' : 'Leave'}</button>
 
 
                 </div>
@@ -232,7 +266,7 @@ const ColorAnalysis = () => {
 
 
                 <Form
-                    canvasRef={canvasRef}
+                    canvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current}
                     image={image}
                     imageSourceURL={imageSourceURL}
                     onPaletteColorDelete={onPaletteColorDelete}

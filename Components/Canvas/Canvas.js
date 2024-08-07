@@ -3,7 +3,7 @@ import { calculateCanvasSize } from "../../utils/canvas";
 
 
 export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage, SAMImage,
-    maskMode, SAMMode, enableMask, invertMask,
+    maskMode, SAMMode, enableMask, invertMask, maskDrawingComplete,
     setSelectedColor,
     maxSize = 640,
 }) {
@@ -31,13 +31,14 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
                     ctx.globalCompositeOperation = 'destination-out';
                 }
 
+
                 ctx.drawImage(maskedImage, 0, 0, maskedImage.width, maskedImage.height);
             }
 
-            if (!SAMMode && SAMImage) {
-                ctx.globalCompositeOperation = 'destination-in';
-                ctx.drawImage(SAMImage, 0, 0, SAMImage.width, SAMImage.height);
-            }
+            // if (enableSAM && !SAMMode && SAMImage) {
+            //     ctx.globalCompositeOperation = 'destination-in';
+            //     ctx.drawImage(SAMImage, 0, 0, SAMImage.width, SAMImage.height);
+            // }
 
             setDrawingComplete(true)
         }
@@ -157,66 +158,4 @@ export function CanvasNoMask({ canvasRef, image, setDrawingComplete, setSelected
     return (<canvas ref={canvasRef} className="max-w-full h-auto  absolute top-0 left-0" />);
     // return (<canvas ref={canvasRef} className="max-w-full h-auto cursor-crosshair absolute top-0 left-0" />);
 }
-
-
-const getNonTransparentBoundingBox = (canvas) => {
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-
-    let [width, height] = [canvas.width, canvas.height];
-
-    let minX = width, minY = height, maxX = 0, maxY = 0;
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const alpha = data[((y * width + x) * 4) + 3];
-            if (alpha !== 0) {
-                minX = Math.min(minX, x);
-                minY = Math.min(minY, y);
-                maxX = Math.max(maxX, x);
-                maxY = Math.max(maxY, y);
-            }
-        }
-    }
-
-    // Add a small padding
-    minX = Math.max(0, minX - 1);
-    minY = Math.max(0, minY - 1);
-    maxX = Math.min(width - 1, maxX + 1);
-    maxY = Math.min(height - 1, maxY + 1);
-
-    width = maxX - minX + 1;
-    height = maxY - minY + 1;
-
-    return {
-        x: minX,
-        y: minY,
-        width,
-        height
-    }
-}
-
-export const removedTransparentPixelsURL = (canvas, image) => {
-
-    let { x: minX, y: minY, width, height } = getNonTransparentBoundingBox(canvas);
-
-    // Find position in original image to keep resolution
-    const scale = image.width / canvas.width;
-    minX = Math.floor(minX * scale);
-    minY = Math.floor(minY * scale);
-    width = Math.ceil(width * scale);
-    height = Math.ceil(height * scale);
-
-    const croppedCanvas = document.createElement('canvas');
-    croppedCanvas.width = width;
-    croppedCanvas.height = height;
-
-    const croppedCtx = croppedCanvas.getContext('2d');
-    croppedCtx.drawImage(image, minX, minY, width, height, 0, 0, width, height);
-
-    //TODO?: keep masked pixel transparent, currently only extract bounding box
-
-    return croppedCanvas.toDataURL()
-};
 

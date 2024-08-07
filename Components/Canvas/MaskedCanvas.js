@@ -2,7 +2,7 @@ import { Calistoga } from 'next/font/google';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CircleIndicator } from '../Color/picker';
 
-const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
+const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true, maskImage, setDrawingComplete }) => {
 
     const isDrawingRef = useRef(false);
     const isErasingRef = useRef(false);
@@ -19,10 +19,18 @@ const MaskedCanvas = ({ canvasRef, image, reset, maskMode = true }) => {
             const ctx = canvas.getContext('2d');
             canvas.width = image.width;
             canvas.height = image.height;
-            ctx.fillStyle = 'black';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // console.log('maskImage, updating :>> ', maskImage, image.width, image.height);
+            if (!maskImage) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.drawImage(maskImage, 0, 0, canvas.width, canvas.height);
+            }
+
+            setDrawingComplete(true)
         }
-    }, [image?.width, image?.height, reset]);
+    }, [image?.width, image?.height, reset, maskImage]);
 
     useEffect(() => {
         brushSizeRef.current = brushSize;

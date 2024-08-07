@@ -3,13 +3,13 @@ import { addTagsToPalette, linkPaletteTags } from "../../lib/db/tags";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { palette, imageURL, userId, tags, imageSourceURL } = req.body;
+        const { palette, imageURL, userId, tags, imageSourceURL, maskImageURL } = req.body;
         if (!palette) {
             return res.status(400).json({ error: 'palette is required' });
         }
 
         try {
-            const paletteId = await addPalette({ palette, imageURL, userId, imageSourceURL });
+            const paletteId = await addPalette({ palette, imageURL, userId, imageSourceURL, maskImageURL     });
             if (tags) {
                 const tags_ = await addTagsToPalette({ userId, tags });
                 await linkPaletteTags({ paletteId, tags: tags_ });

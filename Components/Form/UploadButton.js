@@ -1,23 +1,25 @@
 import { useState } from "react";
-import { removedTransparentPixelsURL } from "../Canvas/Canvas";
 
 import { uploadImageClient } from "../../api/image";
 import { uploadPaletteClient } from "../../api/palette";
 import { getUserId } from "../../api/supabaseClient";
+import { removedTransparentPixelsURL } from "../../utils/canvas";
 
-export function UploadButton({ colorPalette, canvasRef, image, tags, percentage, ignorePalette, imageSourceURL }) {
+export function UploadButton({ colorPalette, canvas, image, tags, percentage, ignorePalette, imageSourceURL, maskCanvas }) {
     const [isUploading, setIsUploading] = useState(false);
 
     const handleUpload = async (event) => {
         setIsUploading(true);
-        const croppedImageURL = removedTransparentPixelsURL(canvasRef.current, image);
+        const croppedImageURL = removedTransparentPixelsURL(canvas, image, false);
+        const cropedMaskedImageURL = removedTransparentPixelsURL(maskCanvas, image, true, true);
 
         //TODO: Wrap this in context  when refactor
         const id = await getUserId()
 
         try {
             const uploadedImageURL = await uploadImageClient(croppedImageURL);
-            await uploadPaletteClient({ palette: { palette: colorPalette, percentage, ignorePalette }, userId: id, imageURL: uploadedImageURL, tags, imageSourceURL });
+            const uploadedMaskedImageURL = await uploadImageClient(cropedMaskedImageURL);
+            await uploadPaletteClient({ palette: { palette: colorPalette, percentage, ignorePalette }, userId: id, imageURL: uploadedImageURL, tags, imageSourceURL, maskImageURL: uploadedMaskedImageURL });
             console.log('upload success :>> ');
 
         } catch (err) {
