@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CircleIndicator } from '../Color/picker';
+import { calculateCanvasSize } from '../../utils/canvas';
 
 const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
     SAMImages = [], SAMEnableIndex = -1, SAMPositions, setSAMPositions, SAMIgnorePositions, setSAMIgnorePositions,
-    displayRadius = 20
+    displayRadius = 20, maxSize = 640,
 }) => {
 
     useEffect(() => {
@@ -14,16 +15,19 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
 
             const canvas = canvasRef.current;
             let ctx = canvas.getContext("2d");
-            canvas.width = image.width;
-            canvas.height = image.height;
+
+            const { width, height } = calculateCanvasSize(image, maxSize);
+            canvas.width = width;
+            canvas.height = height;
 
             ctx.globalCompositeOperation = 'source-over';
-            ctx.drawImage(image, 0, 0, image.width, image.height);
+            ctx.drawImage(image, 0, 0, width, height);
             // setDrawingComplete(true)
         }
     }, [SAMEnableIndex])
 
     useEffect(() => {
+        console.log('samreset :>> ', reset);
         if (image && canvasRef.current) {
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');

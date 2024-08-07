@@ -57,12 +57,12 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
             {(
                 <div className="mt-4">
                     <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
-                    <div className="flex gap-4">
+                    <div className="flex gap-4  flex-wrap">
                         {colorPalette.map((color, index) => (
                             <div key={index} onMouseEnter={() => handleHover(color, index)} onMouseLeave={() => handleUnHover()}    >
                                 <div
 
-                                    className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
+                                    className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative "
                                     style={{ backgroundColor: `rgb(${color.join(",")})` }}
 
                                     onMouseDown={() => setSelectedColor(color)}

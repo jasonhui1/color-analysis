@@ -17,8 +17,9 @@ export function Form({ canvasRef, image,
     formReset
 }) {
 
-    const [tags, setTags] = useState('aaaa');
+    const [tags, setTags] = useState('');
     const [percentage, setPercentage] = useState([]);
+    const [paletteCount, setPaletteCount] = useState(12);
 
 
     useEffect(() => {
@@ -30,7 +31,7 @@ export function Form({ canvasRef, image,
     const analyzeColors = (img) => {
         try {
             const colorThief = new ColorThief();
-            let palette = colorThief.getPalette(img, 6, 10);
+            let palette = colorThief.getPalette(img, paletteCount, 10);
 
             palette.sort((a, b) => calculateBrightness(b) - calculateBrightness(a));
             setColorPalette(palette);
@@ -73,10 +74,11 @@ export function Form({ canvasRef, image,
     }
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 flex-wrap">
 
 
             <div className="flex gap-4 items-center">
+                <TextInput classname="w-12" type="number" label={"Palette Count"} text={paletteCount} setText={setPaletteCount} />
                 <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
                 {/* <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" /> */}
                 <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onCalculatePercentage()}> Calculate Percentage</button>
@@ -100,9 +102,9 @@ export function Form({ canvasRef, image,
                 selectedColor={selectedColor} setSelectedColor={setSelectedColor}
             />
             {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} />}
-{/* 
-            <TextInput text={tags} setText={setTags} label='Tags' />
-            <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' /> */}
+
+            <TextInput text={tags} setText={setTags} label='Tags' classname="min-w-96" />
+            <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' classname="min-w-96"/>
 
 
             {/* {maskDataUrl &&

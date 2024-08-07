@@ -13,6 +13,7 @@ import { Form } from "../../Components/Form/Form";
 import { MaskUI } from "../../Components/Canvas/MaskUI";
 import SAMCanvas from "../../Components/Canvas/SAMCanvas";
 
+
 const ColorAnalysis = () => {
     const canvasRef = useRef(null);
     const maskedCanvasRef = useRef(null);
@@ -23,6 +24,7 @@ const ColorAnalysis = () => {
     const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
 
     const [image, setImage] = useState(null);
+    const imageFileRef = useRef(null);
     const [imageSourceURL, setImageSourceURL] = useState('');
 
     // SAM, use hooks later
@@ -35,7 +37,7 @@ const ColorAnalysis = () => {
     const [reset, setReset] = useState(false);
     const [maskReset, setMaskReset] = useState(false);
     const [highlightReset, setHighlightReset] = useState(false);
-    const [SAMReset, setSAMReset] = useState(false);
+    const [SAMReset, setSAMReset] = useState(true);
     const [formReset, setFormReset] = useState(false);
 
     // Mask UI, use hooks later
@@ -52,6 +54,8 @@ const ColorAnalysis = () => {
     const [colorPalette, setColorPalette] = useState([]);
     const [ignorePalette, setIgnorePalette] = useState([]);
     const [hoveringColor, setHoveringColor] = useState();
+
+    
 
     useEffect(() => {
         if (drawingComplete) {
@@ -82,19 +86,19 @@ const ColorAnalysis = () => {
         setHoveringColor(null);
     };
 
-
     const onImageSelected = (img, file) => {
         setImage(img);
         setMaskMode(false);
         setEnableMask(false);
         setFormReset(!reset);
 
-        console.log('file :>> ', file);
+        imageFileRef.current = file
         setSAMEnableIndex(-1);
         setSAMImages([]);
         setSAMPositions([]);
+        setSAMReset(state => !state);
     }
-
+    
     const onChangeMaskMode = () => {
         setMaskMode(!maskMode)
         if (maskMode) setEnableMask(true)
@@ -109,6 +113,12 @@ const ColorAnalysis = () => {
         croppedImage.onload = () => {
             setImage(croppedImage);
             setEnableMask(false)
+            setReset(!reset);
+
+            setSAMEnableIndex(-1);
+            setSAMImages([]);
+            setSAMPositions([]);
+            setSAMIgnorePositions([]);
         };
     }
 
@@ -124,14 +134,21 @@ const ColorAnalysis = () => {
         // if (!file) return
         if (!canvasRef.current) return
         if (SAMPositions.length === 0 && SAMIgnorePositions.length === 0) { console.log('SAM: No position selected'); return }
+        // const dataURL = canvasRef.current.toDataURL('image/png');
+        // const file = dataURLtoFile(dataURL, `canvas.png`);
 
-        const dataURL = canvasRef.current.toDataURL('image/png');
-        const file = dataURLtoFile(dataURL, `canvas.png`);
+        const file = imageFileRef.current
+        const scale = image.width / canvasRef.current.width
+        const positivePosition = SAMPositions.map(([x, y]) => [x * scale, y * scale])
+        const negativePosition = SAMIgnorePositions.map(([x, y]) => [x * scale, y * scale])
 
         const formData = new FormData()
         formData.append('image', file);
-        formData.append('positions', JSON.stringify(SAMPositions))
-        formData.append('ignorePositions', JSON.stringify(SAMIgnorePositions))
+        formData.append('positions', JSON.stringify(positivePosition))
+        formData.append('ignorePositions', JSON.stringify(negativePosition))
+
+        setSAMEnableIndex(-1);
+        setSAMImages([]);
 
         try {
             const response = await fetch('http://localhost:5000/api/process-image', {
@@ -147,7 +164,6 @@ const ColorAnalysis = () => {
             if (!data.images) throw new Error('No images in response')
             const maskedImages = await Promise.all(data.images.map(loadImage));
             setSAMImages(maskedImages)
-            setSAMEnableIndex(-1);
 
         } catch (error) {
             console.error('Error:', error)
@@ -166,7 +182,7 @@ const ColorAnalysis = () => {
 
             {/* {image && ( */}
             <div className="flex flex-row gap-6 relative mb-3 " >
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 min-w-fit">
                     <div className="mb-4 relative  " ref={fileDropRef}  >
 
                         {/* Drag and drop within the same dimension as canvas */}
