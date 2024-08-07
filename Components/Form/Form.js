@@ -8,7 +8,7 @@ import { TextInput } from "../General/TextInput";
 import { UploadButton } from "./UploadButton";
 
 
-export function Form({ canvasRef, image,
+export function Form({ canvas, image, maskCanvas,
     imageSourceURL, setImageSourceURL,
     colorPalette, setColorPalette,
     ignorePalette, setIgnorePalette,
@@ -24,7 +24,7 @@ export function Form({ canvasRef, image,
 
     useEffect(() => {
         setPercentage([]);
-        setTags('aaa');
+        setTags('');
         setIgnorePalette([]);
     }, [formReset]);
 
@@ -41,9 +41,9 @@ export function Form({ canvasRef, image,
     };
 
     const reAnalysis = () => {
-        if (!canvasRef.current) return
+        if (!canvas) return
 
-        const url = canvasRef.current.toDataURL();
+        const url = canvas.toDataURL();
         const myImage = new Image();
         myImage.src = url;
 
@@ -54,7 +54,7 @@ export function Form({ canvasRef, image,
     };
 
     const onCalculatePercentage = () => {
-        const image = canvasRef.current
+        const image = canvas
         if (!image) return
 
         const counter = {}
@@ -73,12 +73,17 @@ export function Form({ canvasRef, image,
         )))
     }
 
+    const onClickDeletePaletteColor = (colorPalette, setColorPalette) => (color, index) => {
+        onPaletteColorDelete(colorPalette, setColorPalette)(color);
+        setPercentage(percentage.filter((_, i) => i !== index));
+    };
+
     return (
         <div className="flex flex-col gap-4 flex-wrap">
 
 
             <div className="flex gap-4 items-center">
-                <TextInput classname="w-12" type="number" label={"Palette Count"} text={paletteCount} setText={setPaletteCount} />
+                <TextInput classname="w-8" type="number" label={"Palette Count"} text={paletteCount} setText={setPaletteCount} />
                 <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
                 {/* <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" /> */}
                 <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onCalculatePercentage()}> Calculate Percentage</button>
@@ -90,7 +95,7 @@ export function Form({ canvasRef, image,
                 colorPalette={colorPalette} setColorPalette={setColorPalette} colorPalettePercentage={percentage}
                 onPaletteColorHover={onPaletteColorHover}
                 onPaletteColorUnHover={onPaletteColorUnHover}
-                onPaletteColorDelete={onPaletteColorDelete(colorPalette, setColorPalette)}
+                onPaletteColorDelete={onClickDeletePaletteColor(colorPalette, setColorPalette)}
                 selectedColor={selectedColor} setSelectedColor={setSelectedColor}
             />
 
@@ -98,13 +103,13 @@ export function Form({ canvasRef, image,
                 colorPalette={ignorePalette} setColorPalette={setIgnorePalette}
                 onPaletteColorHover={onPaletteColorHover}
                 onPaletteColorUnHover={onPaletteColorUnHover}
-                onPaletteColorDelete={onPaletteColorDelete(ignorePalette, setIgnorePalette)}
+                onPaletteColorDelete={onClickDeletePaletteColor(ignorePalette, setIgnorePalette)}
                 selectedColor={selectedColor} setSelectedColor={setSelectedColor}
             />
             {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} />}
 
             <TextInput text={tags} setText={setTags} label='Tags' classname="min-w-96" />
-            <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' classname="min-w-96"/>
+            <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' classname="min-w-96" />
 
 
             {/* {maskDataUrl &&
@@ -117,8 +122,8 @@ export function Form({ canvasRef, image,
                 />
             } */}
 
-            <UploadButton colorPalette={colorPalette} canvasRef={canvasRef} image={image} tags={tags}
-                percentage={percentage} ignorePalette={ignorePalette} imageSourceURL={imageSourceURL} />
+            <UploadButton colorPalette={colorPalette} canvas={canvas} image={image} tags={tags}
+                percentage={percentage} ignorePalette={ignorePalette} imageSourceURL={imageSourceURL} maskCanvas={maskCanvas} />
 
         </div>
     );

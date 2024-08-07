@@ -39,8 +39,8 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
         onPaletteColorUnHover();
     };
 
-    const handleDelete = (color) => {
-        onPaletteColorDelete(color)
+    const handleDelete = (color, index) => {
+        onPaletteColorDelete(color, index)
         setHoveringIndex(-1);
         setIsEditing(false)
     }
@@ -78,7 +78,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
 
                                     {!isEditing && <MdOutlineEdit className=" cursor-pointer w-6 h-6" color="blue" onClick={() => setIsEditing(true)} />}
                                     {isEditing && <TbPencilCancel className="cursor-pointer w-6 h-6" color="red" onClick={() => setIsEditing(false)} />}
-                                    <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => handleDelete(color)} />
+                                    <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => handleDelete(color, index)} />
                                 </div>
                             </div>
                         ))}
