@@ -7,6 +7,13 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
     displayRadius = 20, maxSize = 640,
 }) => {
 
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const mousePositionRef = useRef(null);
+
+    useEffect(() => {
+        mousePositionRef.current = mousePosition
+    }, [mousePosition])
+
     useEffect(() => {
         if (SAMEnableIndex === -1 || (SAMImages && SAMImages.length) === 0) return
 
@@ -27,7 +34,6 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
     }, [SAMEnableIndex])
 
     useEffect(() => {
-        console.log('samreset :>> ', reset);
         if (image && canvasRef.current) {
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');
@@ -59,7 +65,7 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
     }
 
     const removePosition = (e) => {
-        const { x, y } = getMousePosition(e)
+        let { x, y } = mousePositionRef.current;
 
         const distance = (x1, y1, x2, y2) => Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
         const checkFilter = (position) => distance(x, y, position[0], position[1]) < displayRadius
@@ -93,17 +99,32 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
         }
     }
 
+    // Handler for key press as an alternative to middle mouse button
+    const onKeyPress = (e) => {
+        console.log('e.key :>> ', e.key);
+        if (e.key === 'w' || e.key === 'W') { // Key "M" or "m"
+            onMiddleClick(e);
+        }
+    };
+
+    const onMouseMove = (e) => {
+        setMousePosition(getMousePosition(e))
+    }
 
     // Only trigger when maskMode, so other canvas can listen too
     useEffect(() => {
         if (maskMode) {
             const canvas = canvasRef.current;
             canvas.addEventListener('mousedown', onMouseDown);
+            canvas.addEventListener('mousemove', onMouseMove);
             canvas.addEventListener('contextmenu', (e) => e.preventDefault());;
+            document.addEventListener('keydown', onKeyPress);;
 
             return () => {
                 canvas.removeEventListener('mousedown', onMouseDown);
-                canvas.removeEventListener('contextmenu', (e) => e.preventDefault());;
+                canvas.removeEventListener('mousemove', onMouseMove);
+                canvas.removeEventListener('contextmenu', (e) => e.preventDefault());
+                document.removeEventListener('keydown', onKeyPress);
 
             };
         }
