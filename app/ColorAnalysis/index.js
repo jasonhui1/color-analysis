@@ -12,7 +12,7 @@ import { isColorEqual } from "../../utils/color";
 import { Form } from "../../Components/Form/Form";
 import { MaskUI } from "../../Components/Canvas/MaskUI";
 import SAMCanvas from "../../Components/Canvas/SAMCanvas";
-import { invertImageAlpha, removedTransparentPixelsURL } from "../../utils/canvas";
+import { invertImageAlpha, processCanvas } from "../../utils/canvas";
 
 
 const ColorAnalysis = () => {
@@ -121,11 +121,11 @@ const ColorAnalysis = () => {
 
     const onApplyMask = () => {
 
-        const maskUrl = removedTransparentPixelsURL(maskedCanvasRef.current, image, true, true);
+        const maskUrl = processCanvas({ canvas: maskedCanvasRef?.current, image, cropTransparent: true, useCurrentCanvas: true, isInverted: !invertMask });
         const croppedMaskImage = new Image();
         croppedMaskImage.src = maskUrl;
 
-        const url = removedTransparentPixelsURL(canvasRef.current, image, false);
+        const url = processCanvas({ canvas: canvasRef?.current, image, cropTransparent: true, useCurrentCanvas: false });
         const croppedImage = new Image();
         croppedImage.src = url;
 
@@ -237,7 +237,7 @@ const ColorAnalysis = () => {
                                     SAMIgnorePositions={SAMIgnorePositions} setSAMIgnorePositions={setSAMIgnorePositions}
                                     SAMImages={SAMImages} SAMEnableIndex={SAMEnableIndex}
                                 />
-                                <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current}
+                                <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current} onlyInMask={true}
                                     reset={highlightReset}
                                     color={hoveringColor} colorPalette={colorPalette} ignorePalette={ignorePalette} />
                             </>
@@ -266,7 +266,7 @@ const ColorAnalysis = () => {
 
 
                 <Form
-                    canvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current}
+                    canvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current} invertMask={invertMask}
                     image={image}
                     imageSourceURL={imageSourceURL}
                     onPaletteColorDelete={onPaletteColorDelete}

@@ -8,7 +8,7 @@ import { TextInput } from "../General/TextInput";
 import { UploadButton } from "./UploadButton";
 
 
-export function Form({ canvas, image, maskCanvas,
+export function Form({ canvas, image, maskCanvas, invertMask,
     imageSourceURL, setImageSourceURL,
     colorPalette, setColorPalette,
     ignorePalette, setIgnorePalette,
@@ -122,7 +122,7 @@ export function Form({ canvas, image, maskCanvas,
                 />
             } */}
 
-            <UploadButton colorPalette={colorPalette} canvas={canvas} image={image} tags={tags}
+            <UploadButton colorPalette={colorPalette} canvas={canvas} image={image} tags={tags} invertMask={invertMask}
                 percentage={percentage} ignorePalette={ignorePalette} imageSourceURL={imageSourceURL} maskCanvas={maskCanvas} />
 
         </div>
