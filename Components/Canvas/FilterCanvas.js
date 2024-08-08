@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { calculateBrightness, closeToWhite, isColorEqual, nearestColorFromPalette } from "../../utils/color";
 
-export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCanvas = null, color = null, colorPalette, ignorePalette = [], enable = true }) {
+export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCanvas = null, maskCanvas = null, onlyInMask = false,
+    color = null, colorPalette, ignorePalette = [], enable = true
+}) {
     useEffect(() => {
         if (imageCanvas && canvasRef.current) {
             const canvas = canvasRef.current;
@@ -26,8 +28,23 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
             const currentData = currentImageData.data;
             const combinedPalette = [...colorPalette, ...ignorePalette];
 
+            let maskData;
+            if (maskCanvas && onlyInMask) {
+                const maskCtx = maskCanvas.getContext('2d');
+                maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height).data;
+            }
+
+
             processImageColors(imageCanvas, combinedPalette, ({ nearestColor, alpha, i }) => {
-                if (alpha === 0 || (isColorEqual(color, nearestColor))) {
+                let maskCheck = true
+                if (maskCanvas && onlyInMask) {
+                    const maskAlpha = maskData[i + 3]
+                    if (maskAlpha != 0) maskCheck = false
+                }
+
+                const colorCheck = alpha === 0 || isColorEqual(color, nearestColor)
+
+                if (maskCheck && colorCheck) {
                     // set current to transparent
                     currentData[i + 3] = 0;
                 } else {
