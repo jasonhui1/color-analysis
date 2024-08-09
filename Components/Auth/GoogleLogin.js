@@ -1,4 +1,4 @@
-import { googleSignIn } from "../../api/supabaseClient";
+import { googleSignIn } from "../../lib/clientApis/supabaseClient";
 
 async function handleSignInWithGoogle(response) {
     const { data, error } = googleSignIn(response.credential)

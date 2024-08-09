@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-import { uploadImageClient } from "../../api/image";
-import { uploadPaletteClient } from "../../api/palette";
-import { getUserId } from "../../api/supabaseClient";
+import { uploadImageClient } from "../../lib/clientApis/image";
+import { uploadPaletteClient } from "../../lib/clientApis/palette";
+import { getUserId } from "../../lib/clientApis/supabaseClient";
 import { invertImageAlpha, processCanvas, } from "../../utils/canvas";
 
 export function UploadButton({ colorPalette, canvas, image, tags, percentage, ignorePalette, imageSourceURL, maskCanvas, invertMask = false }) {

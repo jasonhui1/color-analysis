@@ -1,10 +1,10 @@
 "use client"
 import React, { createRef, useEffect, useRef, useState } from 'react'
-import { getPaletteClient } from '../../api/palette'
+import { getPaletteClient } from '../../lib/clientApis/palette'
 import PaletteDisplay, { PaletteDisplaySimple, PaletteDisplaySimpleV2 } from '../../Components/Color/PaletteDisplay';
 import Image from '../../node_modules/next/image';
 import { TriangularColorPickerDisplayColors } from '../../Components/Color/picker';
-import { getUserId } from '../../api/supabaseClient';
+import { getUserId } from '../../lib/clientApis/supabaseClient';
 import { IoSearchOutline } from "react-icons/io5";
 import { CiCircleRemove } from "react-icons/ci";
 import HighlightHoveringColorCanvas from '../../Components/Canvas/FilterCanvas';
