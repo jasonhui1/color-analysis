@@ -18,12 +18,19 @@ export async function uploadPaletteClient({ palette, userId, imageURL = null, ta
 }
 
 
-export async function getPaletteClient({ userId, withTags = false, searchTerm = '', limit = Infinity, }) {
-
-    const options = { userId, limit, withTags }
-    if (searchTerm.trim() !== '') options.searchTerm = searchTerm.trim()
+export async function getPaletteClient({ userId, withTags = false, searchTerm = '', limit = Infinity, imageMaxWidth = null, imageMaxHeight = null }) {
+    const options = {
+        userId,
+        withTags,
+        limit,
+        ...(searchTerm.trim() && { searchTerm: searchTerm.trim() }),
+        ...(imageMaxWidth && { imageMaxWidth }),
+        ...(imageMaxHeight && { imageMaxHeight })
+    };
 
     const queryParams = new URLSearchParams(options).toString();
+    console.log('queryParams :>> ', imageMaxWidth);
+
     const url = `/api/palette?${queryParams}`;
 
     try {

@@ -11,6 +11,10 @@ import HighlightHoveringColorCanvas from '../../Components/Canvas/FilterCanvas';
 import Canvas, { CanvasNoMask } from '../../Components/Canvas/Canvas';
 import { calculateBrightness } from '../../utils/color';
 import { useInView, InView } from 'react-intersection-observer';
+import { createImageFromUrl } from '../../utils/canvas';
+import MaskedCanvas from '../../Components/Canvas/MaskedCanvas';
+
+
 
 export default function DataPage() {
 
@@ -24,26 +28,29 @@ export default function DataPage() {
   const [hoveringRowIndex, setHoveringRowIndex] = useState(-1);
 
   const [canvasRefs, setCanvasRefs] = useState({});
-  const [imageRefs, setImageRefs] = useState({});
+  const [maskCanvasRefs, setMaskCanvasRefs] = useState({});
   const [canvasHLRefs, setCanvasHLRefs] = useState({});
   const [resets, setResets] = useState([]);
+
+  const maxSize = 250
+
 
   useEffect(() => {
     // add or remove refs
     if (!data) return
 
     const newCanvasRefs = {};
-    const newImageRefs = {};
+    const newMaskCanvasRefs = {};
     const newCanvasHLRefs = {};
 
     data.forEach(({ id }) => {
       newCanvasRefs[id] = createRef();
-      newImageRefs[id] = createRef();
+      newMaskCanvasRefs[id] = createRef();
       newCanvasHLRefs[id] = createRef();
     });
 
     setCanvasRefs(newCanvasRefs);
-    setImageRefs(newImageRefs);
+    setMaskCanvasRefs(newMaskCanvasRefs);
     setCanvasHLRefs(newCanvasHLRefs);
     setResets(new Array(data.length).fill(true));
   }, [data]);
@@ -51,7 +58,7 @@ export default function DataPage() {
   async function getData() {
     setLoading(true)
     const userId = await getUserId()
-    const data = await getPaletteClient({ userId, withTags: true, searchTerm: finalSearchTerm })
+    const data = await getPaletteClient({ userId, withTags: true, searchTerm: finalSearchTerm, imageMaxWidth: maxSize, imageMaxHeight: maxSize })
     if (data && data.palette) {
     }
     setData(data)
@@ -96,7 +103,7 @@ export default function DataPage() {
         const id = paletteData.id
 
         return (
-          <Row key={paletteData.id} imageRef={imageRefs[id]} canvasRef={canvasRefs[id]} canvasHLRef={canvasHLRefs[id]}
+          <Row key={paletteData.id} canvasRef={canvasRefs[id]} maskCanvasRef={maskCanvasRefs[id]} canvasHLRef={canvasHLRefs[id]}
             paletteData={paletteData} hoveringColor={hoveringColor} reset={resets[id]} enable={hoveringRowIndex === index}
             onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover(index)} onPaletteColorUnHover={onPaletteColorUnHover} />
         )
@@ -105,9 +112,15 @@ export default function DataPage() {
   )
 }
 
-const Row = ({ imageRef, canvasRef, canvasHLRef, hoveringColor, paletteData, reset, enable, onClickTag, onPaletteColorHover, onPaletteColorUnHover }) => {
+const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData, reset, enable, onClickTag, onPaletteColorHover, onPaletteColorUnHover }) => {
+  const { palette, ignorePalette = [], tags, percentage, imageURL, maskImageURL, imageSourceURL } = paletteData
+  // console.log(cloudinary.url(imageURL, { width: 100, height: 150, crop: "fill", fetch_format: "auto" }))
+  // console.log('imageURL, maskImageURL :>> ', imageURL, maskImageURL);
 
-  const { palette, ignorePalette = [], tags, percentage, imageURL } = paletteData
+  const [image, setImage] = useState(null);
+  const [maskImage, setMaskImage] = useState(null);
+  const maxSize = 250
+
   const sorted_palette = palette.toSorted((a, b) => calculateBrightness(b) - calculateBrightness(a))
   const { ref, inView, entry } = useInView({
     /* Optional options */
@@ -115,30 +128,44 @@ const Row = ({ imageRef, canvasRef, canvasHLRef, hoveringColor, paletteData, res
     rootMargin: '200px 0px',
   });
 
+  useEffect(() => {
+    if (inView) {
+      const loadImage = async (url, setF) => {
+        const img = await createImageFromUrl(url);
+        setF(img);
+
+      };
+      if (imageURL) loadImage(imageURL, setImage);
+      if (maskImageURL) loadImage(maskImageURL, setMaskImage);
+    }
+  }, [inView, imageURL]);
 
   return (
-    <div ref={ref} className='flex gap-4 items-center' >
+    <div ref={ref} className='flex gap-4 items-center ' >
       {inView && (
         <>
+          <div className='flex flex-col gap-1 relative w-[250px] min-h-[100px] h-fit justify-center ' >
+            <div className='relative self-center' style={{ width: image?.width ?? maxSize + 'px', height: image?.height ?? maxSize + 'px' }}>
+              {/* {imageURL && <Image ref={imageRef} src={imageURL} alt={imageURL} width={250} height={250} />} */}
+              <CanvasNoMask canvasRef={canvasRef} image={image} maxSize={maxSize}  />
+              <MaskedCanvas canvasRef={maskCanvasRef} image={image} maskImage={maskImage} initialColor='rgb(0,0,0,0)' />
+              <HighlightHoveringColorCanvas canvasRef={canvasHLRef} imageCanvas={canvasRef?.current} maskCanvas={maskCanvasRef?.current} onlyInMask={true}
+                color={hoveringColor} colorPalette={palette} ignorePalette={ignorePalette}
+                reset={reset} enable={enable}
+              />
 
-          <div className='flex flex-col gap-1 relative w-[250px]'>
-            {imageURL && <Image ref={imageRef} src={imageURL} alt={imageURL} width={250} height={250} />}
-            <CanvasNoMask canvasRef={canvasRef} image={imageRef?.current} />
-            <HighlightHoveringColorCanvas imageCanvas={canvasRef?.current} canvasRef={canvasHLRef}
-              color={hoveringColor} colorPalette={palette} ignorePalette={ignorePalette}
-              reset={reset} enable={enable} />
+            </div>
             <TagsDisplay tags={tags} onClickTag={onClickTag} />
-
           </div>
 
-          <TriangularColorPickerDisplayColors colors={palette} size={200} />
+          <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} />
           <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false} colorPalettePercentage={percentage}
             onPaletteColorHover={(color) => onPaletteColorHover(color)}
             onPaletteColorUnHover={() => onPaletteColorUnHover()}
           />
 
-        </>
-      )}
+        </>)
+      }
     </div>
 
   )

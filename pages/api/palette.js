@@ -1,5 +1,6 @@
 import { addPalette, getPalette } from "../../lib/db/palette";
 import { addTagsToPalette, linkPaletteTags } from "../../lib/db/tags";
+import { v2 as cloudinary } from 'cloudinary';
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -9,7 +10,7 @@ export default async function handler(req, res) {
         }
 
         try {
-            const paletteId = await addPalette({ palette, imageURL, userId, imageSourceURL, maskImageURL     });
+            const paletteId = await addPalette({ palette, imageURL, userId, imageSourceURL, maskImageURL });
             if (tags) {
                 const tags_ = await addTagsToPalette({ userId, tags });
                 await linkPaletteTags({ paletteId, tags: tags_ });
@@ -24,7 +25,7 @@ export default async function handler(req, res) {
         }
 
     } else if (req.method === 'GET') {
-        const { limit, userId, withTags, searchTerm } = req.query;
+        const { limit, userId, withTags, searchTerm, imageMaxWidth, imageMaxHeight } = req.query;
 
         if (!userId) {
             return res.status(400).json({ error: 'Not login' });
@@ -39,6 +40,27 @@ export default async function handler(req, res) {
 
         try {
             const data = await getPalette(options);
+            // Request url at specific size and keep aspect ratio
+            if (imageMaxWidth && imageMaxHeight) {
+
+                data.forEach((data) => {
+                    const { imageURL, maskImageURL } = data
+
+                    if (imageURL && imageMaxWidth && imageMaxHeight) {
+                        const parts = imageURL.split("/image/upload/")
+                        const arg = `w_${imageMaxWidth},h_${imageMaxHeight},c_limit/`
+                        const combinedURL = `${parts[0]}/image/upload/${arg}${parts[1]}`
+                        data.imageURL = combinedURL
+                    }
+
+                    if (maskImageURL && imageMaxWidth && imageMaxHeight) {
+                        const parts = maskImageURL.split("/image/upload/")
+                        const arg = `w_${imageMaxWidth},h_${imageMaxHeight},c_limit/`
+                        const combinedURL = `${parts[0]}/image/upload/${arg}${parts[1]}`
+                        data.maskImageURL = combinedURL
+                    }
+                })
+            }
             res.status(200).json(data);
         } catch (error) {
             console.error('Get palette error:', error);

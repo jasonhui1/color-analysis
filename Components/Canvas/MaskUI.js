@@ -19,11 +19,11 @@ export function MaskUI({ maskMode, onChangeMaskMode,
 
                 {/* <CheckBox label="Enable mask" checked={enableMask} onChange={() => setEnableMask(!enableMask)} /> */}
                 <CheckBox label="Invert mask" checked={invertMask} onChange={() => setInvertMask(!invertMask)} />
-                <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onApplyMask()}> Apply Mask</button>
+                <button disabled={maskMode} className="bg-orange-500 hover:bg-orange-700 disabled:bg-orange-300 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onApplyMask()}> Apply Mask</button>
 
             </div>
             <div className="flex gap-4 items-center">
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => processSAM()}> SAM </button>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => processSAM()}> Process SAM </button>
                 {SAMImages.map((img, index) =>
                     <button key={index} className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded" onClick={() => onSAMIndexClick(index)}> {index} </button>
                 )}

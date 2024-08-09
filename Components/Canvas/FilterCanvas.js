@@ -42,9 +42,9 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
                     if (maskAlpha != 0) maskCheck = false
                 }
 
-                const colorCheck = alpha === 0 || isColorEqual(color, nearestColor)
+                const colorCheck = isColorEqual(color, nearestColor)
 
-                if (maskCheck && colorCheck) {
+                if ((maskCheck && colorCheck)||alpha === 0 ) {
                     // set current to transparent
                     currentData[i + 3] = 0;
                 } else {
