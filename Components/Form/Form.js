@@ -8,7 +8,7 @@ import { TextInput } from "../General/TextInput";
 import { UploadButton } from "./UploadButton";
 
 
-export function Form({ canvas, image, maskCanvas, invertMask,
+export function Form({ canvas, image, maskCanvas, invertMask,hoveringColor,
     imageSourceURL, setImageSourceURL,
     colorPalette, setColorPalette,
     ignorePalette, setIgnorePalette,
@@ -106,7 +106,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
                 onPaletteColorDelete={onClickDeletePaletteColor(ignorePalette, setIgnorePalette)}
                 selectedColor={selectedColor} setSelectedColor={setSelectedColor}
             />
-            {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} />}
+            {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} highlightColor={hoveringColor} />}
 
             <TextInput text={tags} setText={setTags} label='Tags' classname="min-w-96" />
             <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' classname="min-w-96" />

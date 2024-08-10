@@ -158,7 +158,7 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
             <TagsDisplay tags={tags} onClickTag={onClickTag} />
           </div>
 
-          <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} />
+          <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} highlightColor={hoveringColor} />
           <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false} colorPalettePercentage={percentage}
             onPaletteColorHover={(color) => onPaletteColorHover(color)}
             onPaletteColorUnHover={() => onPaletteColorUnHover()}

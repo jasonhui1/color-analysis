@@ -9,6 +9,9 @@ export function UploadButton({ colorPalette, canvas, image, tags, percentage, ig
     const [isUploading, setIsUploading] = useState(false);
 
     const handleUpload = async (event) => {
+        if (!image) throw Error('No image uploaded');
+        if (!colorPalette) throw Error('No colorPalette uploaded');
+
         setIsUploading(true);
         const processedImageURL = processCanvas({ canvas, image, useCurrentCanvas: false, cropTransparent: false });
 

@@ -135,7 +135,7 @@ const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor }) 
     );
 };
 
-export const CircleIndicator = ({ position, diameter, color, border_width = 1 }) => {
+export const CircleIndicator = ({ position, diameter, color, border_width = 1}) => {
     return <div style={{
         position: 'absolute',
         left: `${position.x}px`,
@@ -145,12 +145,13 @@ export const CircleIndicator = ({ position, diameter, color, border_width = 1 })
         borderRadius: '50%',
         border: border_width + 'px solid ' + color,
         transform: 'translate(-50%, -50%)',
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        zIndex: 'inherit',
     }} />
 }
 
 
-const RectIndicator = ({ position, width, height, color, border_width = 1, unit = 'px', rotation = 0, }) => {
+const RectIndicator = ({ position, width, height, color, border_width = 1, unit = 'px', rotation = 0 }) => {
     return <div style={{
         position: 'absolute',
         left: `${position.x}${unit}`,
@@ -160,7 +161,8 @@ const RectIndicator = ({ position, width, height, color, border_width = 1, unit 
         border: border_width + 'px solid ' + color,
         transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
         transformOrigin: 'center center',
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        zIndex: 'inherit',
     }} />
 }
 
@@ -252,7 +254,7 @@ const HSLControl = ({ selectedColor, label, value, min, max, onChange }) => {
 }
 
 
-export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, colors = [], colorisRGB = true }) => {
+export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, colors = [], highlightColor = null, colorisRGB = true },) => {
     const center = size / 2
     const ratio = size / 300
     ///////////////////////////Cirlce///////////////////////
@@ -266,12 +268,28 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
     const w = bb.y2 - bb.y1
 
     if (colorisRGB && colors.length > 0) {
-        colors = colors.map(([r, g, b]) => rgbToHsl(r, g, b, false, false))
+        colors = colors.map((color) => {
+            const [r, g, b] = color
+            const hls = rgbToHsl(r, g, b, false, false)
+
+            if (!highlightColor) return { ...hls, highlight: false }
+
+            const [r_, g_, b_] = highlightColor
+            if (r === r_ && g === g_ && b === b_) {
+                return { ...hls, highlight: true }
+            }
+
+            return { ...hls, highlight: false }
+
+        })
     }
+
     if (colors.length > 0) hue = colors[0].h
 
-    const SVPosition = colors.map(({ s, l }) => getPositionFromSV({ s, v: l, w, bb }))
-    const HuePosition = colors.map(({ h }) => getPositionFromHue(h + defaultHueShift, radius, center, center))
+    const SVPosition = colors.map(({ s, l, highlight }) => Object.assign({}, getPositionFromSV({ s, v: l, w, bb }), { highlight }))
+    const HuePosition = colors.map(({ h, highlight }) => Object.assign({}, getPositionFromHue(h + defaultHueShift, radius, center, center), { highlight }))
+
+    if (highlightColor) console.log('colors :>> ', colors);
 
     return (
         <div className={`w-[${size}px] h-[${size}px] relative`}>
@@ -290,17 +308,24 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
                 hueShift={hue}
             />
 
-            {SVPosition.map((position, index) => (
-                <div key={index}>
-                    <CircleIndicator position={position} diameter={10} color="white" border_width={2} />
-                    <CircleIndicator position={position} diameter={12} color="black" />
+            {SVPosition.map(({ x, y, highlight }, index,) => (
+                <div key={index} className={highlight ? 'z-10' : ''}>
+                    <CircleIndicator position={{ x, y }} diameter={10} color="white" border_width={2} />
+                    {highlight && <CircleIndicator position={{ x, y }} diameter={11} color="green" border_width={2} />}
+                    <CircleIndicator position={{ x, y }} diameter={12} color="black" />
                 </div>
             ))}
 
-            {HuePosition.map((position, index) => (
-                <div key={index}>
-                    <RectIndicator position={position} width={10} height={22} color="white" border_width={2} rotation={colors[index].h + 90 + defaultHueShift} />
-                    <RectIndicator position={position} width={12} height={24} color="black" rotation={colors[index].h + 90 + defaultHueShift} />
+
+
+
+
+            {HuePosition.map(({ x, y, highlight }, index) => (
+                <div key={index} className={highlight ? 'z-10' : ''}>
+                    <RectIndicator position={{ x, y }} width={10} height={22} color="white" border_width={2} rotation={colors[index].h + 90 + defaultHueShift} />
+                    {highlight && <RectIndicator position={{ x, y }} width={11} height={23} color="green" border_width={2} rotation={colors[index].h + 90 + defaultHueShift} />}
+
+                    <RectIndicator position={{ x, y }} width={12} height={24} color="black" rotation={colors[index].h + 90 + defaultHueShift} />
                 </div>
             ))}
         </div>

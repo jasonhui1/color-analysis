@@ -266,7 +266,7 @@ const ColorAnalysis = () => {
 
 
                 <Form
-                    canvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current} invertMask={invertMask}
+                    canvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current} invertMask={invertMask} hoveringColor={hoveringColor}
                     image={image}
                     imageSourceURL={imageSourceURL}
                     onPaletteColorDelete={onPaletteColorDelete}
