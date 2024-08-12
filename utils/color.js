@@ -134,7 +134,9 @@ function hueToRgb(p, q, t) {
 }
 
 export function sortPaletteAndPercentage(palette, percentage) {
+    if (!palette) return { palette: [], percentage: [] }
     if (palette.length !== percentage.length) return { palette, percentage: [] }
+
     const colorPercentagePairs = palette.map((color, index) => ({
         color,
         percentage: percentage[index]
@@ -147,6 +149,6 @@ export function sortPaletteAndPercentage(palette, percentage) {
     const sorted_palette = sortedPairs.map(pair => pair.color);
     const sorted_percentage = sortedPairs.map(pair => pair.percentage);
 
-    return { sorted_palette, sorted_percentage }
+    return { palette: sorted_palette, percentage: sorted_percentage }
 
 }

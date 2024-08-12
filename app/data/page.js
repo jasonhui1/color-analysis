@@ -60,6 +60,7 @@ export default function DataPage() {
     const userId = await getUserId()
     const data = await getPaletteClient({ userId, withTags: true, searchTerm: finalSearchTerm, imageMaxWidth: maxSize, imageMaxHeight: maxSize })
     if (data && data.palette) {
+      if (data.percentage === undefined) data.percentage = []
     }
     setData(data)
     setLoading(false)
@@ -121,7 +122,7 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
   const [maskImage, setMaskImage] = useState(null);
   const maxSize = 250
 
-  const { sorted_palette, sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
+  const { palette:sorted_palette, percentage:sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
   const { ref, inView, entry } = useInView({
     /* Optional options */
     triggerOnce: true,
