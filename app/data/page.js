@@ -3,7 +3,7 @@ import React, { createRef, useEffect, useRef, useState } from 'react'
 import { getPaletteClient } from '../../lib/clientApis/palette'
 import PaletteDisplay, { PaletteDisplaySimple, PaletteDisplaySimpleV2 } from '../../Components/Color/PaletteDisplay';
 import Image from '../../node_modules/next/image';
-import { TriangularColorPickerDisplayColors } from '../../Components/Color/picker';
+import { ColorDisplayer, ColorPicker, TriangularColorPickerDisplayColors } from '../../Components/Color/picker';
 import { getUserId } from '../../lib/clientApis/supabaseClient';
 import { IoSearchOutline } from "react-icons/io5";
 import { CiCircleRemove } from "react-icons/ci";
@@ -24,7 +24,8 @@ export default function DataPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [finalSearchTerm, setFinalSearchTerm] = useState('');
 
-  const [hoveringColor, setHoveringColor] = useState();
+  const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
+  const [hoveringColor, setHoveringColor] = useState(null);
   const [hoveringRowIndex, setHoveringRowIndex] = useState(-1);
 
   const [canvasRefs, setCanvasRefs] = useState({});
@@ -77,7 +78,9 @@ export default function DataPage() {
   // const onDeleteTag = (tag) => {
   //   setFinalSearchTerm(finalSearchTerm.replace(tag, ''))
   // }
-
+  const onPaletteClick = (color) => {
+    setSelectedColor(color)
+  }
 
   const onPaletteColorHover = (rowIndex) => (color) => {
     setHoveringColor(color)
@@ -96,9 +99,11 @@ export default function DataPage() {
   // console.log('data :>> ', data);
   // const searchTags = finalSearchTerm.trim().split(' ').map(tag => tag.trim())
   return (
-    <div className='flex flex-col gap-4'>
-      <h1>DATA</h1>
+    <div className='flex flex-col gap-4 relative'>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
+      <ColorDisplayer selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} />
+
+      {loading && <div>Loading...</div>}
 
       {data && data.map((paletteData, index) => {
         const id = paletteData.id
@@ -106,14 +111,14 @@ export default function DataPage() {
         return (
           <Row key={paletteData.id} canvasRef={canvasRefs[id]} maskCanvasRef={maskCanvasRefs[id]} canvasHLRef={canvasHLRefs[id]}
             paletteData={paletteData} hoveringColor={hoveringColor} reset={resets[id]} enable={hoveringRowIndex === index}
-            onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover(index)} onPaletteColorUnHover={onPaletteColorUnHover} />
+            onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover(index)} onPaletteColorUnHover={onPaletteColorUnHover} onPaletteClick={onPaletteClick} />
         )
       })}
     </div>
   )
 }
 
-const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData, reset, enable, onClickTag, onPaletteColorHover, onPaletteColorUnHover }) => {
+const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData, reset, enable, onClickTag, onPaletteColorHover, onPaletteColorUnHover, onPaletteClick }) => {
   const { palette, ignorePalette = [], tags, percentage, imageURL, maskImageURL, imageSourceURL } = paletteData
   // console.log(cloudinary.url(imageURL, { width: 100, height: 150, crop: "fill", fetch_format: "auto" }))
   // console.log('imageURL, maskImageURL :>> ', imageURL, maskImageURL);
@@ -122,7 +127,7 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
   const [maskImage, setMaskImage] = useState(null);
   const maxSize = 250
 
-  const { palette:sorted_palette, percentage:sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
+  const { palette: sorted_palette, percentage: sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
   const { ref, inView, entry } = useInView({
     /* Optional options */
     triggerOnce: true,
@@ -161,8 +166,9 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
 
           <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} highlightColor={hoveringColor} />
           <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false} colorPalettePercentage={sorted_percentage}
-            onPaletteColorHover={(color) => onPaletteColorHover(color)}
-            onPaletteColorUnHover={() => onPaletteColorUnHover()}
+            onPaletteColorHover={onPaletteColorHover}
+            onPaletteColorUnHover={onPaletteColorUnHover}
+            onPaletteClick={onPaletteClick}
           />
 
         </>)
@@ -184,10 +190,13 @@ const SearchBar = ({ searchTerm, setSearchTerm, setFinalSearchTerm }) => {
   }
 
   return (
-    <div className='flex gap-2 items-center border bg-gray-100 w-fit p-2'>
-      <IoSearchOutline size={20} onClick={() => search(searchTerm)} cursor='pointer' />
-      <input className=' bg-inherit w-96 outline-none ' type='text' value={searchTerm} placeholder='Search Tags' onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyPress} />
-      {searchTerm && <CiCircleRemove size={20} cursor='pointer' onClick={() => { setSearchTerm(''); setFinalSearchTerm('') }} />}
+    <div className='w-full flex justify-center sticky top-0 bg-white z-10'>
+
+      <div className='flex gap-2 items-center border bg-gray-100 w-fit p-2 '>
+        <IoSearchOutline size={20} onClick={() => search(searchTerm)} cursor='pointer' />
+        <input className=' bg-inherit w-96 outline-none ' type='text' value={searchTerm} placeholder='Search Tags' onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyPress} />
+        {searchTerm && <CiCircleRemove size={20} cursor='pointer' onClick={() => { setSearchTerm(''); setFinalSearchTerm('') }} />}
+      </div>
     </div>
   )
 }
