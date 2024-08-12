@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { CircleIndicator } from '../Color/picker';
 import { calculateCanvasSize } from '../../utils/canvas';
+import { CircleIndicator } from '../Color/PositionIndicators';
 
 const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
     SAMImages = [], SAMEnableIndex = -1, SAMPositions, setSAMPositions, SAMIgnorePositions, setSAMIgnorePositions,
