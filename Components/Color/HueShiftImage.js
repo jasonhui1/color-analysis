@@ -56,7 +56,7 @@ const HueShiftImage = ({ src, width, height, alt, hueShift, render = true }) => 
   return (
     <>
       <canvas ref={canvasRef} width={width} height={height} />
-      <div className=' absolute opacity-0'>
+      <div className=' absolute opacity-0 inset-0'>
         <Image
           ref={imageRef}
           src={src}
