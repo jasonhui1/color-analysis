@@ -132,3 +132,21 @@ function hueToRgb(p, q, t) {
     if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
     return p
 }
+
+export function sortPaletteAndPercentage(palette, percentage) {
+    if (palette.length !== percentage.length) return { palette, percentage: [] }
+    const colorPercentagePairs = palette.map((color, index) => ({
+        color,
+        percentage: percentage[index]
+    }));
+
+    const sortedPairs = colorPercentagePairs.sort((a, b) =>
+        calculateBrightness(b.color) - calculateBrightness(a.color)
+    );
+
+    const sorted_palette = sortedPairs.map(pair => pair.color);
+    const sorted_percentage = sortedPairs.map(pair => pair.percentage);
+
+    return { sorted_palette, sorted_percentage }
+
+}

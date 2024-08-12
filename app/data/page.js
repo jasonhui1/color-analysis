@@ -9,7 +9,7 @@ import { IoSearchOutline } from "react-icons/io5";
 import { CiCircleRemove } from "react-icons/ci";
 import HighlightHoveringColorCanvas from '../../Components/Canvas/FilterCanvas';
 import Canvas, { CanvasNoMask } from '../../Components/Canvas/Canvas';
-import { calculateBrightness } from '../../utils/color';
+import { calculateBrightness, sortPaletteAndPercentage } from '../../utils/color';
 import { useInView, InView } from 'react-intersection-observer';
 import { createImageFromUrl } from '../../utils/canvas';
 import MaskedCanvas from '../../Components/Canvas/MaskedCanvas';
@@ -121,7 +121,7 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
   const [maskImage, setMaskImage] = useState(null);
   const maxSize = 250
 
-  const sorted_palette = palette.toSorted((a, b) => calculateBrightness(b) - calculateBrightness(a))
+  const { sorted_palette, sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
   const { ref, inView, entry } = useInView({
     /* Optional options */
     triggerOnce: true,
@@ -147,7 +147,7 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
           <div className='flex flex-col gap-1 relative w-[250px] min-h-[100px] h-fit justify-center ' >
             <div className='relative self-center' style={{ width: image?.width ?? maxSize + 'px', height: image?.height ?? maxSize + 'px' }}>
               {/* {imageURL && <Image ref={imageRef} src={imageURL} alt={imageURL} width={250} height={250} />} */}
-              <CanvasNoMask canvasRef={canvasRef} image={image} maxSize={maxSize}  />
+              <CanvasNoMask canvasRef={canvasRef} image={image} maxSize={maxSize} />
               <MaskedCanvas canvasRef={maskCanvasRef} image={image} maskImage={maskImage} initialColor='rgb(0,0,0,0)' />
               <HighlightHoveringColorCanvas canvasRef={canvasHLRef} imageCanvas={canvasRef?.current} maskCanvas={maskCanvasRef?.current} onlyInMask={true}
                 color={hoveringColor} colorPalette={palette} ignorePalette={ignorePalette}
@@ -159,7 +159,7 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
           </div>
 
           <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} highlightColor={hoveringColor} />
-          <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false} colorPalettePercentage={percentage}
+          <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false} colorPalettePercentage={sorted_percentage}
             onPaletteColorHover={(color) => onPaletteColorHover(color)}
             onPaletteColorUnHover={() => onPaletteColorUnHover()}
           />
