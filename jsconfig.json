@@ -4,7 +4,11 @@
     "module": "ES6",
     "jsx": "preserve",
     //Type checks, useful for checking before pushing
-    "checkJs": true
+    "checkJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   
    "exclude": ["node_modules", "**/node_modules/*",]

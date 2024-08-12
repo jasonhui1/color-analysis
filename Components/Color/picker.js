@@ -5,9 +5,12 @@ import HueShiftImage from './HueShiftImage';
 import { FaRegCircle } from 'react-icons/fa';
 import { getPositionFromSV, withinTriangle_strict, withinCircle, getSVFromPosition, getHueFromPosition, getPositionFromHue } from '../../utils/color_picker_calculation';
 import { rgbToHsl } from '../../utils/color';
+import { CircleIndicator, RectIndicator } from './PositionIndicators';
+import ColorWheel from './ColorWheel';
+import { HSLSlider } from './HLSSliderDisplay';
 
 const defaultHueShift = 30 //by CSP
-const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor }) => {
+const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor = null, isRGBSpace = false }) => {
 
     const [isDraggingColor, setIsDraggingColor] = useState(false);
     const [isDraggingHue, setIsDraggingHue] = useState(false);
@@ -24,6 +27,8 @@ const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor }) 
         x2: 269 / ratio, y2: 255 / ratio
     }
     const w = bb.y2 - bb.y1
+
+    if (isRGBSpace) selectedColor = rgbToHsl(selectedColor.r, selectedColor.g, selectedColor.b)
 
     //Calculate the position
     let selectedColorPosition = getPositionFromSV({ s: selectedColor.s, v: selectedColor.l, w, bb })
@@ -102,28 +107,9 @@ const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor }) 
     };
 
     return (
-        <div className={`w-[${size}px] h-[${size}px] relative`} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} ref={divRef}>
+        <div className={`w-[${size}px] h-[${size}px] relative`} onMouseDown={setSelectedColor && handleMouseDown} onMouseMove={setSelectedColor && handleMouseMove} onMouseUp={setSelectedColor && handleMouseUp} ref={divRef}>
 
-            <div className='relative flex'>
-                {/* Hue not correctly calculated I think, same as hue rotate */}
-                {/* <Image src={"https://i.imgur.com/BRVZgWi.png"} width={size} height={size} alt="color_combined" /> */}
-                {/* <div className='w-full h-full absolute' style={{ background: `hsl(${selectedColor.h}, 100%, 50%)`, mixBlendMode: 'hue', clipPath: `path('M 88 45 L 88 255 L 269 150 z')` }} /> */}
-                <Image className='absolute' src={color_wheel} alt="color_wheel" width={size} height={size} draggable={false} style={{
-                    userSelect: 'none',
-                    WebkitUserDrag: 'none',
-                    KhtmlUserDrag: 'none',
-                    MozUserDrag: 'none',
-                    OUserDrag: 'none',
-                }} />
-            </div>
-            {/* Use Js canvas */}
-            <HueShiftImage
-                src={"https://i.imgur.com/BRVZgWi.png"}
-                width={size}
-                height={size}
-                alt="color_combined"
-                hueShift={selectedColor.h}
-            />
+            <ColorWheel size={size} hue={selectedColor.h} />
 
             {/* Indictator, one with white outline, one with black outline */}
             <CircleIndicator position={selectedColorPosition} diameter={10} color="white" border_width={2} />
@@ -135,124 +121,15 @@ const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor }) 
     );
 };
 
-export const CircleIndicator = ({ position, diameter, color, border_width = 1}) => {
-    return <div style={{
-        position: 'absolute',
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        width: diameter + 'px',
-        height: diameter + 'px',
-        borderRadius: '50%',
-        border: border_width + 'px solid ' + color,
-        transform: 'translate(-50%, -50%)',
-        pointerEvents: 'none',
-        zIndex: 'inherit',
-    }} />
-}
-
-
-const RectIndicator = ({ position, width, height, color, border_width = 1, unit = 'px', rotation = 0 }) => {
-    return <div style={{
-        position: 'absolute',
-        left: `${position.x}${unit}`,
-        top: `${position.y}${unit}`,
-        width: width + 'px',
-        height: height + 'px',
-        border: border_width + 'px solid ' + color,
-        transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
-        transformOrigin: 'center center',
-        pointerEvents: 'none',
-        zIndex: 'inherit',
-    }} />
-}
-
-export const ColorPicker = ({ selectedColor, setSelectedColor }) => {
+export const ColorPicker = ({ size = 300, selectedColor, setSelectedColor = null, isRGBSpace = false, includeSliders = true }) => {
 
     return (
-        <div>
-            <TriangularColorPicker size={300} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
-
-            <HSLSlider selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+        <div className='flex flex-col'>
+            <TriangularColorPicker size={size} selectedColor={selectedColor} setSelectedColor={setSelectedColor} isRGBSpace={isRGBSpace} />
+            {includeSliders && <HSLSlider selectedColor={selectedColor} setSelectedColor={setSelectedColor} isRGBSpace={isRGBSpace} />}
         </div>
     );
 };
-
-export const HSLSlider = ({ selectedColor, setSelectedColor = null, RGB = false, }) => {
-
-    const updateColor = (type, value) => {
-        setSelectedColor(prev => ({ ...prev, [type]: value }));
-    };
-
-
-    let hls = selectedColor
-    if (RGB) hls = rgbToHsl(selectedColor.r, selectedColor.g, selectedColor.b)
-
-    return (
-        <div className="mt-4">
-            <HSLControl selectedColor={hls} label="H" value={hls.h} min={0} max={360} onChange={setSelectedColor && updateColor('h', hls.h)} />
-            <HSLControl selectedColor={hls} label="L" value={hls.l} min={0} max={100} onChange={setSelectedColor && updateColor('l', hls.l)} />
-            <HSLControl selectedColor={hls} label="S" value={hls.s} min={0} max={100} onChange={setSelectedColor && updateColor('s', hls.s)} />
-        </div>
-    )
-}
-
-const HSLControl = ({ selectedColor, label, value, min, max, onChange }) => {
-
-    const sliderRef = useRef(null);
-    const background =
-        label === 'H' ? `linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%) ` :
-            label === 'S' ? `linear-gradient(to right, hsl(${selectedColor.h}, 0%, ${selectedColor.l}%) 0%,  hsl(${selectedColor.h}, 100%, ${selectedColor.l}%) 100% ` :
-                `linear-gradient(to right, hsl(${selectedColor.h}, ${selectedColor.s}%, 0%) 0%,  hsl(${selectedColor.h}, ${selectedColor.s}%, 50%) 50% ,  hsl(${selectedColor.h}, ${selectedColor.s}%, 100%) 100% `
-
-
-    const handleSliderChange = (e) => {
-        const rect = sliderRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const newValue = Math.round((x / rect.width) * (max - min) + min);
-        onChange(Math.max(min, Math.min(max, newValue)));
-    };
-
-    const handleMouseDown = (e) => {
-        handleSliderChange(e);
-        document.addEventListener('mousemove', handleSliderChange);
-        document.addEventListener('mouseup', handleMouseUp);
-    };
-
-    const handleMouseUp = () => {
-        document.removeEventListener('mousemove', handleSliderChange);
-        document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    return (
-        <div className="flex flex-row gap-4 mb-1 justify-between items-center  ">
-            <label className="">{label} </label>
-            <div
-                ref={sliderRef}
-                className={`flex-grow h-4 relative cursor-pointer border border-gray-500`}
-                onMouseDown={handleMouseDown}
-                style={{ background: `${background}` }}
-            >
-
-                <div
-                    className="absolute -bottom-2 w-0 h-0 
-                     border-l-[6px] border-l-transparent 
-                     border-r-[6px] border-r-transparent 
-                     border-b-[8px] border-b-gray-600"
-                    style={{ left: `calc(${(value - min) / (max - min) * 100}% - 8px)` }}
-                />
-            </div>
-            <input
-                type="number"
-                className="w-16 p-1"
-                value={value}
-                onChange={(e) => onChange(Math.max(min, Math.min(max, Number(e.target.value))))}
-                min={min}
-                max={max}
-            />
-        </div>
-    )
-}
-
 
 export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, colors = [], highlightColor = null, colorisRGB = true },) => {
     const center = size / 2
@@ -284,29 +161,16 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
         })
     }
 
-    if (colors.length > 0) hue = colors[0].h
 
     const SVPosition = colors.map(({ s, l, highlight }) => Object.assign({}, getPositionFromSV({ s, v: l, w, bb }), { highlight }))
     const HuePosition = colors.map(({ h, highlight }) => Object.assign({}, getPositionFromHue(h + defaultHueShift, radius, center, center), { highlight }))
 
-    if (highlightColor) console.log('colors :>> ', colors);
+    if (colors.length > 0) hue = colors[0].h
+
 
     return (
         <div className={`w-[${size}px] h-[${size}px] relative`}>
-            <Image className='absolute' src={color_wheel} alt="color_wheel" width={size} height={size} draggable={false} style={{
-                userSelect: 'none',
-                WebkitUserDrag: 'none',
-                KhtmlUserDrag: 'none',
-                MozUserDrag: 'none',
-                OUserDrag: 'none',
-            }} />
-            <HueShiftImage
-                src={"https://i.imgur.com/BRVZgWi.png"}
-                width={size}
-                height={size}
-                alt="color_combined"
-                hueShift={hue}
-            />
+            <ColorWheel size={size} hue={hue} />
 
             {SVPosition.map(({ x, y, highlight }, index,) => (
                 <div key={index} className={highlight ? 'z-10' : ''}>
@@ -315,10 +179,6 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
                     <CircleIndicator position={{ x, y }} diameter={12} color="black" />
                 </div>
             ))}
-
-
-
-
 
             {HuePosition.map(({ x, y, highlight }, index) => (
                 <div key={index} className={highlight ? 'z-10' : ''}>

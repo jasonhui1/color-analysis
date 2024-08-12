@@ -15,6 +15,17 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
         }
     }, [imageCanvas?.width, imageCanvas?.height, reset]);
 
+    const checkFilter = ({ maskData, i, nearestColor, alpha }) => {
+        let maskCheck = true
+        if (maskCanvas && onlyInMask) {
+            const maskAlpha = maskData[i + 3]
+            if (maskAlpha != 0) maskCheck = false
+        }
+
+        const colorCheck = isColorEqual(color, nearestColor)
+        return (maskCheck && colorCheck) || alpha === 0
+    }
+
 
     useEffect(() => {
         if (!enable) return
@@ -33,19 +44,10 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
                 const maskCtx = maskCanvas.getContext('2d');
                 maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height).data;
             }
-
-
+            
             processImageColors(imageCanvas, combinedPalette, ({ nearestColor, alpha, i }) => {
-                let maskCheck = true
-                if (maskCanvas && onlyInMask) {
-                    const maskAlpha = maskData[i + 3]
-                    if (maskAlpha != 0) maskCheck = false
-                }
-
-                const colorCheck = isColorEqual(color, nearestColor)
-
-                if ((maskCheck && colorCheck)||alpha === 0 ) {
-                    // set current to transparent
+                if (checkFilter({ maskData, i, nearestColor, alpha })) {
+                    // set current to transparent 
                     currentData[i + 3] = 0;
                 } else {
                     currentData[i + 3] = 255;

@@ -57,7 +57,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
         isSelectingRef.current = false;
     };
 
-    const selectColor = useCallback((e) => {
+    const selectColor = (e) => {
         const isSelecting = isSelectingRef.current;
         if ((!isSelecting)) return;
 
@@ -70,7 +70,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
         const color = ctx.getImageData(x, y, 1, 1).data;
         const [r, g, b] = color.slice(0, 3);
         setSelectedColor([r, g, b]);
-    }, [image])
+    }
 
     useEffect(() => {
         if (!maskMode) {

@@ -4,7 +4,6 @@ import HighlightHoveringColorCanvas, { processImageColors } from "../../Componen
 
 import GoogleLogin from "../../Components/Auth/GoogleLogin";
 import Canvas from "../../Components/Canvas/Canvas";
-import { HSLSlider, TriangularColorPickerDisplayColors } from "../../Components/Color/picker";
 import FileUpload from "../../Components/Form/FileUpload";
 import MaskedCanvas from "../../Components/Canvas/MaskedCanvas";
 import { isColorEqual } from "../../utils/color";
@@ -13,6 +12,8 @@ import { Form } from "../../Components/Form/Form";
 import { MaskUI } from "../../Components/Canvas/MaskUI";
 import SAMCanvas from "../../Components/Canvas/SAMCanvas";
 import { invertImageAlpha, processCanvas } from "../../utils/canvas";
+import { HSLSlider } from "@/Components/Color/HLSSliderDisplay";
+import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
 
 
 const ColorAnalysis = () => {
@@ -255,15 +256,7 @@ const ColorAnalysis = () => {
 
                 </div>
 
-                <div className="flex flex-col">
-
-                    {<TriangularColorPickerDisplayColors colors={[selectedColor]} />}
-                    {selectedColor &&
-                        <HSLSlider selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} RGB={true} />
-                    }
-
-                </div>
-
+                <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} />
 
                 <Form
                     canvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current} invertMask={invertMask} hoveringColor={hoveringColor}

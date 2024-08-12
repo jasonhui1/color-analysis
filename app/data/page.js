@@ -3,7 +3,7 @@ import React, { createRef, useEffect, useRef, useState } from 'react'
 import { getPaletteClient } from '../../lib/clientApis/palette'
 import PaletteDisplay, { PaletteDisplaySimple, PaletteDisplaySimpleV2 } from '../../Components/Color/PaletteDisplay';
 import Image from '../../node_modules/next/image';
-import { ColorDisplayer, ColorPicker, TriangularColorPickerDisplayColors } from '../../Components/Color/picker';
+import { ColorPicker, TriangularColorPickerDisplayColors } from '../../Components/Color/picker';
 import { getUserId } from '../../lib/clientApis/supabaseClient';
 import { IoSearchOutline } from "react-icons/io5";
 import { CiCircleRemove } from "react-icons/ci";
@@ -101,8 +101,11 @@ export default function DataPage() {
   return (
     <div className='flex flex-col gap-4 relative'>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
-      <ColorDisplayer selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} />
+      <div className='fixed right-0 top-1/4 '>
+        <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} />
+      </div>
 
+      {error && <div>Error: {error}</div>}
       {loading && <div>Loading...</div>}
 
       {data && data.map((paletteData, index) => {
@@ -114,6 +117,10 @@ export default function DataPage() {
             onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover(index)} onPaletteColorUnHover={onPaletteColorUnHover} onPaletteClick={onPaletteClick} />
         )
       })}
+
+      {!loading && !data && <div>You have not added any data</div>}
+
+
     </div>
   )
 }
