@@ -7,8 +7,12 @@ const HueShiftImage = ({ src, width, height, alt, hueShift, render = true }) => 
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
 
-  const drawImage = (ctx, img) => {
-    ctx.drawImage(img, 0, 0, width, height);
+  const drawImage = (image) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const [width, height] = [canvas.width, canvas.height];
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(image, 0, 0, width, height);
     const imageData = ctx.getImageData(0, 0, width, height);
     const data = imageData.data;
 
@@ -36,15 +40,13 @@ const HueShiftImage = ({ src, width, height, alt, hueShift, render = true }) => 
 
   useEffect(() => {
     if (!render) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
 
     const img = imageRef.current;
     if (img.complete) {
-      drawImage(ctx, img);
+      drawImage(img);
     } else {
       img.onload = () => {
-        drawImage(ctx, img);
+        drawImage(img);
 
       };
     }
