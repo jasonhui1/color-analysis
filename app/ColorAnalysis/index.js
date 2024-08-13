@@ -6,113 +6,66 @@ import GoogleLogin from "../../Components/Auth/GoogleLogin";
 import Canvas from "../../Components/Canvas/Canvas";
 import FileUpload from "../../Components/Form/FileUpload";
 import MaskedCanvas from "../../Components/Canvas/MaskedCanvas";
-import { isColorEqual } from "../../utils/color";
 
 import { Form } from "../../Components/Form/Form";
 import { MaskUI } from "../../Components/Canvas/MaskUI";
 import SAMCanvas from "../../Components/Canvas/SAMCanvas";
 import { invertImageAlpha, processCanvas } from "../../utils/canvas";
-import { HSLSlider } from "@/Components/Color/HLSSliderDisplay";
 import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
+import useCanvas from "@/hooks/useCanvas";
+import useSAM from "@/hooks/useSAM";
+import { useMaskUI } from "@/hooks/useMaskUI";
+import { useColorPalette } from "@/hooks/useColorPalette";
+import { loadImage } from "@/utils/image";
 
 
 const ColorAnalysis = () => {
-    const canvasRef = useRef(null);
-    const maskedCanvasRef = useRef(null);
-    const SAMCanvasRef = useRef(null);
-    const highlightCanvasRef = useRef(null);
-    const fileDropRef = useRef(null);
+    const { canvasRef, reset, drawingComplete, setDrawingComplete, updateCanvas } = useCanvas()
+    const { canvasRef: maskedCanvasRef, reset: maskReset, drawingComplete: maskDrawingComplete, setDrawingComplete: setMaskDrawingComplete, updateCanvas: updateMaskCanvas } = useCanvas()
+    const { canvasRef: highlightCanvasRef, reset: highlightReset, drawingComplete: HighlightDrawingComplete, setDrawingComplete: setHighlightDrawingComplete, updateCanvas: updateHighlightCanvas } = useCanvas()
+    const { canvasRef: SAMCanvasRef, reset: SAMReset, updateCanvas: updateSAMCanvas } = useCanvas()
 
-    const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
+    const fileDropRef = useRef(null);
 
     const [image, setImage] = useState(null);
     const [maskImage, setMaskImage] = useState(null);
     const imageFileRef = useRef(null);
     const [imageSourceURL, setImageSourceURL] = useState('');
 
-    // SAM, use hooks later
-    const [SAMImages, setSAMImages] = useState([]);
-    const [SAMEnableIndex, setSAMEnableIndex] = useState(-1);
-    const [SAMPositions, setSAMPositions] = useState([]);
-    const [SAMIgnorePositions, setSAMIgnorePositions] = useState([]);
-
     //Resets, use canvas hook
-    const [reset, setReset] = useState(false);
-    const [maskReset, setMaskReset] = useState(false);
-    const [highlightReset, setHighlightReset] = useState(false);
-    const [SAMReset, setSAMReset] = useState(true);
     const [formReset, setFormReset] = useState(false);
+    const { colorPalette, ignorePalette, selectedColor, hoveringColor,
+        setColorPalette, setIgnorePalette, setSelectedColor,
+        onPaletteColorHover, onPaletteColorUnHover, onPaletteColorDelete, onPaletteColorClick } = useColorPalette({ onUnhover: updateHighlightCanvas });
 
-    // Mask UI, use hooks later
-    const [maskMode, setMaskMode] = useState(false);
-    const [SAMMode, setSAMMode] = useState(false);
-    const [enableMask, setEnableMask] = useState(false);
-    const [invertMask, setInvertMask] = useState(false);
+    const { maskMode, setMaskMode, enableMask, setEnableMask, invertMask, setInvertMask, resetMaskUI } = useMaskUI();
 
-    //
-    const [drawingComplete, setDrawingComplete] = useState(false);
-    const [maskDrawingComplete, setMaskDrawingComplete] = useState(false);
-
-    //
-    const [colorPalette, setColorPalette] = useState([]);
-    const [ignorePalette, setIgnorePalette] = useState([]);
-    const [hoveringColor, setHoveringColor] = useState();
-
+    const { resetSAM, SAMImages, setSAMImages,
+        SAMEnableIndex, setSAMEnableIndex,
+        SAMPositions, setSAMPositions,
+        SAMIgnorePositions, setSAMIgnorePositions,
+        SAMMode, setSAMMode,
+        reconnectSAM, SAMconnected, processSAM
+    } = useSAM();
 
 
     useEffect(() => {
-        if (drawingComplete) {
-            setDrawingComplete(false); // Reset the flag for future drawings
-            // if (!maskMode && autoAnalysis) reAnalysis();
-        }
-    }, [drawingComplete]);
-
-    useEffect(() => {
-        if (maskDrawingComplete) {
-            setMaskDrawingComplete(false); // Reset the flag for future drawings
-            setReset(state => !state);
-            // if (!maskMode && autoAnalysis) reAnalysis();
-        }
+        if (maskDrawingComplete && enableMask) updateCanvas()
     }, [maskDrawingComplete]);
 
-    useEffect(() => {
-        if (!SAMMode) {
-            setReset(state => !state);
-        }
-    }, [SAMEnableIndex]);
-
-    const onPaletteColorHover = (color) => {
-        // highlightColor(color);
-        setHoveringColor(color);
-    };
-
-    const onPaletteColorUnHover = () => {
-        setHighlightReset(!highlightReset);
-        setHoveringColor(null);
-    };
-
-    const onPaletteColorDelete = (palette, setPalette) => (color) => {
-        const newPalette = palette.filter((c) => !isColorEqual(c, color));
-        setPalette(newPalette);
-        setHoveringColor(null);
-    };
 
     const onImageSelected = (img, file) => {
+        imageFileRef.current = file
         setImage(img);
-        setMaskMode(false);
-        setEnableMask(false);
-        setFormReset(!reset);
         setMaskImage(null);
 
-        setReset(state => !state);
-        setMaskReset(state => !state);
+        setFormReset(!reset);
+        resetMaskUI()
+        updateCanvas();
+        updateMaskCanvas()
 
-        imageFileRef.current = file
-        setSAMEnableIndex(-1);
-        setSAMImages([]);
-        setSAMPositions([]);
-        setSAMIgnorePositions([]);
-        setSAMReset(state => !state);
+        resetSAM()
+        updateSAMCanvas()
     }
 
     const onChangeMaskMode = () => {
@@ -120,91 +73,35 @@ const ColorAnalysis = () => {
         if (maskMode) setEnableMask(true)
     };
 
-    const onApplyMask = () => {
+    const onApplyMask = async () => {
 
         const maskUrl = processCanvas({ canvas: maskedCanvasRef?.current, image, cropTransparent: true, useCurrentCanvas: true, isInverted: !invertMask });
-        const croppedMaskImage = new Image();
-        croppedMaskImage.src = maskUrl;
+        const croppedMaskImage = await loadImage(maskUrl);
 
         const url = processCanvas({ canvas: canvasRef?.current, image, cropTransparent: true, useCurrentCanvas: false });
-        const croppedImage = new Image();
-        croppedImage.src = url;
-
-        croppedImage.onload = () => {
-            setImage(croppedImage);
-            setEnableMask(false)
-            setReset(state => !state);
-
-            setSAMEnableIndex(-1);
-            setSAMImages([]);
-            setSAMPositions([]);
-            setSAMIgnorePositions([]);
-        };
+        const croppedImage = await loadImage(url);
 
 
-        croppedMaskImage.onload = () => {
-            setMaskImage(croppedMaskImage);
-            setMaskReset(state => !state);
-        };
+        setMaskImage(croppedMaskImage);
+        updateMaskCanvas()
 
+        setImage(croppedImage);
+        setEnableMask(false)
+        updateCanvas()
+        resetSAM()
     }
-
-    useEffect(() => {
-        // fetch('http://localhost:5000/api/hello')
-        //     .then(response => response.json())
-        //     .then(data => console.log(data))
-    }, [])
 
     const onClickSAMIndex = async (index) => {
         setSAMEnableIndex(index);
         const maskSAMImage = await invertImageAlpha(SAMImages[index]);
+
         setMaskImage(maskSAMImage);
-        setMaskReset(state => !state);
         setEnableMask(true);
-    }
-
-    const processSAM = async () => {
-        // if (!file) return
-        if (!canvasRef.current) return
-        if (SAMPositions.length === 0 && SAMIgnorePositions.length === 0) { console.log('SAM: No position selected'); return }
-        const dataURL = canvasRef.current.toDataURL('image/png');
-        const file = dataURLtoFile(dataURL, `canvas.png`);
-        const scale = 1
-
-        // const file = imageFileRef.current
-        // const scale = image.width / canvasRef.current.width
-        const positivePosition = SAMPositions.map(([x, y]) => [x * scale, y * scale])
-        const negativePosition = SAMIgnorePositions.map(([x, y]) => [x * scale, y * scale])
-
-        const formData = new FormData()
-        formData.append('image', file);
-        formData.append('positions', JSON.stringify(positivePosition))
-        formData.append('ignorePositions', JSON.stringify(negativePosition))
-
-        setSAMEnableIndex(-1);
-        setSAMImages([]);
-
-        try {
-            const response = await fetch('http://localhost:5000/api/process-image', {
-                method: 'POST',
-                body: formData,
-            })
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok')
-            }
-
-            const data = await response.json()
-            if (!data.images) throw new Error('No images in response')
-            const maskedImages = await Promise.all(data.images.map(loadImage));
-            setSAMImages(maskedImages)
-
-        } catch (error) {
-            console.error('Error:', error)
+        updateMaskCanvas();
+        if (!SAMMode) {
+            updateCanvas()
         }
     }
-
-
 
 
     return (
@@ -248,7 +145,7 @@ const ColorAnalysis = () => {
                         enableMask={enableMask} setEnableMask={setEnableMask}
                         invertMask={invertMask} setInvertMask={setInvertMask}
                         onSAMIndexClick={onClickSAMIndex} SAMImages={SAMImages}
-                        processSAM={processSAM}
+                        processSAM={() => processSAM(canvasRef?.current)}
                         onApplyMask={onApplyMask} />
 
                     <button onClick={() => setSAMMode(!SAMMode)} className="bg-gray-200 px-2 py-1 rounded-md cursor-pointer text-sm">SAM Mode : {!SAMMode ? 'Enter' : 'Leave'}</button>
@@ -272,34 +169,9 @@ const ColorAnalysis = () => {
                     ignorePalette={ignorePalette} setIgnorePalette={setIgnorePalette}
                     formReset={formReset}
                 />
-
-
-
             </div>
 
         </div>
     );
 };
 export default ColorAnalysis;
-
-const loadImage = (base64image) => {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.src = `data:image/png;base64,${base64image}`;
-        img.onload = () => {
-            resolve(img);
-        };
-    });
-};
-
-const dataURLtoFile = (dataurl, filename) => {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], filename, { type: mime });
-};
