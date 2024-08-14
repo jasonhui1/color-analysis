@@ -2,13 +2,19 @@ import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import CheckBox from "../../Components/General/CheckBox";
 
 
-export function MaskUI({ maskMode, onChangeMaskMode,
+export function MaskUI({ maskMode, setMaskMode,
     enableMask, setEnableMask,
     invertMask, setInvertMask,
-   
+
     SAMImages, processSAM, onSAMIndexClick,
     onApplyMask
 }) {
+
+    const onChangeMaskMode = () => {
+        setMaskMode(!maskMode)
+        if (maskMode) setEnableMask(true)
+    };
+
 
     return (
         <div className="flex flex-col gap-2">

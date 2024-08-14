@@ -1,4 +1,3 @@
-import { Calistoga } from 'next/font/google';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CircleIndicator } from '../Color/PositionIndicators';
 

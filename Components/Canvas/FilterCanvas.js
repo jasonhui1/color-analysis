@@ -29,6 +29,7 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
 
     useEffect(() => {
         if (!enable) return
+        console.log('color :>> ', color);
         if (imageCanvas) {
             if (!color) return
 
@@ -44,7 +45,7 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
                 const maskCtx = maskCanvas.getContext('2d');
                 maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height).data;
             }
-            
+
             processImageColors(imageCanvas, combinedPalette, ({ nearestColor, alpha, i }) => {
                 if (checkFilter({ maskData, i, nearestColor, alpha })) {
                     // set current to transparent 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 export default function useCanvas() {
-    const canvasRef = useRef(null);
+    const ref = useRef(null);
     const [reset, setReset] = useState(false);
     const [drawingComplete, setDrawingComplete] = useState(false);
 
@@ -11,10 +11,10 @@ export default function useCanvas() {
         }
     }, [drawingComplete]);
 
-    const updateCanvas = () => {
+    const update = () => {
         setReset(state => !state);
     };
 
-    return { canvasRef, reset, drawingComplete, setDrawingComplete, updateCanvas };
+    return { ref, reset, drawingComplete, setDrawingComplete, update };
 
 }
