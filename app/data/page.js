@@ -154,7 +154,7 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
   }, [inView, imageURL]);
 
   return (
-    <div ref={ref} className='flex gap-4 items-center ' style={{ height: image ? 'auto' : 100 + 'px' }}>
+    <div ref={ref} className='flex gap-4 items-center ' style={{ minHeight: inView ? 'auto' : '100px' }}>
       {inView && (
         <>
           <div className='flex flex-col gap-1 relative w-[250px] min-h-[100px] h-fit justify-center ' >

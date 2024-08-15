@@ -32,19 +32,20 @@ const ColorAnalysis = () => {
     //Resets, use canvas hook
     const [formResetToggle, setFormResetToggle] = useState(false);
 
-    const { colorPalette, ignorePalette, selectedColor, hoveringColor,
-        setColorPalette, setIgnorePalette, setSelectedColor,
-        onPaletteColorHover, onPaletteColorUnHover, onPaletteColorDelete, onPaletteColorClick } = useColorPalette();
-
-    // const [colorPalette, setColorPalette] = useState([]);
-    // const [ignorePalette, setIgnorePalette] = useState([]);
-    // const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
-    // const [hoveringColor, setHoveringColor] = useState();
+    const [colorPalette, setColorPalette] = useState([]);
+    const [ignorePalette, setIgnorePalette] = useState([]);
+    const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
+    const [hoveringColor, setHoveringColor] = useState();
 
     const [invertMask, setInvertMask] = useState(false);
 
-    const onImageSelected = (img, file) => {
+    const resetForm = (img, file, url) => {
         setFormResetToggle(state => !state);
+        if (url) {
+            setImageSourceURL(url);
+        } else {
+            setImageSourceURL('');
+        }
     }
 
     return (
@@ -56,9 +57,12 @@ const ColorAnalysis = () => {
 
             {/* {image && ( */}
             <div className="flex flex-row gap-6 relative mb-3 " >
-                <ImageEditor canvasRef={canvasRef} maskedCanvasRef={maskCanvasRef} image={image} setImage={setImage}
-                    maskImage={maskImage} setMaskImage={setMaskImage} onFileDrop={onImageSelected} setImageSourceURL={setImageSourceURL}
-                    hoveringColor={hoveringColor} setSelectedColor={setSelectedColor} colorPalette={colorPalette} ignorePalette={ignorePalette}
+                <ImageEditor canvasRef={canvasRef} maskedCanvasRef={maskCanvasRef}
+                    image={image} setImage={setImage}
+                    maskImage={maskImage} setMaskImage={setMaskImage}
+                    onImageSelected={resetForm}
+                    hoveringColor={hoveringColor} setSelectedColor={setSelectedColor}
+                    colorPalette={colorPalette} ignorePalette={ignorePalette}
                     invertMask={invertMask} setInvertMask={setInvertMask}
                 />
 
@@ -66,15 +70,10 @@ const ColorAnalysis = () => {
 
                 {/* Use Context */}
                 <Form
-                    canvas={canvasRef?.current} maskCanvas={maskCanvasRef?.current} invertMask={invertMask} hoveringColor={hoveringColor}
-                    image={image}
-                    imageSourceURL={imageSourceURL}
-                    onPaletteColorDelete={onPaletteColorDelete}
-                    onPaletteColorHover={onPaletteColorHover}
-                    onPaletteColorUnHover={onPaletteColorUnHover}
-                    selectedColor={selectedColor}
-                    setImageSourceURL={setImageSourceURL}
-                    setSelectedColor={setSelectedColor}
+                    canvas={canvasRef?.current} maskCanvas={maskCanvasRef?.current} image={image} invertMask={invertMask}
+                    hoveringColor={hoveringColor} setHoveringColor={setHoveringColor}
+                    selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+                    imageSourceURL={imageSourceURL} setImageSourceURL={setImageSourceURL}
                     colorPalette={colorPalette} setColorPalette={setColorPalette}
                     ignorePalette={ignorePalette} setIgnorePalette={setIgnorePalette}
                     formReset={formResetToggle}

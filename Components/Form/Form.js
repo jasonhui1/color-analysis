@@ -6,20 +6,31 @@ import { TriangularColorPickerDisplayColors } from "../Color/picker";
 import { processImageColors } from "../Canvas/FilterCanvas";
 import { TextInput } from "../General/TextInput";
 import { UploadButton } from "./UploadButton";
-
-
-export function Form({ canvas, image, maskCanvas, invertMask,hoveringColor,
+import { useColorPaletteInteractivity } from "@/hooks/useColorPalette";
+import { CiWarning } from "react-icons/ci";
+export function Form({ canvas, image, maskCanvas, invertMask,
     imageSourceURL, setImageSourceURL,
     colorPalette, setColorPalette,
     ignorePalette, setIgnorePalette,
-    onPaletteColorDelete, onPaletteColorHover, onPaletteColorUnHover,
     selectedColor, setSelectedColor,
+    hoveringColor, setHoveringColor,
     formReset
 }) {
 
     const [tags, setTags] = useState('');
     const [percentage, setPercentage] = useState([]);
     const [paletteCount, setPaletteCount] = useState(12);
+    const [percentageIsAccurate, setPercentageIsAccurate] = useState(false);
+
+    const { onPaletteColorHover,
+        onPaletteColorUnHover,
+        onPaletteColorDelete,
+        onPaletteColorClick
+    } = useColorPaletteInteractivity({ setPalette: setColorPalette, setSelectedColor, setHoveringColor });
+
+    const {
+        onPaletteColorDelete: onIgnorePaletteColorDelete,
+    } = useColorPaletteInteractivity({ setPalette: setIgnorePalette, setSelectedColor, setHoveringColor });
 
 
     useEffect(() => {
@@ -71,11 +82,25 @@ export function Form({ canvas, image, maskCanvas, invertMask,hoveringColor,
         setPercentage(colorPalette.map((color) => (
             Math.round((counter[color] / totalPixels) * 100)
         )))
+
+        setPercentageIsAccurate(true);
+
     }
 
-    const onClickDeletePaletteColor = (colorPalette, setColorPalette) => (color, index) => {
-        onPaletteColorDelete(colorPalette, setColorPalette)(color);
+    const removePercentage = (index) => {
         setPercentage(percentage.filter((_, i) => i !== index));
+        setPercentageIsAccurate(false);
+    }
+
+    const onDeletePaletteColor = (color, index) => {
+        onPaletteColorDelete(color)
+        removePercentage(index)
+    };
+
+    const onDeleteIgnorePaletteColor = (color, index) => {
+        onIgnorePaletteColorDelete(color)
+        removePercentage(index)
+
     };
 
     return (
@@ -87,6 +112,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,hoveringColor,
                 <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
                 {/* <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" /> */}
                 <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onCalculatePercentage()}> Calculate Percentage</button>
+                {!percentageIsAccurate && <CiWarning className="cursor-pointer" size={30} color="red" strokeWidth={1} onClick={() => onCalculatePercentage()} />}
             </div>
 
 
@@ -95,16 +121,19 @@ export function Form({ canvas, image, maskCanvas, invertMask,hoveringColor,
                 colorPalette={colorPalette} setColorPalette={setColorPalette} colorPalettePercentage={percentage}
                 onPaletteColorHover={onPaletteColorHover}
                 onPaletteColorUnHover={onPaletteColorUnHover}
-                onPaletteColorDelete={onClickDeletePaletteColor(colorPalette, setColorPalette)}
-                selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+                onPaletteColorDelete={onDeletePaletteColor}
+                onPaletteColorClick={onPaletteColorClick}
+                selectedColor={selectedColor}
             />
 
             <PaletteDisplay
                 colorPalette={ignorePalette} setColorPalette={setIgnorePalette}
                 onPaletteColorHover={onPaletteColorHover}
                 onPaletteColorUnHover={onPaletteColorUnHover}
-                onPaletteColorDelete={onClickDeletePaletteColor(ignorePalette, setIgnorePalette)}
-                selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+                onPaletteColorDelete={onDeleteIgnorePaletteColor}
+                onPaletteColorClick={onPaletteColorClick}
+                selectedColor={selectedColor}
+                title="Ignore Palette"
             />
             {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} highlightColor={hoveringColor} />}
 

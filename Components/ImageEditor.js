@@ -13,7 +13,7 @@ import FileUpload from "./Form/FileUpload";
 import CheckBox from "./General/CheckBox";
 
 const ImageEditor = ({ canvasRef, maskedCanvasRef,
-    image, setImage, maskImage, setMaskImage, onFileDrop, setImageSourceURL,
+    image, setImage, maskImage, setMaskImage, onImageSelected,
     hoveringColor, setSelectedColor, colorPalette, ignorePalette,
     invertMask, setInvertMask
 }) => {
@@ -69,7 +69,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         setEnableMask(false)
     }
 
-    const onImageSelected = (img) => {
+    const handleImageSelection = (img, file, url) => {
         setImage(img);
         setMaskImage(null);
 
@@ -80,7 +80,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         resetMaskUI()
         resetSAM()
 
-        onFileDrop()
+        onImageSelected(img, file, url)
     }
 
 
@@ -90,7 +90,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
             <div className="mb-4 relative  " ref={fileDropRef}  >
                 {/* Drag and drop within the same dimension as canvas */}
                 <div className={`${image ? 'absolute inset-0  pointer-events-none ' : ''} `} style={{ width: canvasRef?.current?.width ?? '720' + 'px', height: canvasRef?.current?.height ?? '720' + 'px' }}>
-                    <FileUpload onImageSelected={onImageSelected} imageSelected={image !== null} fileDropRef={fileDropRef} setImageSourceURL={setImageSourceURL} />
+                    <FileUpload onImageSelected={handleImageSelection} imageSelected={image !== null} fileDropRef={fileDropRef} />
                 </div>
 
                 {/* Canvas Area */}

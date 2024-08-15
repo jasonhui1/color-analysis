@@ -1,66 +1,40 @@
+import { extractDroppedFileUrl } from "@/utils/file";
 import { useState, useRef, useEffect } from "react";
 import { LuUpload } from "react-icons/lu";
 
-export default function FileUpload({ onImageSelected, imageSelected, fileDropRef, setImageSourceURL }) {
+export default function FileUpload({ onImageSelected, imageSelected, fileDropRef}) {
 
     const [isUploading, setIsUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
     const onDragOver = (event) => {
-        console.log('dragging over:>> ');
         event.preventDefault();
         setIsDragging(true);
     };
 
     const onDragLeave = (event) => {
-        console.log('dragging leave:>> ');
-
         event.preventDefault();
         setIsDragging(false);
     };
 
-    const onDrop = (event) => {
-        console.log('drop :>> ');
+    const onDrop = async (event) => {
         event.preventDefault();
         setIsDragging(false);
+
         const file = event.dataTransfer.files[0];
+        const sourceURL = await extractDroppedFileUrl(event)
 
-        let sourceURL = null
-        setImageSourceURL(sourceURL);
-
-        // get source URL, is aschronous
-        for (let item of event.dataTransfer.items) {
-            if (item.kind === 'string' && item.type === 'text/uri-list') {
-                item.getAsString((url) => {
-                    console.log('URL of the dropped image: ', url);
-                    setImageSourceURL(url);
-
-                });
-            }
-
-            // Extract from html if need to store the url of the image instead of the site
-            // if (item.kind === 'file') {
-            //     const file_ = item.getAsFile();
-            //     console.log('file kind :>> ', file_);
-            // } else if (item.kind === 'string') {
-            //     if (item.type === 'text/uri-list' || item.type === 'text/plain' || item.type === 'text/html') {
-            //         item.getAsString((data) => {
-            //             console.log(`Data from item of type ${item.type} :>> `, data);
-            //         });
-            //     }
-            // }
-        }
-
-        handleImageUpload(file)
+        handleImageSelected(file, sourceURL)
     };
 
     const onClick = () => {
         if (imageSelected) return
+        //simulate click to open file explorer
         fileInputRef.current.click();
     }
 
-    const handleImageUpload = (file) => {
+    const handleImageSelected = (file, url) => {
         if (!file) return
         setIsUploading(true)
         const reader = new FileReader();
@@ -69,7 +43,7 @@ export default function FileUpload({ onImageSelected, imageSelected, fileDropRef
             const img = new Image();
             img.src = e.target.result;
             img.onload = () => {
-                onImageSelected(img , file)
+                onImageSelected(img, file, url)
             };
         };
 
@@ -108,7 +82,7 @@ export default function FileUpload({ onImageSelected, imageSelected, fileDropRef
             <input
                 type="file"
                 ref={fileInputRef}
-                onChange={(e) => handleImageUpload(e.target.files[0])}
+                onChange={(e) => handleImageSelected(e.target.files[0])}
                 className="hidden"
                 accept="image/*"
             />

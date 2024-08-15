@@ -9,7 +9,9 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
     onPaletteColorHover,
     onPaletteColorUnHover,
     onPaletteColorDelete,
-    selectedColor, setSelectedColor
+    onPaletteColorClick,
+    selectedColor,
+    title = "Color Palette",
 }) {
 
     const [hoveringIndex, setHoveringIndex] = useState(-1);
@@ -56,7 +58,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
         <>
             {(
                 <div className="mt-4">
-                    <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
+                    {title && <h2 className="text-xl font-semibold mb-2">{title}</h2>}
                     <div className="flex gap-4  flex-wrap">
                         {colorPalette.map((color, index) => (
                             <div key={index} onMouseEnter={() => handleHover(color, index)} onMouseLeave={() => handleUnHover()}    >
@@ -65,7 +67,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
                                     className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative "
                                     style={{ backgroundColor: `rgb(${color.join(",")})` }}
 
-                                    onMouseDown={() => setSelectedColor(color)}
+                                    onMouseDown={() => onPaletteColorClick(color)}
                                     onContextMenu={(e) => e.preventDefault()}
                                 >
 
