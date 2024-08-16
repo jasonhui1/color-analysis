@@ -8,12 +8,17 @@ import { TextInput } from "../General/TextInput";
 import { UploadButton } from "./UploadButton";
 import { useColorPaletteInteractivity } from "@/hooks/useColorPalette";
 import { CiWarning } from "react-icons/ci";
+import ToggleComponent from "../General/ToggleComponent";
+import CheckBox from "../General/CheckBox";
+
+
 export function Form({ canvas, image, maskCanvas, invertMask,
     imageSourceURL, setImageSourceURL,
     colorPalette, setColorPalette,
     ignorePalette, setIgnorePalette,
     selectedColor, setSelectedColor,
     hoveringColor, setHoveringColor,
+    onlyHighlightMask, setOnlyHighlightMask,
     formReset
 }) {
 
@@ -107,14 +112,16 @@ export function Form({ canvas, image, maskCanvas, invertMask,
         <div className="flex flex-col gap-4 flex-wrap">
 
 
-            <div className="flex gap-4 items-center">
-                <TextInput classname="w-8" type="number" label={"Palette Count"} text={paletteCount} setText={setPaletteCount} showBorder={false}/>
+            <div className="flex gap-4 items-center flex-wrap">
+                <TextInput classname="w-8" type="number" label={"Palette Count"} text={paletteCount} setText={setPaletteCount} showBorder={false} />
                 <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
                 {/* <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" /> */}
                 <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onCalculatePercentage()}> Calculate Percentage</button>
                 {!percentageIsAccurate && <CiWarning className="cursor-pointer" size={20} color="red" strokeWidth={1} onClick={() => onCalculatePercentage()} />}
+
             </div>
 
+            <CheckBox label="Highlight only mask" checked={onlyHighlightMask} onChange={() => setOnlyHighlightMask(!onlyHighlightMask)} />
 
 
             <PaletteDisplay
@@ -126,15 +133,17 @@ export function Form({ canvas, image, maskCanvas, invertMask,
                 selectedColor={selectedColor}
             />
 
-            <PaletteDisplay
-                colorPalette={ignorePalette} setColorPalette={setIgnorePalette}
-                onPaletteColorHover={onPaletteColorHover}
-                onPaletteColorUnHover={onPaletteColorUnHover}
-                onPaletteColorDelete={onDeleteIgnorePaletteColor}
-                onPaletteColorClick={onPaletteColorClick}
-                selectedColor={selectedColor}
-                title="Ignore Palette"
-            />
+            <ToggleComponent label={"Ignore Palette"}>
+                <PaletteDisplay
+                    colorPalette={ignorePalette} setColorPalette={setIgnorePalette}
+                    onPaletteColorHover={onPaletteColorHover}
+                    onPaletteColorUnHover={onPaletteColorUnHover}
+                    onPaletteColorDelete={onDeleteIgnorePaletteColor}
+                    onPaletteColorClick={onPaletteColorClick}
+                    selectedColor={selectedColor}
+                    title="Ignore Palette"
+                />
+            </ToggleComponent>
             {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} highlightColor={hoveringColor} />}
 
             <TextInput text={tags} setText={setTags} label='Tags' classname="min-w-96" />

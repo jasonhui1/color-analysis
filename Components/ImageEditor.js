@@ -11,20 +11,23 @@ import MaskedCanvas from "./Canvas/MaskedCanvas";
 import SAMCanvas from "./Canvas/SAMCanvas";
 import FileUpload from "./Form/FileUpload";
 import CheckBox from "./General/CheckBox";
+import ToggleComponent from "./General/ToggleComponent";
+import SAMUI from "./Canvas/SAMUI";
 
 const ImageEditor = ({ canvasRef, maskedCanvasRef,
     image, setImage, maskImage, setMaskImage, onImageSelected,
     hoveringColor, setSelectedColor, colorPalette, ignorePalette,
-    invertMask, setInvertMask
+    invertMask, setInvertMask,
+    onlyHighlightMask
 }) => {
 
-    const { reset, drawingComplete, setDrawingComplete, update: updateCanvas } = useCanvas()
+    const { reset: canvasReset, drawingComplete, setDrawingComplete, update: updateCanvas } = useCanvas()
     const { reset: maskReset, drawingComplete: maskDrawingComplete, setDrawingComplete: setMaskDrawingComplete, update: updateMaskCanvas } = useCanvas()
     const { ref: highlightCanvasRef, reset: highlightReset, drawingComplete: HighlightDrawingComplete, setDrawingComplete: setHighlightDrawingComplete, update: updateHighlightCanvas } = useCanvas()
     const { ref: SAMCanvasRef, reset: SAMReset, update: updateSAMCanvas } = useCanvas()
 
     const fileDropRef = useRef(null);
-    const { enableMask, setEnableMask, maskMode, setMaskMode, reset: resetMaskUI, onlyHighlightMask, setOnlyHighlightMask } = useMaskUI();
+    const { enableMask, setEnableMask, maskMode, setMaskMode, reset: resetMaskUI } = useMaskUI();
 
     const { resetSAM, SAMImages,
         SAMEnableIndex, setSAMEnableIndex,
@@ -39,17 +42,16 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         if (maskDrawingComplete && enableMask) updateCanvas()
     }, [maskDrawingComplete]);
 
-
     const onClickSAMIndex = async (index) => {
         setSAMEnableIndex(index);
         const maskSAMImage = await invertImageAlpha(SAMImages[index]);
 
         setMaskImage(maskSAMImage);
         updateMaskCanvas();
+        setEnableMask(true);
         if (!SAMMode) {
             updateCanvas()
         }
-        setEnableMask(true);
     }
 
     const onApplyMask = async () => {
@@ -98,7 +100,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                 {/* Canvas Area */}
                 {image &&
                     <>
-                        <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={reset}
+                        <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={canvasReset}
                             maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
                             setSelectedColor={setSelectedColor}
                             SAMImage={SAMCanvasRef.current} SAMMode={SAMMode} maskDrawingComplete={maskDrawingComplete}
@@ -121,14 +123,14 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
             <MaskUI maskMode={maskMode} setMaskMode={setMaskMode}
                 enableMask={enableMask} setEnableMask={setEnableMask}
                 invertMask={invertMask} setInvertMask={setInvertMask}
-                onSAMIndexClick={onClickSAMIndex} SAMImages={SAMImages}
-                processSAM={() => processSAM(canvasRef?.current)}
                 onApplyMask={onApplyMask} />
 
-            <button onClick={() => setSAMMode(!SAMMode)} className="bg-gray-200 px-2 py-1 rounded-md cursor-pointer text-sm">SAM Mode : {!SAMMode ? 'Enter' : 'Leave'}</button>
-            <CheckBox label="Highlight only mask" checked={onlyHighlightMask} onChange={() => setOnlyHighlightMask(!onlyHighlightMask)} />
+            <ToggleComponent label="SAM" >
+                <SAMUI SAMMode={SAMMode} setSAMMode={setSAMMode} SAMImages={SAMImages}
+                    processSAM={() => processSAM(canvasRef?.current)} onClickSAMIndex={onClickSAMIndex}
 
-
+                />
+            </ToggleComponent>
         </div>
     )
 }

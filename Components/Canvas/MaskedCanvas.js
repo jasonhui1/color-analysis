@@ -113,7 +113,8 @@ const MaskedCanvas = ({ canvasRef, image, reset = true, maskMode = false, maskIm
             {/* <div className='absolute' style={{ top: mousePosition.y, left: mousePosition.x }}></div> */}
             {maskMode && <CircleIndicator position={mousePosition} diameter={brushSize} color={'white'} border_width={1} />}
             {maskMode && <CircleIndicator position={mousePosition} diameter={brushSize + 2} color={'black'} />}
-            {maskMode && <div className=" bg-white p-4 rounded shadow w-96">
+            {/* Brush size slider */}
+            {/* {maskMode && <div className=" bg-white p-4 rounded shadow w-96">
                 <input
                     type="range"
                     min="10"
@@ -123,7 +124,8 @@ const MaskedCanvas = ({ canvasRef, image, reset = true, maskMode = false, maskIm
                     className="w-full"
                 />
                 <div className="text-center mt-2">Brush Size: {brushSize}px</div>
-            </div>}
+            </div>
+            } */}
         </>
     );
 };

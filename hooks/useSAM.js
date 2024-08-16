@@ -36,7 +36,7 @@ export default function useSAM() {
 
     const processSAM = async (canvas,) => {
         // if (!file) return
-        if (!canvas) return
+        if (!canvas) return new Error('No canvas provided')
         if (SAMPositions.length === 0 && SAMIgnorePositions.length === 0) { console.log('SAM: No position selected'); return }
         const dataURL = canvas.toDataURL('image/png');
         const file = dataURLtoFile(dataURL, `canvas.png`);

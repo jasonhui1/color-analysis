@@ -1,22 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 
-import HighlightHoveringColorCanvas, { processImageColors } from "../../Components/Canvas/FilterCanvas";
 
 import GoogleLogin from "../../Components/Auth/GoogleLogin";
-import Canvas from "../../Components/Canvas/Canvas";
-import FileUpload from "../../Components/Form/FileUpload";
-import MaskedCanvas from "../../Components/Canvas/MaskedCanvas";
 
 import { Form } from "../../Components/Form/Form";
-import { MaskUI } from "../../Components/Canvas/MaskUI";
-import SAMCanvas from "../../Components/Canvas/SAMCanvas";
-import { invertImageAlpha, processCanvas } from "../../utils/canvas";
-import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
-import useCanvas from "@/hooks/useCanvas";
-import useSAM from "@/hooks/useSAM";
-import { useMaskUI } from "@/hooks/useMaskUI";
-import { useColorPalette } from "@/hooks/useColorPalette";
-import { loadImage } from "@/utils/image";
+import { ColorPicker } from "@/Components/Color/picker";
+
 import ImageEditor from "@/Components/ImageEditor";
 import Link from "@/node_modules/next/link";
 
@@ -39,6 +28,8 @@ const ColorAnalysis = () => {
     const [hoveringColor, setHoveringColor] = useState();
 
     const [invertMask, setInvertMask] = useState(false);
+    const [onlyHighlightMask, setOnlyHighlightMask] = useState(true);
+
 
     const resetForm = (img, file, url) => {
         setFormResetToggle(state => !state);
@@ -64,6 +55,7 @@ const ColorAnalysis = () => {
                     hoveringColor={hoveringColor} setSelectedColor={setSelectedColor}
                     colorPalette={colorPalette} ignorePalette={ignorePalette}
                     invertMask={invertMask} setInvertMask={setInvertMask}
+                    onlyHighlightMask={onlyHighlightMask}
                 />
 
                 <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} />
@@ -76,6 +68,7 @@ const ColorAnalysis = () => {
                     imageSourceURL={imageSourceURL} setImageSourceURL={setImageSourceURL}
                     colorPalette={colorPalette} setColorPalette={setColorPalette}
                     ignorePalette={ignorePalette} setIgnorePalette={setIgnorePalette}
+                    onlyHighlightMask={onlyHighlightMask} setOnlyHighlightMask={setOnlyHighlightMask}
                     formReset={formResetToggle}
                 />
             </div>
