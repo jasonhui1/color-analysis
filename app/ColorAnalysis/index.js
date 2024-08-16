@@ -18,6 +18,7 @@ import { useMaskUI } from "@/hooks/useMaskUI";
 import { useColorPalette } from "@/hooks/useColorPalette";
 import { loadImage } from "@/utils/image";
 import ImageEditor from "@/Components/ImageEditor";
+import Link from "@/node_modules/next/link";
 
 
 const ColorAnalysis = () => {
@@ -49,11 +50,10 @@ const ColorAnalysis = () => {
     }
 
     return (
-        <div className="p-4">
-            <GoogleLogin />
-            <h1 className="text-2xl font-bold mb-4">
-                Color Analysis
-            </h1>
+        <div className="p-4 ">
+
+            <Header />
+
 
             {/* {image && ( */}
             <div className="flex flex-row gap-6 relative mb-3 " >
@@ -84,3 +84,20 @@ const ColorAnalysis = () => {
     );
 };
 export default ColorAnalysis;
+
+
+
+function Header() {
+    return (
+        <div className="flex justify-between mb-2">
+            <h1 className="text-2xl font-bold mb-4">
+                Color Analysis
+            </h1>
+            <div className="flex gap-2 items-center">
+
+                <Link href="/data" className="text-blue-500 hover:text-blue-700 bg-gray-200 px-2 py-1 rounded-md">View Data</Link>
+                <GoogleLogin />
+            </div>
+        </div>
+    );
+}

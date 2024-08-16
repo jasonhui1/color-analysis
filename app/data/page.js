@@ -13,6 +13,7 @@ import { calculateBrightness, sortPaletteAndPercentage } from '../../utils/color
 import { useInView, InView } from 'react-intersection-observer';
 import { createImageFromUrl } from '../../utils/canvas';
 import MaskedCanvas from '../../Components/Canvas/MaskedCanvas';
+import Link from '@/node_modules/next/link';
 
 
 
@@ -100,7 +101,15 @@ export default function DataPage() {
   // const searchTags = finalSearchTerm.trim().split(' ').map(tag => tag.trim())
   return (
     <div className='flex flex-col gap-4 relative'>
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
+
+      <Header
+        searchTerm={searchTerm}
+        setFinalSearchTerm={setFinalSearchTerm}
+        setSearchTerm={setSearchTerm}
+      />
+
+
+
       <div className='fixed right-0 top-1/4 '>
         <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} />
       </div>
@@ -124,6 +133,7 @@ export default function DataPage() {
     </div>
   )
 }
+
 
 const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData, reset, enable, onClickTag, onPaletteColorHover, onPaletteColorUnHover, onPaletteClick }) => {
   const { palette, ignorePalette = [], tags, percentage, imageURL, maskImageURL, imageSourceURL } = paletteData
@@ -197,13 +207,11 @@ const SearchBar = ({ searchTerm, setSearchTerm, setFinalSearchTerm }) => {
   }
 
   return (
-    <div className='w-full flex justify-center sticky top-0 bg-white z-10'>
 
-      <div className='flex gap-2 items-center border bg-gray-100 w-fit p-2 '>
-        <IoSearchOutline size={20} onClick={() => search(searchTerm)} cursor='pointer' />
-        <input className=' bg-inherit w-96 outline-none ' type='text' value={searchTerm} placeholder='Search Tags' onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyPress} />
-        {searchTerm && <CiCircleRemove size={20} cursor='pointer' onClick={() => { setSearchTerm(''); setFinalSearchTerm('') }} />}
-      </div>
+    <div className='flex gap-2 items-center border bg-gray-100 w-fit p-2 '>
+      <IoSearchOutline size={20} onClick={() => search(searchTerm)} cursor='pointer' />
+      <input className=' bg-inherit w-96 outline-none ' type='text' value={searchTerm} placeholder='Search Tags' onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyPress} />
+      {searchTerm && <CiCircleRemove size={20} cursor='pointer' onClick={() => { setSearchTerm(''); setFinalSearchTerm('') }} />}
     </div>
   )
 }
@@ -223,4 +231,17 @@ const TagsDisplay = ({ tags, onClickTag }) => {
       }
     </div>
   )
+}
+
+
+
+function Header({ searchTerm, setFinalSearchTerm, setSearchTerm }) {
+  return (
+    <div className='w-full flex justify-center sticky top-0 z-10 bg-white bg-opacity-80'>
+      <div className='flex-1 flex justify-center'>
+        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
+      </div>
+      <Link href='/' className='text-blue-500 hover:text-blue-700 bg-gray-200 px-2 py-1 rounded-md self-center'>Upload</Link>
+    </div>
+  );
 }

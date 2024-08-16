@@ -83,13 +83,15 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         onImageSelected(img, file, url)
     }
 
+    const maxSize = 640
+
 
 
     return (
         <div className="flex flex-col gap-3 min-w-fit">
             <div className="mb-4 relative  " ref={fileDropRef}  >
                 {/* Drag and drop within the same dimension as canvas */}
-                <div className={`${image ? 'absolute inset-0  pointer-events-none ' : ''} `} style={{ width: canvasRef?.current?.width ?? '720' + 'px', height: canvasRef?.current?.height ?? '720' + 'px' }}>
+                <div className={`${image ? 'absolute inset-0  pointer-events-none ' : ''} `} style={{ width: canvasRef?.current?.width ?? maxSize + 'px', height: canvasRef?.current?.height ?? maxSize + 'px' }}>
                     <FileUpload onImageSelected={handleImageSelection} imageSelected={image !== null} fileDropRef={fileDropRef} />
                 </div>
 

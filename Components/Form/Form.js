@@ -108,11 +108,11 @@ export function Form({ canvas, image, maskCanvas, invertMask,
 
 
             <div className="flex gap-4 items-center">
-                <TextInput classname="w-8" type="number" label={"Palette Count"} text={paletteCount} setText={setPaletteCount} />
+                <TextInput classname="w-8" type="number" label={"Palette Count"} text={paletteCount} setText={setPaletteCount} showBorder={false}/>
                 <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
                 {/* <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" /> */}
                 <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onCalculatePercentage()}> Calculate Percentage</button>
-                {!percentageIsAccurate && <CiWarning className="cursor-pointer" size={30} color="red" strokeWidth={1} onClick={() => onCalculatePercentage()} />}
+                {!percentageIsAccurate && <CiWarning className="cursor-pointer" size={20} color="red" strokeWidth={1} onClick={() => onCalculatePercentage()} />}
             </div>
 
 
