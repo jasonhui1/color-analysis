@@ -10,6 +10,7 @@ import { useColorPaletteInteractivity } from "@/hooks/useColorPalette";
 import { CiWarning } from "react-icons/ci";
 import ToggleComponent from "../General/ToggleComponent";
 import CheckBox from "../General/CheckBox";
+import TagInput from "./TagInput";
 
 
 export function Form({ canvas, image, maskCanvas, invertMask,
@@ -22,7 +23,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
     formReset
 }) {
 
-    const [tags, setTags] = useState('');
+    const [tags, setTags] = useState([]);
     const [percentage, setPercentage] = useState([]);
     const [paletteCount, setPaletteCount] = useState(12);
     const [percentageIsAccurate, setPercentageIsAccurate] = useState(false);
@@ -40,7 +41,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
 
     useEffect(() => {
         setPercentage([]);
-        setTags('');
+        setTags([]);
         setIgnorePalette([]);
     }, [formReset]);
 
@@ -146,7 +147,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
             </ToggleComponent>
             {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} highlightColor={hoveringColor} />}
 
-            <TextInput text={tags} setText={setTags} label='Tags' classname="min-w-96" />
+            <TagInput tags={tags} setTags={setTags} />
             <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' classname="min-w-96" />
 
 
@@ -166,3 +167,4 @@ export function Form({ canvas, image, maskCanvas, invertMask,
         </div>
     );
 }
+
