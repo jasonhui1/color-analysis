@@ -58,8 +58,10 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         const url = processCanvas({ canvas: canvasRef?.current, image, cropTransparent: true, useCurrentCanvas: false });
         const maskUrl = processCanvas({ canvas: maskedCanvasRef?.current, image, cropTransparent: true, useCurrentCanvas: true, isInverted: !invertMask });
 
-        const croppedImage = await loadImage(url);
-        const croppedMaskImage = await loadImage(maskUrl);
+        const [croppedImage, croppedMaskImage] = await Promise.all([
+            loadImage(url),
+            loadImage(maskUrl)
+        ]);
 
         setImage(croppedImage);
         setMaskImage(croppedMaskImage);
@@ -83,6 +85,15 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         resetSAM()
 
         onImageSelected(img, file, url)
+    }
+
+    const resetAll = () => {
+        updateCanvas();
+        updateMaskCanvas()
+        updateSAMCanvas()
+
+        resetMaskUI()
+        resetSAM()
     }
 
     const maxSize = 640

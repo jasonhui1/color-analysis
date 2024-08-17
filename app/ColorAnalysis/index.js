@@ -33,18 +33,13 @@ const ColorAnalysis = () => {
 
     const resetForm = (img, file, url) => {
         setFormResetToggle(state => !state);
-        if (url) {
-            setImageSourceURL(url);
-        } else {
-            setImageSourceURL('');
-        }
+        setImageSourceURL(url || '');
     }
 
     return (
         <div className="p-4 ">
 
             <Header />
-
 
             {/* {image && ( */}
             <div className="flex flex-row gap-6 relative mb-3 " >
