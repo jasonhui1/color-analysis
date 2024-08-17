@@ -1,17 +1,14 @@
-import ColorThief from "colorthief";
 import PaletteDisplay from "../../Components/Color/PaletteDisplay";
 import { useState, useEffect } from "react";
-import { calculateBrightness } from "../../utils/color";
 import { TriangularColorPickerDisplayColors } from "../Color/picker";
-import { processImageColors } from "../Canvas/FilterCanvas";
 import { TextInput } from "../General/TextInput";
 import { UploadButton } from "./UploadButton";
 import { useColorPaletteInteractivity } from "@/hooks/useColorPalette";
-import { CiWarning } from "react-icons/ci";
 import ToggleComponent from "../General/ToggleComponent";
 import CheckBox from "../General/CheckBox";
 import TagInput from "./TagInput";
-
+import { AnalysisColorButton } from "./AnalysisColorButton";
+import { CalulatePercentageButton } from "./CalulatePercentageButton";
 
 export function Form({ canvas, image, maskCanvas, invertMask,
     imageSourceURL, setImageSourceURL,
@@ -45,53 +42,6 @@ export function Form({ canvas, image, maskCanvas, invertMask,
         setIgnorePalette([]);
     }, [formReset]);
 
-    const analyzeColors = (img) => {
-        try {
-            const colorThief = new ColorThief();
-            let palette = colorThief.getPalette(img, paletteCount, 10);
-
-            palette.sort((a, b) => calculateBrightness(b) - calculateBrightness(a));
-            setColorPalette(palette);
-        } catch (error) {
-            console.error("Error analyzing colors:", error);
-        }
-    };
-
-    const reAnalysis = () => {
-        if (!canvas) return
-
-        const url = canvas.toDataURL();
-        const myImage = new Image();
-        myImage.src = url;
-
-        // setMaskDataUrl(url);
-        myImage.onload = () => {
-            analyzeColors(myImage);
-        };
-    };
-
-    const onCalculatePercentage = () => {
-        const image = canvas
-        if (!image) return
-
-        const counter = {}
-        let totalPixels = 0
-        processImageColors(image, [...colorPalette, ...ignorePalette], ({ nearestColor, alpha }) => {
-            if (alpha === 0) return
-            totalPixels += 1
-            counter[nearestColor] = (counter[nearestColor] || 0) + 1
-        });
-
-        // Subtract ignored colors pixels
-        ignorePalette.forEach((color) => totalPixels -= counter[color])
-
-        setPercentage(colorPalette.map((color) => (
-            Math.round((counter[color] / totalPixels) * 100)
-        )))
-
-        setPercentageIsAccurate(true);
-
-    }
 
     const removePercentage = (index) => {
         setPercentage(percentage.filter((_, i) => i !== index));
@@ -115,11 +65,9 @@ export function Form({ canvas, image, maskCanvas, invertMask,
 
             <div className="flex gap-4 items-center flex-wrap">
                 <TextInput classname="w-8" type="number" label={"Palette Count"} text={paletteCount} setText={setPaletteCount} showBorder={false} />
-                <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => reAnalysis()}> Analysis Palette</button>
+                <AnalysisColorButton canvas={canvas} paletteCount={paletteCount} setColorPalette={setColorPalette} />
+                <CalulatePercentageButton canvas={canvas} colorPalette={colorPalette} ignorePalette={ignorePalette} setPercentage={setPercentage} percentageIsAccurate={percentageIsAccurate} setPercentageIsAccurate={setPercentageIsAccurate} />
                 {/* <CheckBox checked={autoAnalysis} onChange={() => setAutoAnalysis(!autoAnalysis)} label="Auto analysis" /> */}
-                <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-fit" onClick={() => onCalculatePercentage()}> Calculate Percentage</button>
-                {!percentageIsAccurate && <CiWarning className="cursor-pointer" size={20} color="red" strokeWidth={1} onClick={() => onCalculatePercentage()} />}
-
             </div>
 
             <CheckBox label="Highlight only mask" checked={onlyHighlightMask} onChange={() => setOnlyHighlightMask(!onlyHighlightMask)} />
