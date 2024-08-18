@@ -1,3 +1,4 @@
+import { getTagsClient } from '@/lib/clientApis/tags'
 import { useEffect, useState } from 'react'
 
 const useTags = () => {
@@ -7,12 +8,11 @@ const useTags = () => {
     useEffect(() => {
         const getTags = async () => {
             setLoading(true)
-            const { data } = await fetch('/api/tags').then(res => res.json())
+            const data  = await getTagsClient()
 
             const tags = data.map(tag => tag.tag)
             setLoading(false)
             setTags(tags)
-            console.log('tags :>> ', tags);
         }
 
         getTags()
