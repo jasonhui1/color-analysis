@@ -25,7 +25,7 @@ export default async function handler(req, res) {
         }
 
     } else if (req.method === 'GET') {
-        const { limit, userId, withTags, searchTerm, imageMaxWidth, imageMaxHeight } = req.query;
+        const { limit, userId, withTags, searchTags, imageMaxWidth, imageMaxHeight } = req.query;
 
         if (!userId) {
             return res.status(400).json({ error: 'Not login' });
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
             limit: limit ? parseInt(limit) : Infinity,
             userId,
             withTags: withTags === 'true',
-            searchTags: searchTerm?.split(' ').map(tag => tag.trim()) ?? []
+            searchTags: searchTags?.split(',').map(tag => tag.trim()) ?? []
         };
 
         try {

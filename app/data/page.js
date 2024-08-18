@@ -14,6 +14,10 @@ import { useInView, InView } from 'react-intersection-observer';
 import { createImageFromUrl } from '../../utils/canvas';
 import MaskedCanvas from '../../Components/Canvas/MaskedCanvas';
 import Link from '@/node_modules/next/link';
+import useTags from '@/hooks/useTags';
+import { useTagSuggestion } from '@/hooks/useTagSuggestion';
+import { TagsSuggestion } from '@/Components/Form/TagsSuggestion';
+import { TagsDisplay } from '@/Components/Form/TagsDisplay';
 
 
 
@@ -36,6 +40,7 @@ export default function DataPage() {
 
   const maxSize = 250
 
+  const [searchTags, setSearchTags] = useState([]);
 
   useEffect(() => {
     // add or remove refs
@@ -59,8 +64,7 @@ export default function DataPage() {
 
   async function getData() {
     setLoading(true)
-    const userId = await getUserId()
-    const data = await getPaletteClient({ userId, withTags: true, searchTerm: finalSearchTerm, imageMaxWidth: maxSize, imageMaxHeight: maxSize })
+    const data = await getPaletteClient({ withTags: true, searchTags: searchTags, imageMaxWidth: maxSize, imageMaxHeight: maxSize })
     if (data && data.palette) {
       if (data.percentage === undefined) data.percentage = []
     }
@@ -70,7 +74,7 @@ export default function DataPage() {
 
   useEffect(() => {
     getData()
-  }, [finalSearchTerm])
+  }, [searchTags])
 
   const onClickTag = (tag) => {
     setSearchTerm(searchTerm + ' ' + tag)
@@ -106,9 +110,9 @@ export default function DataPage() {
         searchTerm={searchTerm}
         setFinalSearchTerm={setFinalSearchTerm}
         setSearchTerm={setSearchTerm}
+        tags={searchTags}
+        setTags={setSearchTags}
       />
-
-
 
       <div className='fixed right-0 top-1/4 '>
         <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} />
@@ -178,7 +182,7 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
               />
 
             </div>
-            <TagsDisplay tags={tags} onClickTag={onClickTag} />
+            <ImageTagsDisplay tags={tags} onClickTag={onClickTag} />
           </div>
 
           <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} highlightColor={hoveringColor} />
@@ -217,17 +221,17 @@ const SearchBar = ({ searchTerm, setSearchTerm, setFinalSearchTerm }) => {
 }
 
 
-const TagDisplay = ({ tag, onClick }) => {
+const ImageTagDisplay = ({ tag, onClick }) => {
   return (
     <div className='bg-gray-200 px-2 py-1 rounded-md cursor-pointer text-sm' onClick={onClick}>{tag}</div>
   )
 }
 
-const TagsDisplay = ({ tags, onClickTag }) => {
+const ImageTagsDisplay = ({ tags, onClickTag }) => {
   return (
     <div className='flex gap-2 flex-wrap'>
       {tags && tags.map((tag, index) =>
-        <TagDisplay key={index} tag={tag} onClick={() => onClickTag(tag)} />)
+        <ImageTagDisplay key={index} tag={tag} onClick={() => onClickTag(tag)} />)
       }
     </div>
   )
@@ -235,11 +239,29 @@ const TagsDisplay = ({ tags, onClickTag }) => {
 
 
 
-function Header({ searchTerm, setFinalSearchTerm, setSearchTerm }) {
+function Header({ tags, setTags, searchTerm, setFinalSearchTerm, setSearchTerm }) {
+
+  const { tags: all_tags, loading: loadingTags } = useTags()
+  const { suggestions, selectedIndex, onKeyDown, onClickSuggestion } = useTagSuggestion({
+    input: searchTerm, setInput: setSearchTerm,
+    all_tags, currentTags: tags, setCurrentTags: setTags
+  })
+
+  const removeTag = (tag) => {
+    setTags(tags.filter(t => t !== tag))
+  }
+
   return (
     <div className='w-full flex justify-center sticky top-0 z-10 bg-white bg-opacity-80'>
-      <div className='flex-1 flex justify-center'>
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
+      <div className='flex-1 flex justify-center' onKeyDown={onKeyDown}>
+        <div className="flex flex-col gap-2 relative" >
+          <div className="flex flex-wrap gap-2 mb-2">
+
+            <TagsDisplay tags={tags} onRemove={removeTag} />
+            <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
+          </div>
+          <TagsSuggestion suggestions={suggestions} selectedIndex={selectedIndex} onClickSuggestion={onClickSuggestion} className='top-12' />
+        </div>
       </div>
       <Link href='/' className='text-blue-500 hover:text-blue-700 bg-gray-200 px-2 py-1 rounded-md self-center'>Upload</Link>
     </div>
