@@ -29,7 +29,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
         onPaletteColorUnHover,
         onPaletteColorDelete,
         onPaletteColorClick
-    } = useColorPaletteInteractivity({ setPalette: setColorPalette, setSelectedColor, setHoveringColor });
+    } = useColorPaletteInteractivity({ setPalette: setColorPalette, setSelectedColor, setHoveringColor, });
 
     const {
         onPaletteColorDelete: onIgnorePaletteColorDelete,
@@ -79,6 +79,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
                 onPaletteColorUnHover={onPaletteColorUnHover}
                 onPaletteColorDelete={onDeletePaletteColor}
                 onPaletteColorClick={onPaletteColorClick}
+                onPaletteColorEdit={() => setPercentageIsAccurate(false)}
                 selectedColor={selectedColor}
             />
 
@@ -89,6 +90,8 @@ export function Form({ canvas, image, maskCanvas, invertMask,
                     onPaletteColorUnHover={onPaletteColorUnHover}
                     onPaletteColorDelete={onDeleteIgnorePaletteColor}
                     onPaletteColorClick={onPaletteColorClick}
+                    onPaletteColorEdit={() => setPercentageIsAccurate(false)}
+
                     selectedColor={selectedColor}
                     title="Ignore Palette"
                 />

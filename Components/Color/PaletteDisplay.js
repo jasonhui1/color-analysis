@@ -1,7 +1,7 @@
 import { MdOutlineEdit } from "react-icons/md";
 import { FaDeleteLeft } from "react-icons/fa6";
 import { useEffect, useState } from "react";
-import { calculateBrightness } from "../../utils/color";
+import { calculateBrightness, isColorEqual } from "../../utils/color";
 import { TbPencilCancel } from "react-icons/tb";
 import { IoMdAdd } from "react-icons/io";
 
@@ -10,6 +10,7 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
     onPaletteColorUnHover,
     onPaletteColorDelete,
     onPaletteColorClick,
+    onPaletteColorEdit = () => {},
     selectedColor,
     title = "Color Palette",
 }) {
@@ -21,7 +22,10 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
         if (selectedColor && isEditing) {
             const newPalette = [...colorPalette];
             newPalette[hoveringIndex] = selectedColor;
+            if (isColorEqual(newPalette[hoveringIndex], colorPalette[hoveringIndex])) return
+
             setColorPalette(newPalette);
+            onPaletteColorEdit()
             // setIsEditing(false);
             // setHoveringIndex(-1);
 
