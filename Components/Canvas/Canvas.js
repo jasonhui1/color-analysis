@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { calculateCanvasSize } from "../../utils/canvas";
 
 
-export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage, SAMImage,
-    maskMode, SAMMode, enableMask, invertMask, maskDrawingComplete,
+export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage,
+    maskMode = false, enableMask, invertMask = false,
     setSelectedColor,
     maxSize = 640,
 }) {
@@ -42,7 +42,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
 
             setDrawingComplete(true)
         }
-    }, [canvasRef, image, reset, maskMode, enableMask, invertMask, SAMMode]);
+    }, [canvasRef, image, reset, maskMode, enableMask, invertMask]);
     // }, [canvasRef, image, reset, maskMode, maskedImage?.width, maskedImage?.height, enableMask, invertMask]);
 
 

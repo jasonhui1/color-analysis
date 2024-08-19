@@ -131,10 +131,10 @@ export function PaletteDisplaySimple({ colorPalette, }) {
 }
 
 
-export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPaletteColorUnHover, onPaletteClick, colorPalettePercentage = [], showHeading = true }) {
+export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPaletteColorUnHover, onPaletteColorClick, colorPalettePercentage = [], showHeading = true }) {
 
     return (
-        <div className="mt-4">
+        <div>
             {showHeading && <h2 className="text-xl font-semibold mb-2">Color Palette</h2>}
             <div className="flex gap-4">
                 {colorPalette.map((color, index) => (

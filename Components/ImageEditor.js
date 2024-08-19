@@ -114,7 +114,6 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                         <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={canvasReset}
                             maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
                             setSelectedColor={setSelectedColor}
-                            SAMImage={SAMCanvasRef.current} SAMMode={SAMMode} maskDrawingComplete={maskDrawingComplete}
                         />
                         <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} maskImage={maskImage} reset={maskReset} maskMode={maskMode}
                             setDrawingComplete={setMaskDrawingComplete}

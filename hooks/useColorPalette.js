@@ -1,7 +1,7 @@
 import { isColorEqual } from "@/utils/color";
 import { useState } from "react";
 
-export function useColorPaletteInteractivity({ setPalette, setHoveringColor = null, setSelectedColor = null, onHover = () => { }, onUnhover = () => { }, onDelete = () => { }, onClick = () => { } }) {
+export function useColorPaletteInteractivity({ setPalette = null, setHoveringColor = null, setSelectedColor = null, onHover = () => { }, onUnhover = () => { }, onDelete = () => { }, onClick = () => { } } = {}) {
 
     const onPaletteColorHover = (color) => {
         if (setHoveringColor) setHoveringColor(color);

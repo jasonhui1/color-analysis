@@ -40,27 +40,6 @@ export default async function handler(req, res) {
 
         try {
             const data = await getPalette(options);
-            // Request url at specific size and keep aspect ratio
-            if (imageMaxWidth && imageMaxHeight) {
-
-                data.forEach((data) => {
-                    const { imageURL, maskImageURL } = data
-
-                    if (imageURL && imageMaxWidth && imageMaxHeight) {
-                        const parts = imageURL.split("/image/upload/")
-                        const arg = `w_${imageMaxWidth},h_${imageMaxHeight},c_limit/`
-                        const combinedURL = `${parts[0]}/image/upload/${arg}${parts[1]}`
-                        data.imageURL = combinedURL
-                    }
-
-                    if (maskImageURL && imageMaxWidth && imageMaxHeight) {
-                        const parts = maskImageURL.split("/image/upload/")
-                        const arg = `w_${imageMaxWidth},h_${imageMaxHeight},c_limit/`
-                        const combinedURL = `${parts[0]}/image/upload/${arg}${parts[1]}`
-                        data.maskImageURL = combinedURL
-                    }
-                })
-            }
             res.status(200).json(data);
         } catch (error) {
             console.error('Get palette error:', error);
