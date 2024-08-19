@@ -27,7 +27,7 @@ export default function DataPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [finalSearchTerm, setFinalSearchTerm] = useState('');
+  const [searchToggle, setSearchToggle] = useState(true);
 
   const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
   const [hoveringColor, setHoveringColor] = useState(null);
@@ -73,11 +73,14 @@ export default function DataPage() {
   }
 
   useEffect(() => {
+    if (!searchToggle) return
     getData()
-  }, [searchTags])
+    setSearchToggle(false);
+  }, [searchToggle])
 
   const onClickTag = (tag) => {
-    setSearchTerm(searchTerm + ' ' + tag)
+    if (searchTags.includes(tag)) return
+    setSearchTags([...searchTags, tag])
   }
 
   // const onDeleteTag = (tag) => {
@@ -108,7 +111,7 @@ export default function DataPage() {
 
       <Header
         searchTerm={searchTerm}
-        setFinalSearchTerm={setFinalSearchTerm}
+        onSearch={() => setSearchToggle(true)}
         setSearchTerm={setSearchTerm}
         tags={searchTags}
         setTags={setSearchTags}
@@ -199,23 +202,19 @@ const Row = ({ canvasRef, canvasHLRef, maskCanvasRef, hoveringColor, paletteData
   )
 }
 
-const SearchBar = ({ searchTerm, setSearchTerm, setFinalSearchTerm }) => {
+const SearchBar = ({ searchTerm, setSearchTerm, onSearch }) => {
   const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      search(searchTerm)
+    if (event.key === 'Enter' && !searchTerm) {
+      onSearch()
     }
-  }
-
-  const search = (searchTerm) => {
-    setFinalSearchTerm(searchTerm)
   }
 
   return (
 
     <div className='flex gap-2 items-center border bg-gray-100 w-fit p-2 '>
-      <IoSearchOutline size={20} onClick={() => search(searchTerm)} cursor='pointer' />
+      <IoSearchOutline size={20} onClick={onSearch} cursor='pointer' />
       <input className=' bg-inherit w-96 outline-none ' type='text' value={searchTerm} placeholder='Search Tags' onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyPress} />
-      {searchTerm && <CiCircleRemove size={20} cursor='pointer' onClick={() => { setSearchTerm(''); setFinalSearchTerm('') }} />}
+      {searchTerm && <CiCircleRemove size={20} cursor='pointer' onClick={() => { setSearchTerm('') }} />}
     </div>
   )
 }
@@ -239,7 +238,7 @@ const ImageTagsDisplay = ({ tags, onClickTag }) => {
 
 
 
-function Header({ tags, setTags, searchTerm, setFinalSearchTerm, setSearchTerm }) {
+function Header({ tags, setTags, searchTerm, onSearch, setSearchTerm }) {
 
   const { tags: all_tags, loading: loadingTags } = useTags()
   const { suggestions, selectedIndex, onKeyDown, onClickSuggestion } = useTagSuggestion({
@@ -258,7 +257,7 @@ function Header({ tags, setTags, searchTerm, setFinalSearchTerm, setSearchTerm }
           <div className="flex flex-wrap gap-2 mb-2">
 
             <TagsDisplay tags={tags} onRemove={removeTag} />
-            <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFinalSearchTerm={setFinalSearchTerm} />
+            <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={onSearch} />
           </div>
           <TagsSuggestion suggestions={suggestions} selectedIndex={selectedIndex} onClickSuggestion={onClickSuggestion} className='top-12' />
         </div>
