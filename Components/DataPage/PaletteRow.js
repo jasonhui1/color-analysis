@@ -10,6 +10,7 @@ import MaskedCanvas from '../../Components/Canvas/MaskedCanvas';
 import { ImageTagsDisplay } from './ImageTagsDisplay';
 import { setImageURL } from '@/lib/cloudinary/utils';
 import { MdOutlineZoomOutMap } from "react-icons/md";
+import { deletePaletteClient } from '@/lib/clientApis/palette';
 
 export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
     hoveringColor, paletteData,
@@ -17,7 +18,7 @@ export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
     onClickTag, onPaletteColorHover, onPaletteColorUnHover, onPaletteColorClick,
     setEnlargeIndex }) => {
 
-    const { palette, ignorePalette = [], tags, percentage, imageURL, maskImageURL, imageSourceURL } = paletteData
+    const { id: paletteId, palette, ignorePalette = [], tags, percentage, imageURL, maskImageURL, imageSourceURL } = paletteData
     // console.log(cloudinary.url(imageURL, { width: 100, height: 150, crop: "fill", fetch_format: "auto" }))
     // console.log('imageURL, maskImageURL :>> ', imageURL, maskImageURL);
 
@@ -73,6 +74,9 @@ export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
                         onPaletteColorUnHover={onPaletteColorUnHover}
                         onPaletteColorClick={onPaletteColorClick}
                     />
+
+                    {/* Need more safety steps before deploy */}
+                    {/* <button onClick={() => deletePaletteClient({ paletteId })}>X</button> */}
 
                 </>)
             }
