@@ -1,10 +1,10 @@
 
-export const TagsSuggestion = ({ suggestions, selectedIndex, onClickSuggestion ,className='' }) => {
+export const TagsSuggestion = ({ suggestions, selectedIndex, onClickSuggestion, input, className = '' }) => {
     return (
         <>
-            {suggestions.length > 0 && (
-                <ul className={"absolute z-10 w-full bg-white border rounded " + className}>
-                    {suggestions.map((suggestion, index) => (
+            <ul className={"absolute z-10 w-full bg-white border rounded " + className}>
+                {suggestions.length > 0 ? (
+                    suggestions.map((suggestion, index) => (
                         <li
                             key={index}
                             onClick={() => onClickSuggestion(suggestion)}
@@ -12,9 +12,9 @@ export const TagsSuggestion = ({ suggestions, selectedIndex, onClickSuggestion ,
                         >
                             {suggestion}
                         </li>
-                    ))}
-                </ul>
-            )}
+                    ))
+                ) : <li className={`p-2 bg-gray-100`} onClick={() => onClickSuggestion(input)}>Add new</li>}
+            </ul>
         </>
     );
 

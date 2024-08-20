@@ -10,6 +10,7 @@ async function addPaletteData({ palette, imageURL, userId, imageSourceURL, maskI
     }
 
     console.log('upload palette success :>> ');
+    return paletteId
 }
 
 async function POSTHandler(req, res) {

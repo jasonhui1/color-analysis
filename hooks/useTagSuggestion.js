@@ -3,29 +3,40 @@ import { useEffect, useState } from "react"
 export function useTagSuggestion({ input, setInput, all_tags, currentTags, setCurrentTags }) {
     const [suggestions, setSuggestions] = useState([])
     const [selectedIndex, setSelectedIndex] = useState(0)
+    const [show, setShow] = useState(false)
 
     useEffect(() => {
         const value = input.trim()
-        if (!value) { setSuggestions([]); return }
+        if (!value) { setSuggestions([]); setShow(false); return }
 
-        const filtered = all_tags.filter(tag =>
+        let filtered = all_tags.filter(tag =>
             tag.toLowerCase().includes(value.toLowerCase()) && !currentTags.includes(tag)
         );
 
         setSuggestions(filtered);
         setSelectedIndex(0)
+        setShow(true)
     }, [input]);
 
+    const onFocus = () => {
+        if (input.trim()) setShow(true)
+    }
+
+    const onBlur = () => {
+        // Debounce, click does not fire otherwise
+        let timeout = setTimeout(() => {
+            setShow(false)
+            clearTimeout(timeout);
+        }, 100);
+    }
 
     const onKeyDown = (e) => {
         if (e.key === 'Enter') {
             if (suggestions[selectedIndex]) {
-                onClickSuggestion(suggestions[selectedIndex])
+                addTag(suggestions[selectedIndex])
             } else {
-                if (input) setCurrentTags([...currentTags, input])
+                addTag(input)
             }
-            setInput('')
-            setSuggestions([])
         }
 
         if (e.key === 'ArrowDown') {
@@ -40,11 +51,11 @@ export function useTagSuggestion({ input, setInput, all_tags, currentTags, setCu
     }
 
 
-    const onClickSuggestion = (suggestion) => {
+    const addTag = (suggestion) => {
         setInput('')
         setCurrentTags([...currentTags, suggestion])
     }
 
-    return { suggestions, selectedIndex, onKeyDown, onClickSuggestion }
+    return { suggestions, selectedIndex, onKeyDown, addTag, show, onFocus, onBlur }
 
 }
