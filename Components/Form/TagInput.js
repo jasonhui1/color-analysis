@@ -8,7 +8,7 @@ import { TagsSuggestion } from "./TagsSuggestion";
 const TagInput = ({ tags, setTags }) => {
     const { tags: all_tags, loading } = useTags()
     const [currentInput, setCurrentInput] = useState('')
-    const { suggestions, selectedIndex, onKeyDown, addTag, show: showSuggestions, onFocus, onBlur } = useTagSuggestion({
+    const { suggestions, selectedIndex, onKeyDown, addTag, show: showSuggestions, onFocus, onBlur, onHover } = useTagSuggestion({
         input: currentInput, setInput: setCurrentInput,
         all_tags, currentTags: tags, setCurrentTags: setTags
     })
@@ -27,7 +27,7 @@ const TagInput = ({ tags, setTags }) => {
                 <TagsDisplay tags={tags} onRemove={removeTag} />
                 <TextInput text={currentInput} setText={setCurrentInput} label="Tag" />
             </div>
-            {showSuggestions && <TagsSuggestion suggestions={suggestions} selectedIndex={selectedIndex} onClickSuggestion={addTag} input={currentInput} />}
+            {showSuggestions && <TagsSuggestion suggestions={suggestions} selectedIndex={selectedIndex} onClickSuggestion={addTag} onHover={onHover}input={currentInput} />}
 
         </div>
 

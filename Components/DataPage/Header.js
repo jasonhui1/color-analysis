@@ -9,9 +9,10 @@ import { SearchBar } from './SearchBar';
 export function Header({ tags, setTags, searchTerm, onSearch, setSearchTerm }) {
 
   const { tags: all_tags, loading: loadingTags } = useTags()
-  const { suggestions, selectedIndex, onKeyDown, addTag, onBlur, onFocus, show: showSuggestions } = useTagSuggestion({
+  const { suggestions, selectedIndex, onKeyDown, addTag, onBlur, onFocus, onHover, show: showSuggestions } = useTagSuggestion({
     input: searchTerm, setInput: setSearchTerm,
-    all_tags, currentTags: tags, setCurrentTags: setTags
+    all_tags, currentTags: tags, setCurrentTags: setTags,
+    enableNewTag: false
   })
 
   const removeTag = (tag) => {
@@ -27,7 +28,7 @@ export function Header({ tags, setTags, searchTerm, onSearch, setSearchTerm }) {
             <TagsDisplay tags={tags} onRemove={removeTag} />
             <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={onSearch} />
           </div>
-          {showSuggestions && <TagsSuggestion suggestions={suggestions} selectedIndex={selectedIndex} onClickSuggestion={addTag} input={searchTerm} className='top-12' />}
+          {showSuggestions && <TagsSuggestion suggestions={suggestions} selectedIndex={selectedIndex} onClickSuggestion={addTag} onHover={onHover} enableNewTag={false} className='top-12' />}
         </div>
       </div>
       <Link href='/' className='text-blue-500 hover:text-blue-700 bg-gray-200 px-2 py-1 rounded-md self-center'>Upload</Link>

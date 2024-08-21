@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-export function useTagSuggestion({ input, setInput, all_tags, currentTags, setCurrentTags }) {
+export function useTagSuggestion({ input, setInput, all_tags, currentTags, setCurrentTags, enableNewTag = true }) {
     const [suggestions, setSuggestions] = useState([])
     const [selectedIndex, setSelectedIndex] = useState(0)
     const [show, setShow] = useState(false)
@@ -30,12 +30,16 @@ export function useTagSuggestion({ input, setInput, all_tags, currentTags, setCu
         }, 100);
     }
 
+    const onHover = (index) => {
+        setSelectedIndex(index)
+    }
+
     const onKeyDown = (e) => {
         if (e.key === 'Enter') {
             if (suggestions[selectedIndex]) {
                 addTag(suggestions[selectedIndex])
             } else {
-                addTag(input)
+                if (enableNewTag) addTag(input)
             }
         }
 
@@ -56,6 +60,6 @@ export function useTagSuggestion({ input, setInput, all_tags, currentTags, setCu
         setCurrentTags([...currentTags, suggestion])
     }
 
-    return { suggestions, selectedIndex, onKeyDown, addTag, show, onFocus, onBlur }
+    return { suggestions, selectedIndex, onKeyDown, addTag, show, onFocus, onBlur, onHover }
 
 }
