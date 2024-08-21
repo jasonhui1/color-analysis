@@ -43,6 +43,10 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
 
 
     useEffect(() => {
+        if (drawingComplete) updateSobelCanvas()
+    }, [drawingComplete]);
+
+    useEffect(() => {
         if (maskDrawingComplete && enableMask) updateCanvas()
     }, [maskDrawingComplete]);
 

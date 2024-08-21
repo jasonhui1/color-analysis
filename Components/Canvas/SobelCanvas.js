@@ -19,16 +19,14 @@ export default function SobelCanvas({ canvasRef, imageCanvas, reset, enabled = t
     }, [imageCanvas?.width, imageCanvas?.height]);
 
     useEffect(() => {
-
-        // does not trigger update when mask update
-        if (enabled) {
-            // if (enabled && !calculated) {
+        if (enabled && !calculated) {
             applySobelFilter();
         }
     }, [enabled]);
 
     useEffect(() => {
         setCalculated(false);
+        if (enabled) applySobelFilter()
     }, [reset]);
 
     const applySobelFilter = () => {
