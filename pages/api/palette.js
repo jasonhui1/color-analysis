@@ -2,8 +2,8 @@ import { deleteImage } from "@/lib/cloudinary/image";
 import { addPalette, deletePalette, getPalette, updatePalette } from "../../lib/db/palette";
 import { addTagsToPalette, linkPaletteTags } from "../../lib/db/tags";
 
-async function addPaletteData({ palette, imageURL, userId, imageSourceURL, maskImageURL, tags }) {
-    const paletteId = await addPalette({ palette, imageURL, userId, imageSourceURL, maskImageURL });
+async function addPaletteData({ id = null, palette, imageURL, userId, imageSourceURL, maskImageURL, tags }) {
+    const paletteId = await addPalette({ id, palette, imageURL, userId, imageSourceURL, maskImageURL });
     if (tags) {
         const tags_ = await addTagsToPalette({ userId, tags });
         await linkPaletteTags({ paletteId, tags: tags_ });
@@ -70,7 +70,7 @@ async function UPDATEHandler(req, res) {
         // }
 
         await deletePalette({ userId, paletteId });
-        const newPaletteId = await addPaletteData({ palette, imageURL, userId, imageSourceURL, maskImageURL, tags });
+        const newPaletteId = await addPaletteData({ id: paletteId, palette, imageURL, userId, imageSourceURL, maskImageURL, tags });
 
         console.log('upload palette success :>> ');
         res.status(200).json({ newPaletteId });
