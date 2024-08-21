@@ -1,10 +1,10 @@
 import useCanvas from "@/hooks/useCanvas";
 import { useMaskUI } from "@/hooks/useMaskUI";
 import useSAM from "@/hooks/useSAM";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { invertImageAlpha, processCanvas } from "@/utils/canvas";
 import { loadImage } from "@/utils/image";
-import { MaskUI } from "./Canvas/MaskUI";
+import { MaskEnableButton, MaskUI } from "./Canvas/MaskUI";
 import Canvas from "./Canvas/Canvas";
 import HighlightHoveringColorCanvas from "./Canvas/FilterCanvas";
 import MaskedCanvas from "./Canvas/MaskedCanvas";
@@ -13,6 +13,7 @@ import FileUpload from "./Form/FileUpload";
 import CheckBox from "./General/CheckBox";
 import ToggleComponent from "./General/ToggleComponent";
 import SAMUI from "./Canvas/SAMUI";
+import SobelCanvas from "./Canvas/SobelCanvas";
 
 const ImageEditor = ({ canvasRef, maskedCanvasRef,
     image, setImage, maskImage, setMaskImage, onImageSelected,
@@ -25,6 +26,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
     const { reset: maskReset, drawingComplete: maskDrawingComplete, setDrawingComplete: setMaskDrawingComplete, update: updateMaskCanvas } = useCanvas()
     const { ref: highlightCanvasRef, reset: highlightReset, drawingComplete: HighlightDrawingComplete, setDrawingComplete: setHighlightDrawingComplete, update: updateHighlightCanvas } = useCanvas()
     const { ref: SAMCanvasRef, reset: SAMReset, update: updateSAMCanvas } = useCanvas()
+    const { ref: sobelCanvasRef, reset: sobelReset, update: updateSobelCanvas } = useCanvas()
 
     const fileDropRef = useRef(null);
     const { enableMask, setEnableMask, maskMode, setMaskMode, reset: resetMaskUI } = useMaskUI();
@@ -36,6 +38,8 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         SAMMode, setSAMMode,
         reconnectSAM, SAMconnected, processSAM
     } = useSAM();
+
+    const [enableSobel, setEnableSobel] = useState(false);
 
 
     useEffect(() => {
@@ -66,34 +70,28 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         setImage(croppedImage);
         setMaskImage(croppedMaskImage);
 
-        updateCanvas()
-        updateMaskCanvas()
-
+        resetAllCanvas()
         resetSAM()
         setEnableMask(false)
+        setEnableSobel(false)
     }
 
     const handleImageSelection = (img, file, url) => {
         setImage(img);
         setMaskImage(null);
 
-        updateCanvas();
-        updateMaskCanvas()
-        updateSAMCanvas()
-
+        resetAllCanvas()
         resetMaskUI()
         resetSAM()
 
         onImageSelected(img, file, url)
     }
 
-    const resetAll = () => {
+    const resetAllCanvas = () => {
         updateCanvas();
         updateMaskCanvas()
         updateSAMCanvas()
-
-        resetMaskUI()
-        resetSAM()
+        updateSobelCanvas()
     }
 
     const maxSize = 640
@@ -115,6 +113,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                             maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
                             setSelectedColor={setSelectedColor}
                         />
+                        <SobelCanvas canvasRef={sobelCanvasRef} reset={sobelReset} imageCanvas={canvasRef?.current} enabled={enableSobel} />
                         <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} maskImage={maskImage} reset={maskReset} maskMode={maskMode}
                             setDrawingComplete={setMaskDrawingComplete}
                         />
@@ -126,6 +125,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                         <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current} onlyInMask={onlyHighlightMask}
                             reset={highlightReset}
                             color={hoveringColor} colorPalette={colorPalette} ignorePalette={ignorePalette} />
+
                     </>
                 }
             </div>
@@ -140,6 +140,12 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                     processSAM={() => processSAM(canvasRef?.current)} onClickSAMIndex={onClickSAMIndex}
 
                 />
+            </ToggleComponent>
+
+            <ToggleComponent label="Filter" >
+                <div className="flex flex-row gap-3">
+                    <MaskEnableButton enableMask={enableSobel} setEnableMask={setEnableSobel} />
+                </div>
             </ToggleComponent>
         </div>
     )
