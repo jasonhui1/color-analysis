@@ -40,6 +40,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
     } = useSAM();
 
     const [enableSobel, setEnableSobel] = useState(false);
+    const [sobelColorSpace, setSobelColorSpace] = useState('rgb');
 
 
     useEffect(() => {
@@ -78,6 +79,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         resetSAM()
         setEnableMask(false)
         setEnableSobel(false)
+
     }
 
     const handleImageSelection = (img, file, url) => {
@@ -117,7 +119,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                             maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
                             setSelectedColor={setSelectedColor}
                         />
-                        <SobelCanvas canvasRef={sobelCanvasRef} reset={sobelReset} imageCanvas={canvasRef?.current} enabled={enableSobel} />
+                        <SobelCanvas canvasRef={sobelCanvasRef} reset={sobelReset} imageCanvas={canvasRef?.current} enabled={enableSobel} colorSpace={sobelColorSpace} />
                         <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} maskImage={maskImage} reset={maskReset} maskMode={maskMode}
                             setDrawingComplete={setMaskDrawingComplete}
                         />
