@@ -15,19 +15,18 @@ const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor = n
     const [isDraggingColor, setIsDraggingColor] = useState(false);
     const [isDraggingHue, setIsDraggingHue] = useState(false);
     const divRef = useRef(null);
-
+    
     const center = size / 2
-    const ratio = 1 / 300 * size
+    const ratio = size / 300
     ///////////////////////////Cirlce///////////////////////
-    const radius = 25 / ratio
+    const radius = 25 * ratio
 
     /////////////////////////Triangle///////////////////////
     const bb = {
-        x1: 88 / ratio, y1: 45 / ratio,
-        x2: 269 / ratio, y2: 255 / ratio
+        x1: 88 * ratio, y1: 45 * ratio,
+        x2: 269 * ratio, y2: 255 * ratio
     }
     const w = bb.y2 - bb.y1
-
     if (isRGBSpace) selectedColor = rgbToHsl(selectedColor.r, selectedColor.g, selectedColor.b)
 
     //Calculate the position
@@ -121,12 +120,12 @@ const TriangularColorPicker = ({ size = 300, selectedColor, setSelectedColor = n
     );
 };
 
-export const ColorPicker = ({ size = 300, selectedColor, setSelectedColor = null, isRGBSpace = false, includeSliders = true }) => {
+export const ColorPicker = ({ size = 300, selectedColor, setSelectedColor = null, isRGBSpace = false, includeSliders = true  , allowInput = true }) => {
 
     return (
         <div className='flex flex-col'>
             <TriangularColorPicker size={size} selectedColor={selectedColor} setSelectedColor={setSelectedColor} isRGBSpace={isRGBSpace} />
-            {includeSliders && <HSLSlider selectedColor={selectedColor} setSelectedColor={setSelectedColor} isRGBSpace={isRGBSpace} />}
+            {includeSliders && <HSLSlider selectedColor={selectedColor} setSelectedColor={setSelectedColor} isRGBSpace={isRGBSpace} allowInput={allowInput}/>}
         </div>
     );
 };

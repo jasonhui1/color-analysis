@@ -138,7 +138,7 @@ export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPa
             {showHeading && <h2 className="text-xl font-semibold mb-2">Color Palette</h2>}
             <div className="flex gap-4">
                 {colorPalette.map((color, index) => (
-                    <div key={index} onMouseEnter={() => onPaletteColorHover(color)} onMouseLeave={() => onPaletteColorUnHover()} onClick={() => onPaletteClick(color)}    >
+                    <div key={index} onMouseEnter={() => onPaletteColorHover(color)} onMouseLeave={() => onPaletteColorUnHover()} onClick={() => onPaletteColorClick(color)}    >
                         <div
 
                             className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "

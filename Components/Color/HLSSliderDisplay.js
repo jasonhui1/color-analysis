@@ -2,7 +2,7 @@ import { rgbToHsl } from "@/utils/color";
 import { useRef } from "react";
 
 
-export const HSLSlider = ({ selectedColor, setSelectedColor = null, isRGBSpace = false, }) => {
+export const HSLSlider = ({ selectedColor, setSelectedColor = null, isRGBSpace = false, allowInput = true }) => {
 
     const updateColor = (type, value) => {
         setSelectedColor(prev => ({ ...prev, [type]: value }));
@@ -13,14 +13,14 @@ export const HSLSlider = ({ selectedColor, setSelectedColor = null, isRGBSpace =
 
     return (
         <div className="mt-4">
-            <HSLControl selectedColor={selectedColor} label="H" value={selectedColor.h} min={0} max={360} onChange={setSelectedColor && updateColor('h', selectedColor.h)} />
-            <HSLControl selectedColor={selectedColor} label="L" value={selectedColor.l} min={0} max={100} onChange={setSelectedColor && updateColor('l', selectedColor.l)} />
-            <HSLControl selectedColor={selectedColor} label="S" value={selectedColor.s} min={0} max={100} onChange={setSelectedColor && updateColor('s', selectedColor.s)} />
+            <HSLControl selectedColor={selectedColor} label="H" value={selectedColor.h} min={0} max={360} onChange={setSelectedColor && updateColor('h', selectedColor.h)} allowInput={allowInput} />
+            <HSLControl selectedColor={selectedColor} label="L" value={selectedColor.l} min={0} max={100} onChange={setSelectedColor && updateColor('l', selectedColor.l)} allowInput={allowInput}/>
+            <HSLControl selectedColor={selectedColor} label="S" value={selectedColor.s} min={0} max={100} onChange={setSelectedColor && updateColor('s', selectedColor.s)} allowInput={allowInput}/>
         </div>
     )
 }
 
-const HSLControl = ({ selectedColor, label, value, min, max, onChange }) => {
+const HSLControl = ({ selectedColor, label, value, min, max, onChange, allowInput = true }) => {
 
     const sliderRef = useRef(null);
     const background =
@@ -52,8 +52,8 @@ const HSLControl = ({ selectedColor, label, value, min, max, onChange }) => {
             <label className="">{label} </label>
             <div
                 ref={sliderRef}
-                className={`flex-grow h-4 relative cursor-pointer border border-gray-500`}
-                onMouseDown={handleMouseDown}
+                className={`flex-grow h-4 relative border border-gray-500 ${allowInput ? 'cursor-pointer' : ''}`}
+                onMouseDown={allowInput && handleMouseDown}
                 style={{ background: `${background}` }}
             >
 
@@ -65,14 +65,17 @@ const HSLControl = ({ selectedColor, label, value, min, max, onChange }) => {
                     style={{ left: `calc(${(value - min) / (max - min) * 100}% - 8px)` }}
                 />
             </div>
-            <input
-                type="number"
-                className="w-16 p-1"
-                value={value}
-                onChange={(e) => onChange(Math.max(min, Math.min(max, Number(e.target.value))))}
-                min={min}
-                max={max}
-            />
+            {allowInput ?
+                <input
+                    type="number"
+                    className="w-16 p-1 bg-transparent"
+                    value={value}
+                    onChange={(e) => onChange(Math.max(min, Math.min(max, Number(e.target.value))))}
+                    min={min}
+                    max={max}
+                />:
+                <label className="text-sm w-8"> {value}</label>
+            }
         </div>
     )
 }

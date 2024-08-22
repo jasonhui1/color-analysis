@@ -82,8 +82,8 @@ export default function DataPage() {
         setTags={setSearchTags}
       />
 
-      <div className='fixed right-0 bottom-0 z-20 '>
-        <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} size={300}/>
+      <div className='fixed right-0 bottom-0 z-20 p-2 '>
+        <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} size={200} allowInput={false}/>
       </div>
 
       {enlargingPalette && <div className='flex items-center justify-center fixed inset-0 vh-100 w-full z-10 bg-red-50 '>
