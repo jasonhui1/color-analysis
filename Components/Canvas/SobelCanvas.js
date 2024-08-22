@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import convert from 'color-convert';
+import { calculateBrightness } from "@/utils/color";
 
 // type ColorSpace = 'rgb' | 'lab'
 export default function SobelCanvas({ canvasRef, imageCanvas, reset, enabled = true, colorSpace = 'rgb' }) {
@@ -37,14 +38,14 @@ export default function SobelCanvas({ canvasRef, imageCanvas, reset, enabled = t
         let sobelData;
         console.log('colorSpace calculating :>> ', colorSpace);
 
-        if (colorSpace === 'rgb') {
-            console.log('rgb :>> ,');
-            sobelData = sobelFilterRGB(imageData);
-        } 
+        // if (colorSpace === 'rgb') {
+        //     sobelData = sobelFilterRGB(imageData);
+        // } 
         // else if (colorSpace === 'lab') {
         //     sobelData = sobelFilterLAB(imageData);
         // }
 
+        sobelData = sobelFilterRGB(imageData);
         sobelData = invertFilter(sobelData);
 
         const canvas = canvasRef?.current;
@@ -72,6 +73,12 @@ export default function SobelCanvas({ canvasRef, imageCanvas, reset, enabled = t
         ];
 
         const getColorAt = (x, y, colorChannel) => {
+            // const r = imageData.data[(y * width + x) * 4]
+            // const g = imageData.data[(y * width + x) * 4 + 1]
+            // const b = imageData.data[(y * width + x) * 4 + 2]
+
+            // const l = calculateBrightness([r, g, b])
+            // return l
             const index = (y * width + x) * 4 + colorChannel;
             return imageData.data[index];
         };
@@ -114,66 +121,67 @@ export default function SobelCanvas({ canvasRef, imageCanvas, reset, enabled = t
         return sobelData;
     };
 
-    // No visible improvement but has much higher cost
-    // const sobelFilterLAB = (imageData) => {
-    //     const width = imageData.width;
-    //     const height = imageData.height;
-    //     const sobelData = new ImageData(width, height);
+    // Block look and has much slower
+    const sobelFilterLAB = (imageData) => {
+        const width = imageData.width;
+        const height = imageData.height;
+        const sobelData = new ImageData(width, height);
 
-    //     const kernelX = [
-    //         [-1, 0, 1],
-    //         [-2, 0, 2],
-    //         [-1, 0, 1]
-    //     ];
-    //     const kernelY = [
-    //         [-1, -2, -1],
-    //         [0, 0, 0],
-    //         [1, 2, 1]
-    //     ];
+        const kernelX = [
+            [-1, 0, 1],
+            [-2, 0, 2],
+            [-1, 0, 1]
+        ];
+        const kernelY = [
+            [-1, -2, -1],
+            [0, 0, 0],
+            [1, 2, 1]
+        ];
 
-    //     const getLabAt = (x, y) => {
-    //         const index = (y * width + x) * 4;
-    //         const r = imageData.data[index];
-    //         const g = imageData.data[index + 1];
-    //         const b = imageData.data[index + 2];
-    //         return convert.rgb.lab([r, g, b]);
-    //     };
+        const getLabAt = (x, y) => {
+            const index = (y * width + x) * 4;
+            const r = imageData.data[index];
+            const g = imageData.data[index + 1];
+            const b = imageData.data[index + 2];
+            return convert.rgb.lab.raw([r, g, b]);
+        };
 
-    //     for (let y = 1; y < height - 1; y++) {
-    //         for (let x = 1; x < width - 1; x++) {
-    //             let pixelX = [0, 0, 0];
-    //             let pixelY = [0, 0, 0];
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                let pixelX = [0, 0, 0];
+                let pixelY = [0, 0, 0];
 
-    //             for (let i = -1; i <= 1; i++) {
-    //                 for (let j = -1; j <= 1; j++) {
-    //                     const lab = getLabAt(x + j, y + i);
-    //                     for (let c = 0; c < 3; c++) {
-    //                         pixelX[c] += kernelX[i + 1][j + 1] * lab[c];
-    //                         pixelY[c] += kernelY[i + 1][j + 1] * lab[c];
-    //                     }
-    //                 }
-    //             }
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const lab = getLabAt(x + j, y + i);
+                        for (let c = 0; c < 3; c++) {
+                            pixelX[c] += kernelX[i + 1][j + 1] * lab[c];
+                            pixelY[c] += kernelY[i + 1][j + 1] * lab[c];
+                        }
+                    }
+                }
 
-    //             const [l, a, b] = getLabAt(x, y);;
 
-    //             const magnitude = Math.sqrt(
-    //                 pixelX.reduce((sum, val) => sum + val * val, 0) +
-    //                 pixelY.reduce((sum, val) => sum + val * val, 0)
-    //             );
+                const magnitude = Math.sqrt(
+                    pixelX.reduce((sum, val) => sum + val * val, 0) +
+                    pixelY.reduce((sum, val) => sum + val * val, 0)
+                );
 
-    //             // Convert magnitude to RGB
-    //             const rgb = convert.lab.rgb([magnitude, a, b]); // Using only L channel for edge intensity
+                // Convert magnitude to RGB
+                const [l, a, b] = getLabAt(x, y);
+                // const rgb = convert.lab.rgb([magnitude, a,b]); // Using only L channel for edge intensity
+                const rgb = convert.lab.rgb([magnitude, 0, 0]); // Using only L channel for edge intensity
 
-    //             const index = (y * width + x) * 4;
-    //             sobelData.data[index] = rgb[0];
-    //             sobelData.data[index + 1] = rgb[1];
-    //             sobelData.data[index + 2] = rgb[2];
-    //             sobelData.data[index + 3] = 255; // Set alpha channel to fully opaque
-    //         }
-    //     }
+                const index = (y * width + x) * 4;
+                sobelData.data[index] = rgb[0];
+                sobelData.data[index + 1] = rgb[1];
+                sobelData.data[index + 2] = rgb[2];
+                sobelData.data[index + 3] = 255; // Set alpha channel to fully opaque
+            }
+        }
 
-    //     return sobelData;
-    // };
+        return sobelData;
+    };
 
     const invertFilter = (imageData) => {
         const ctx = imageCanvas.getContext('2d');
