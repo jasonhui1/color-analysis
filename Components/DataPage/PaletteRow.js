@@ -19,7 +19,7 @@ export const PaletteRow = ({ paletteData,
 
 
     showTags = true, showPalette = true, showSelect = true,
-    onClickTag = null, onPaletteColorClick = null, onPaletteSelect = null, setEnlargeIndex = null,
+    onClickTag = null, onPaletteColorClick = null, onPaletteSelect = null, setEnlargeIndex = null, maxSize = 250
 }) => {
 
     const { id: paletteId, palette, ignorePalette = [], tags, percentage, imageURL, maskImageURL, imageSourceURL } = paletteData
@@ -30,7 +30,6 @@ export const PaletteRow = ({ paletteData,
     const [maskImage, setMaskImage] = useState(null);
     const [selected, setSelected] = useState(false)
     const [hoveringColor, setHoveringColor] = useState(null)
-    const maxSize = 250
 
     const { palette: sorted_palette, percentage: sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
     const { ref, inView, entry } = useInView({
@@ -67,7 +66,7 @@ export const PaletteRow = ({ paletteData,
         <div ref={ref} className='flex gap-4 items-center ' style={{ minHeight: inView ? 'auto' : '100px' }}>
             {inView && (
                 <>
-                    <div className='flex flex-col gap-1 relative min-w-[250px] max-w-[250px] min-h-[250px] h-fit justify-center cursor-pointer ' >
+                    <div className='flex flex-col gap-1 relative  h-fit justify-center cursor-pointer ' style={{ width: maxSize + 'px', minHeight: maxSize + 'px' }} >
                         <div className='relative self-center' style={{ width: image?.width ?? maxSize + 'px', height: image?.height ?? maxSize + 'px' }} onClick={setEnlargeIndex && setEnlargeIndex} >
                             {/* {imageURL && <Image ref={imageRef} src={imageURL} alt={imageURL} width={250} height={250} />} */}
                             <CanvasNoMask canvasRef={canvasRef} image={image} maxSize={maxSize} />

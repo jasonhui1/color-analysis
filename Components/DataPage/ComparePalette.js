@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import PaletteRow from "./PaletteRow";
 import { IoMdClose } from "react-icons/io";
 import Image from "@/node_modules/next/image";
+import { setImageURL } from "@/lib/cloudinary/utils";
 
 export default function ComparePalette({ paletteData, onClose }) {
 
@@ -16,7 +17,7 @@ export default function ComparePalette({ paletteData, onClose }) {
 
     return (
         <div className='flex items-center justify-center fixed inset-0 vh-100 w-full z-10 bg-orange-50 '>
-            <div className="flex flex-col h-3/4 w-3/4 ">
+            <div className="flex flex-col h-full w-5/6">
 
                 <div className='relative h-[500px] '>
                     {paletteData.map((data, index) =>
@@ -24,15 +25,16 @@ export default function ComparePalette({ paletteData, onClose }) {
                             <PaletteRow
                                 paletteData={data}
                                 showTags={false} showPalette={false} showSelect={false}
+                                maxSize={500}
                             />
                         </div>)}
                 </div>
                 <div className="flex gap-2 mt-auto">
 
                     {paletteData.map((data, index) =>
-                        <div className="relative" key={data.id} onClick={() => { setVisibleIndex(index) }} >
-                            <Image src={data.imageURL} alt={'image'} width={100} height={100} />
-                            <div className={`absolute inset-0 bg-black w-full h-full bg-opacity-50 ${index === visibleIndex ? '' : 'opacity-0'}`}/>
+                        <div className="relative cursor-pointer min-w-[150px] h-[200px]" key={data.id} onClick={() => { setVisibleIndex(index) }} >
+                            <Image src={setImageURL(data.imageURL, 150, 150)} alt={'image'} layout="fill" objectFit="contain" />
+                            <div className={`absolute inset-0 bg-black w-full h-full bg-opacity-50  ${(index === visibleIndex) ? 'opacity-0' :''}`}/>
                         </div>
                     )}
 
