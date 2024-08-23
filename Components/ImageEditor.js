@@ -166,7 +166,11 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                     <MaskEnableButton enableMask={enableSobel} setEnableMask={setEnableSobel} />
                 </div>
             </ToggleComponent>
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={exportAndOpenImage}>Export and Open Image</button>
+            <ToggleComponent label="Export image" >
+
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={exportAndOpenImage}>Export and Open Image</button>
+            </ToggleComponent>
+
         </div>
     )
 }

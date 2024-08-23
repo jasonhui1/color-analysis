@@ -6,7 +6,7 @@ import { TagsDisplay } from '@/Components/Form/TagsDisplay';
 import { SearchBar } from './SearchBar';
 
 
-export function Header({ tags, setTags, searchTerm, onSearch, setSearchTerm }) {
+export function Header({ tags, setTags, searchTerm, onSearch, setSearchTerm, showCompareButton, onClickCompareButton }) {
 
   const { tags: all_tags, loading: loadingTags } = useTags()
   const { suggestions, selectedIndex, onKeyDown, addTag, onBlur, onFocus, onHover, show: showSuggestions } = useTagSuggestion({
@@ -27,6 +27,7 @@ export function Header({ tags, setTags, searchTerm, onSearch, setSearchTerm }) {
 
             <TagsDisplay tags={tags} onRemove={removeTag} />
             <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={onSearch} />
+            {showCompareButton && <button onClick={onClickCompareButton} className='text-orange-500 hover:text-orange-700 bg-gray-200 px-2 py-1 rounded-md self-center'>Compare</button>}
           </div>
           {showSuggestions && <TagsSuggestion suggestions={suggestions} selectedIndex={selectedIndex} onClickSuggestion={addTag} onHover={onHover} enableNewTag={false} className='top-12' />}
         </div>

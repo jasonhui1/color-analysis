@@ -11,12 +11,16 @@ import { ImageTagsDisplay } from './ImageTagsDisplay';
 import { setImageURL } from '@/lib/cloudinary/utils';
 import { MdOutlineZoomOutMap } from "react-icons/md";
 import { deletePaletteClient } from '@/lib/clientApis/palette';
+import CheckBox from '../General/CheckBox';
 
 export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
     hoveringColor, paletteData,
     reset, enable,
     onClickTag, onPaletteColorHover, onPaletteColorUnHover, onPaletteColorClick,
-    setEnlargeIndex }) => {
+    setEnlargeIndex,
+    onPaletteSelect,
+
+}) => {
 
     const { id: paletteId, palette, ignorePalette = [], tags, percentage, imageURL, maskImageURL, imageSourceURL } = paletteData
     // console.log(cloudinary.url(imageURL, { width: 100, height: 150, crop: "fill", fetch_format: "auto" }))
@@ -24,6 +28,7 @@ export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
 
     const [image, setImage] = useState(null);
     const [maskImage, setMaskImage] = useState(null);
+    const [selected, setSelected] = useState(false)
     const maxSize = 250
 
     const { palette: sorted_palette, percentage: sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
@@ -46,7 +51,10 @@ export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
         }
     }, [inView, imageURL]);
 
-
+    const onSelect = () => {
+        setSelected(!selected)
+        onPaletteSelect(paletteId, !selected)
+    }
 
 
     return (
@@ -77,7 +85,7 @@ export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
 
                     {/* Need more safety steps before deploy */}
                     {/* <button onClick={() => deletePaletteClient({ paletteId })}>X</button> */}
-
+                    <CheckBox checked={selected} onChange={onSelect} label='' />
                 </>)
             }
         </div>
