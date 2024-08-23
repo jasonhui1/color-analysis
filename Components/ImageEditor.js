@@ -63,6 +63,20 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         }
     }
 
+    const exportAndOpenImage = async () => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+            // Convert canvas to blob
+            const blob = await processCanvas({ canvas: canvasRef?.current, image, cropTransparent: true, useCurrentCanvas: false, toBlob: true });
+            const url = URL.createObjectURL(blob);
+
+            // Open the URL in a new tab
+            window.open(url, '_blank');
+            // Clean up the URL object after a delay
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+        };
+    };
+
     const onApplyMask = async () => {
         const url = processCanvas({ canvas: canvasRef?.current, image, cropTransparent: true, useCurrentCanvas: false });
         const maskUrl = processCanvas({ canvas: maskedCanvasRef?.current, image, cropTransparent: true, useCurrentCanvas: true, isInverted: !invertMask });
@@ -147,12 +161,12 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
 
                 />
             </ToggleComponent>
-
             <ToggleComponent label="Filter" >
                 <div className="flex flex-row gap-3">
                     <MaskEnableButton enableMask={enableSobel} setEnableMask={setEnableSobel} />
                 </div>
             </ToggleComponent>
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={exportAndOpenImage}>Export and Open Image</button>
         </div>
     )
 }

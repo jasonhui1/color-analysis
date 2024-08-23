@@ -102,7 +102,7 @@ const createResultCanvas = (sourceCanvas, sourceBounds, targetWidth, targetHeigh
 
 
 // Main function to process and crop the image
-export const processCanvas = ({ canvas, image, useCurrentCanvas = true, isInverted = false, cropTransparent = false }) => {
+export const processCanvas = ({ canvas, image, useCurrentCanvas = true, isInverted = false, cropTransparent = false, toBlob = false }) => {
     const bounds = getBoundingBox(canvas, isInverted, cropTransparent);
     const scale = image.width / canvas.width;
     const targetWidth = Math.ceil(bounds.width * scale);
@@ -117,7 +117,15 @@ export const processCanvas = ({ canvas, image, useCurrentCanvas = true, isInvert
     };
 
     const resultCanvas = createResultCanvas(sourceCanvas, sourceBounds, targetWidth, targetHeight);
-    return resultCanvas.toDataURL();
+    if (toBlob) {
+        return new Promise((resolve) => {
+            resultCanvas.toBlob((blob) => {
+                resolve(blob);
+            }, 'image/png');
+        });
+    } else {
+        return resultCanvas.toDataURL('image/png');
+    }
 };
 
 export const invertImageAlpha = async (image, returnCanvas = false) => {
