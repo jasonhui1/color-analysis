@@ -5,7 +5,7 @@ import PaletteRow from '@/Components/DataPage/PaletteRow';
 import { Header } from '@/Components/DataPage/Header';
 import { useFetchPalettesData } from '@/hooks/useFetchPalettesData';
 import EnlargePaletteDisplay from '@/Components/DataPage/EnlargePaletteDisplay';
-import { IoMdClose } from "react-icons/io";
+import ComparePalette from '@/Components/DataPage/ComparePalette';
 
 export default function DataPage() {
 
@@ -58,31 +58,20 @@ export default function DataPage() {
       </div>
 
       {comparing &&
-        <div className='flex items-center justify-center fixed inset-0 vh-100 w-full z-10 bg-orange-50 '>
-          <div className='flex flex-col gap-4 relative'>
-            {selectedPalettes.map((paletteId, index) =>
-              <PaletteRow key={paletteId}
-                paletteData={data.find(palette => palette.id == paletteId)}
-                onClickTag={onClickTag}
-                setEnlargeIndex={() => setEnlargeIndex(index)}
-                onPaletteColorClick={onPaletteColorClick}
-                onPaletteSelect={onPaletteSelect}
-              />)}
-          </div>
-
-          <IoMdClose className='absolute top-0 right-0 p-2 cursor-pointer' onClick={() => setComparing(false)} size={48} />
-        </div>
+        <ComparePalette
+          paletteData={selectedPalettes.map(paletteId => data.find(palette => palette.id == paletteId))}
+          onClose={()=>setComparing(false)}
+        />
       }
 
 
-
-      {enlargingPalette && <div className='flex items-center justify-center fixed inset-0 vh-100 w-full z-10 bg-red-50 '>
+      {enlargingPalette &&
         <EnlargePaletteDisplay imageURL={enlargingPalette.imageURL} maskImageURL={enlargingPalette.maskImageURL}
           colorPalette={enlargingPalette.palette} ignorePalette={enlargingPalette.ignorePalette} percentage={enlargingPalette.colorPalettePercentage}
           setSelectedColor={setSelectedColor}
+          onClose={()=>setEnlargeIndex(-1)}
         />
-        <IoMdClose className='absolute top-0 right-0 p-2 cursor-pointer' onClick={() => setEnlargeIndex(-1)} size={48} />
-      </div>}
+      }
 
       {error && <div>Error: {error}</div>}
       {loading && <div>Loading...</div>}
@@ -105,6 +94,10 @@ export default function DataPage() {
     </div>
   )
 }
+
+
+
+
 
 
 

@@ -9,9 +9,10 @@ import { useColorPaletteInteractivity } from "@/hooks/useColorPalette";
 import PaletteDisplay, { PaletteDisplaySimpleV2 } from "../Color/PaletteDisplay";
 import { createImageFromUrl } from "@/utils/canvas";
 import { setImageURL } from "@/lib/cloudinary/utils";
+import { IoMdClose } from "react-icons/io";
 
 
-const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePalette, percentage, maxSize = 640, setSelectedColor }) => {
+const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePalette, percentage, maxSize = 640, setSelectedColor, onClose }) => {
     const canvasRef = useRef(null);
     const maskCanvasRef = useRef(null);
 
@@ -46,25 +47,29 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
     }, []);
 
     return (
-        <div className="flex flex-row gap-6 relative mb-3 p-4 " >
-            <ImageDisplay canvasRef={canvasRef} maskedCanvasRef={maskCanvasRef}
-                image={image} maskImage={maskImage}
-                hoveringColor={hoveringColor} setSelectedColor={setSelectedColor}
-                colorPalette={colorPalette} ignorePalette={ignorePalette}
-                onlyHighlightMask={onlyHighlightMask}
-            />
-
-            <div className=" flex flex-col gap-4">
-
-                <PaletteDisplaySimpleV2
-                    colorPalette={colorPalette} colorPalettePercentage={percentage}
-                    onPaletteColorHover={onPaletteColorHover}
-                    onPaletteColorUnHover={onPaletteColorUnHover}
-                    onPaletteColorClick={onPaletteColorClick}
+        <div className='flex items-center justify-center fixed inset-0 vh-100 w-full z-10 bg-red-50 '>
+            <div className="flex flex-row gap-6 relative mb-3 p-4 " >
+                <ImageDisplay canvasRef={canvasRef} maskedCanvasRef={maskCanvasRef}
+                    image={image} maskImage={maskImage}
+                    hoveringColor={hoveringColor} setSelectedColor={setSelectedColor}
+                    colorPalette={colorPalette} ignorePalette={ignorePalette}
+                    onlyHighlightMask={onlyHighlightMask}
                 />
-                {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} highlightColor={hoveringColor} />}
 
+                <div className=" flex flex-col gap-4">
+
+                    <PaletteDisplaySimpleV2
+                        colorPalette={colorPalette} colorPalettePercentage={percentage}
+                        onPaletteColorHover={onPaletteColorHover}
+                        onPaletteColorUnHover={onPaletteColorUnHover}
+                        onPaletteColorClick={onPaletteColorClick}
+                    />
+                    {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} highlightColor={hoveringColor} />}
+
+                </div>
             </div>
+            <IoMdClose className='absolute top-0 right-0 p-2 cursor-pointer' onClick={onClose} size={48} />
+
         </div>
     );
 };
