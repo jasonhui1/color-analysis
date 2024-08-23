@@ -12,11 +12,11 @@ import { setImageURL } from '@/lib/cloudinary/utils';
 import { MdOutlineZoomOutMap } from "react-icons/md";
 import { deletePaletteClient } from '@/lib/clientApis/palette';
 import CheckBox from '../General/CheckBox';
+import useCanvas from '@/hooks/useCanvas';
+import { useColorPaletteInteractivity } from '@/hooks/useColorPalette';
 
-export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
-    hoveringColor, paletteData,
-    reset, enable,
-    onClickTag, onPaletteColorHover, onPaletteColorUnHover, onPaletteColorClick,
+export const PaletteRow = ({ paletteData,
+    onClickTag, onPaletteColorClick,
     setEnlargeIndex,
     onPaletteSelect,
 
@@ -29,6 +29,7 @@ export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
     const [image, setImage] = useState(null);
     const [maskImage, setMaskImage] = useState(null);
     const [selected, setSelected] = useState(false)
+    const [hoveringColor, setHoveringColor] = useState(null)
     const maxSize = 250
 
     const { palette: sorted_palette, percentage: sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
@@ -56,6 +57,11 @@ export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
         onPaletteSelect(paletteId, !selected)
     }
 
+    const { ref: canvasRef } = useCanvas()
+    const { ref: maskCanvasRef } = useCanvas()
+    const { ref: canvasHLRef, reset: highlightReset, update: updateHighlightCanvas } = useCanvas()
+
+    const { onPaletteColorHover, onPaletteColorUnHover } = useColorPaletteInteractivity({setHoveringColor})
 
     return (
         <div ref={ref} className='flex gap-4 items-center ' style={{ minHeight: inView ? 'auto' : '100px' }}>
@@ -68,7 +74,7 @@ export const PaletteRow = ({ canvasRef, canvasHLRef, maskCanvasRef,
                             <MaskedCanvas canvasRef={maskCanvasRef} image={image} maskImage={maskImage} initialColor='rgb(0,0,0,0)' />
                             <HighlightHoveringColorCanvas canvasRef={canvasHLRef} imageCanvas={canvasRef?.current} maskCanvas={maskCanvasRef?.current} onlyInMask={true}
                                 color={hoveringColor} colorPalette={palette} ignorePalette={ignorePalette}
-                                reset={reset} enable={enable}
+                                reset={highlightReset}
                             />
 
                         </div>

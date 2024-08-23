@@ -13,13 +13,6 @@ export default function DataPage() {
   const [searchToggle, setSearchToggle] = useState(true);
 
   const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
-  const [hoveringColor, setHoveringColor] = useState(null);
-  const [hoveringRowIndex, setHoveringRowIndex] = useState(-1);
-
-  const [canvasRefs, setCanvasRefs] = useState({});
-  const [maskCanvasRefs, setMaskCanvasRefs] = useState({});
-  const [canvasHLRefs, setCanvasHLRefs] = useState({});
-  const [resets, setResets] = useState([]);
 
   const maxSize = 250
   const [searchTags, setSearchTags] = useState([]);
@@ -30,26 +23,6 @@ export default function DataPage() {
 
   const [selectedPalette, setSelectedPalette] = useState([])
 
-  useEffect(() => {
-    // add or remove refs
-    if (!data) return
-
-    const newCanvasRefs = {};
-    const newMaskCanvasRefs = {};
-    const newCanvasHLRefs = {};
-
-    data.forEach(({ id }) => {
-      newCanvasRefs[id] = createRef();
-      newMaskCanvasRefs[id] = createRef();
-      newCanvasHLRefs[id] = createRef();
-    });
-
-    setCanvasRefs(newCanvasRefs);
-    setMaskCanvasRefs(newMaskCanvasRefs);
-    setCanvasHLRefs(newCanvasHLRefs);
-    setResets(new Array(data.length).fill(true));
-  }, [data]);
-
   const onClickTag = (tag) => {
     if (searchTags.includes(tag)) return
     setSearchTags([...searchTags, tag])
@@ -58,17 +31,6 @@ export default function DataPage() {
     setSelectedColor(color)
   }
 
-  const onPaletteColorHover = (rowIndex) => (color) => {
-    setHoveringColor(color)
-    setHoveringRowIndex(rowIndex)
-  }
-  const onPaletteColorUnHover = () => {
-    setHoveringColor(null);
-    setHoveringRowIndex(-1)
-    const newReset = [...resets]
-    newReset[hoveringRowIndex] = !newReset[hoveringRowIndex]
-    setResets(newReset)
-  }
 
   const onPaletteSelect = (paletteId, selected) => {
     if (selected) {
@@ -106,20 +68,20 @@ export default function DataPage() {
         <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} size={200} allowInput={false} />
       </div>
 
-      {comparing && <div className='flex items-center justify-center fixed inset-0 vh-100 w-full z-10 bg-orange-50 '>
-      <div className='flex flex-col gap-4 relative'>
-        {selectedPalette.map((paletteId, index) =>
-          <PaletteRow key={paletteId} canvasRef={canvasRefs[paletteId]} maskCanvasRef={maskCanvasRefs[paletteId]} canvasHLRef={canvasHLRefs[paletteId]}
-            paletteData={data.find(({ id }) => id === paletteId)} hoveringColor={hoveringColor}
-            reset={resets[paletteId]} enable={hoveringRowIndex === index}
-            onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover(index)} onPaletteColorUnHover={onPaletteColorUnHover} onPaletteColorClick={onPaletteColorClick}
-            setEnlargeIndex={() => setEnlargeIndex(index)}
-            onPaletteSelect={onPaletteSelect}
-          />)}
-          </div>
+      {/* {comparing && <div className='flex items-center justify-center fixed inset-0 vh-100 w-full z-10 bg-orange-50 '>
+        <div className='flex flex-col gap-4 relative'>
+          {selectedPalette.map((paletteId, index) =>
+            <PaletteRow key={paletteId} canvasRef={canvasRefs[paletteId]} maskCanvasRef={maskCanvasRefs[paletteId]} canvasHLRef={canvasHLRefs[paletteId]}
+              paletteData={data.find(({ id }) => id === paletteId)} hoveringColor={hoveringColor}
+              reset={resets[paletteId]} enable={hoveringRowIndex === index}
+              onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover(index)} onPaletteColorUnHover={onPaletteColorUnHover} onPaletteColorClick={onPaletteColorClick}
+              setEnlargeIndex={() => setEnlargeIndex(index)}
+              onPaletteSelect={onPaletteSelect}
+            />)}
+        </div>
 
         <IoMdClose className='absolute top-0 right-0 p-2 cursor-pointer' onClick={() => setComparing(false)} size={48} />
-      </div>}
+      </div>} */}
 
 
       {enlargingPalette && <div className='flex items-center justify-center fixed inset-0 vh-100 w-full z-10 bg-red-50 '>
@@ -137,11 +99,11 @@ export default function DataPage() {
         const id = paletteData.id
 
         return (
-          <PaletteRow key={paletteData.id} canvasRef={canvasRefs[id]} maskCanvasRef={maskCanvasRefs[id]} canvasHLRef={canvasHLRefs[id]}
-            paletteData={paletteData} hoveringColor={hoveringColor}
-            reset={resets[id]} enable={hoveringRowIndex === index}
-            onClickTag={onClickTag} onPaletteColorHover={onPaletteColorHover(index)} onPaletteColorUnHover={onPaletteColorUnHover} onPaletteColorClick={onPaletteColorClick}
+          <PaletteRow key={paletteData.id}
+            paletteData={paletteData}
+            onClickTag={onClickTag}
             setEnlargeIndex={() => setEnlargeIndex(index)}
+            onPaletteColorClick={onPaletteColorClick}
             onPaletteSelect={onPaletteSelect}
           />
         )
