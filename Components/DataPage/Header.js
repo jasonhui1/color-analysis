@@ -4,9 +4,11 @@ import { useTagSuggestion } from '@/hooks/useTagSuggestion';
 import { TagsSuggestion } from '@/Components/Form/TagsSuggestion';
 import { TagsDisplay } from '@/Components/Form/TagsDisplay';
 import { SearchBar } from './SearchBar';
+import { useState } from 'react';
 
 
-export function Header({ tags, setTags, searchTerm, onSearch, setSearchTerm, showCompareButton, onClickCompareButton }) {
+export function Header({ tags, setTags, onSearch, showCompareButton, onClickCompareButton }) {
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { tags: all_tags, loading: loadingTags } = useTags()
   const { suggestions, selectedIndex, onKeyDown, addTag, onBlur, onFocus, onHover, show: showSuggestions } = useTagSuggestion({
