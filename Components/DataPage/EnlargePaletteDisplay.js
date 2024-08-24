@@ -63,6 +63,7 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
                 />
 
                 <div className=" flex flex-col gap-4">
+                    <CheckBox label='Only highlight mask' checked={onlyHighlightMask} onChange={() => setOnlyHighlightMask  (!onlyHighlightMask)} />
 
                     <PaletteDisplaySimpleV2
                         colorPalette={colorPalette} colorPalettePercentage={percentage}
