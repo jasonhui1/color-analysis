@@ -29,7 +29,6 @@ export default function HighlightHoveringColorCanvas({ canvasRef, reset, imageCa
 
     useEffect(() => {
         if (!enable) return
-        console.log('color :>> ', color);
         if (imageCanvas) {
             if (!color) return
 

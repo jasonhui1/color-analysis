@@ -6,6 +6,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
     maskMode = false, enableMask, invertMask = false,
     setSelectedColor,
     maxSize = 640,
+    extraDrawing = (ctx) => { },
 }) {
 
     const isSelectingRef = useRef(false);
@@ -34,6 +35,9 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
 
                 ctx.drawImage(maskedImage, 0, 0, maskedImage.width, maskedImage.height);
             }
+            ctx.globalCompositeOperation = 'source-over';
+
+            extraDrawing()
 
             // if (enableSAM && !SAMMode && SAMImage) {
             //     ctx.globalCompositeOperation = 'destination-in';

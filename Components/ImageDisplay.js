@@ -7,11 +7,12 @@ import HighlightHoveringColorCanvas from "./Canvas/FilterCanvas";
 import MaskedCanvas from "./Canvas/MaskedCanvas";
 import SobelCanvas from "./Canvas/SobelCanvas";
 import ToggleComponent from "./General/ToggleComponent";
+import { replaceCanvasColor } from "@/utils/canvas";
 
 const ImageDisplay = ({ canvasRef, maskedCanvasRef,
     image, maskImage,
     hoveringColor, setSelectedColor,
-    colorPalette, ignorePalette,
+    colorPalette, ignorePalette, replacePalette = null, enableReplacePalette = false,
     onlyHighlightMask,
     maxSize = 640
 }) => {
@@ -28,10 +29,19 @@ const ImageDisplay = ({ canvasRef, maskedCanvasRef,
         if (maskDrawingComplete && enableMask) updateCanvas()
     }, [maskDrawingComplete]);
 
+    useEffect(() => {
+        updateCanvas()
+    }, [replacePalette, enableReplacePalette]);
+
 
     useEffect(() => {
         if (drawingComplete) updateSobelCanvas()
     }, [drawingComplete]);
+
+    const extraDrawing = () => {
+        if (!enableReplacePalette) return
+        replaceCanvasColor(canvasRef?.current, colorPalette, replacePalette)
+    }
 
     return (
         <div className="flex flex-col gap-3 min-w-fit">
@@ -43,7 +53,9 @@ const ImageDisplay = ({ canvasRef, maskedCanvasRef,
                             maskedImage={maskedCanvasRef.current} enableMask={enableMask}
                             setSelectedColor={setSelectedColor}
                             maxSize={maxSize}
+                            extraDrawing={extraDrawing}
                         />
+
                         <SobelCanvas canvasRef={sobelCanvasRef} reset={sobelReset} imageCanvas={canvasRef?.current} enabled={enableSobel} colorSpace={'rgb'} />
 
                         <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} maskImage={maskImage} reset={maskReset}

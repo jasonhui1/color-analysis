@@ -6,11 +6,12 @@ import { TbPencilCancel } from "react-icons/tb";
 import { IoMdAdd } from "react-icons/io";
 
 export default function PaletteDisplay({ colorPalette, setColorPalette, colorPalettePercentage = [],
-    onPaletteColorHover,
-    onPaletteColorUnHover,
-    onPaletteColorDelete,
+    onPaletteColorHover = (color) => {},
+    onPaletteColorUnHover = (color) => {},
+    onPaletteColorDelete = (color, index) => { },
     onPaletteColorClick,
-    onPaletteColorEdit = () => {},
+    onPaletteColorEdit = () => { },
+    enableAdd = true, enableDelete = true, enableEdit = true,
     selectedColor,
     title = "Color Palette",
 }) {
@@ -75,20 +76,20 @@ export default function PaletteDisplay({ colorPalette, setColorPalette, colorPal
                                     onContextMenu={(e) => e.preventDefault()}
                                 >
 
-
                                     {colorPalettePercentage.length > 0 && <PercentageText color={color} percentage={colorPalettePercentage[index]} />}
                                 </div>
 
+                                {enableEdit &&
+                                    <div className={`flex justify-between ${hoveringIndex !== index ? 'opacity-0' : ''}`}>
 
-                                <div className={`flex justify-between ${hoveringIndex !== index ? 'opacity-0' : ''}`}>
-
-                                    {!isEditing && <MdOutlineEdit className=" cursor-pointer w-6 h-6" color="blue" onClick={() => setIsEditing(true)} />}
-                                    {isEditing && <TbPencilCancel className="cursor-pointer w-6 h-6" color="red" onClick={() => setIsEditing(false)} />}
-                                    <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => handleDelete(color, index)} />
-                                </div>
+                                        {!isEditing && <MdOutlineEdit className=" cursor-pointer w-6 h-6" color="blue" onClick={() => setIsEditing(true)} />}
+                                        {isEditing && <TbPencilCancel className="cursor-pointer w-6 h-6" color="red" onClick={() => setIsEditing(false)} />}
+                                        {onPaletteColorDelete && <FaDeleteLeft className="cursor-pointer w-6 h-6" color="white" stroke="red" strokeWidth={20} onClick={() => handleDelete(color, index)} />}
+                                    </div>
+                                }
                             </div>
                         ))}
-                        <button onClick={addPaletteColor} className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center"><IoMdAdd size={25} /></button>
+                        {enableAdd && <button onClick={addPaletteColor} className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center"><IoMdAdd size={25} /></button>}
                     </div>
                 </div>
             )}

@@ -1,3 +1,6 @@
+import { processImageColors } from "@/Components/Canvas/FilterCanvas";
+import { isColorEqual } from "./color";
+
 export const calculateCanvasSize = (image, maxSize) => {
     // Calculate new dimensions
     let width = image.width;
@@ -174,3 +177,24 @@ export const createImageFromUrl = (url) => {
         image.onerror = reject;
     });
 };
+
+export const replaceCanvasColor = (canvas, palette1, palette2) => {
+    const requireReplace = palette1.map((color, index) => !isColorEqual(color, palette2[index]));
+    console.log('requireReplace :>> ', requireReplace);
+    if (!requireReplace.includes(true)) return
+
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    processImageColors(canvas, palette1, ({ nearestColor, alpha, i }) => {
+        const colorIndex = palette1.indexOf(nearestColor);
+        if (requireReplace[colorIndex]) {
+            const replaceColor = palette2[colorIndex];
+            data [i] = replaceColor[0];
+            data [i + 1] = replaceColor[1];
+            data [i + 2] = replaceColor[2];
+        }
+    });
+    ctx.putImageData(imageData, 0, 0);
+}

@@ -10,9 +10,11 @@ import PaletteDisplay, { PaletteDisplaySimpleV2 } from "../Color/PaletteDisplay"
 import { createImageFromUrl } from "@/utils/canvas";
 import { setImageURL } from "@/lib/cloudinary/utils";
 import { IoMdClose } from "react-icons/io";
+import ToggleComponent from "../General/ToggleComponent";
+import CheckBox from "../General/CheckBox";
 
 
-const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePalette, percentage, maxSize = 640, setSelectedColor, onClose }) => {
+const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePalette, percentage, maxSize = 640, selectedColor, setSelectedColor, onClose }) => {
     const canvasRef = useRef(null);
     const maskCanvasRef = useRef(null);
 
@@ -27,6 +29,8 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
 
     const [image, setImage] = useState(null);
     const [maskImage, setMaskImage] = useState(null);
+    const [replacePalette, setReplacePalette] = useState([]);
+    const [enableReplacePalette, setEnableReplacePalette] = useState(false);
 
     useEffect(() => {
         const loadResizedImage = async (url, setF) => {
@@ -37,6 +41,8 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
         };
         if (imageURL) loadResizedImage(imageURL, setImage);
         if (maskImageURL) loadResizedImage(maskImageURL, setMaskImage);
+
+        setReplacePalette(colorPalette)
     }, []);
 
     useEffect(() => {
@@ -52,7 +58,7 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
                 <ImageDisplay canvasRef={canvasRef} maskedCanvasRef={maskCanvasRef}
                     image={image} maskImage={maskImage}
                     hoveringColor={hoveringColor} setSelectedColor={setSelectedColor}
-                    colorPalette={colorPalette} ignorePalette={ignorePalette}
+                    colorPalette={colorPalette} ignorePalette={ignorePalette} replacePalette={replacePalette} enableReplacePalette={enableReplacePalette}
                     onlyHighlightMask={onlyHighlightMask}
                 />
 
@@ -64,6 +70,16 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
                         onPaletteColorUnHover={onPaletteColorUnHover}
                         onPaletteColorClick={onPaletteColorClick}
                     />
+
+                    <ToggleComponent label='Replace Color Palette'  >
+
+                        <PaletteDisplay
+                            title='Replace Color Palette'
+                            colorPalette={replacePalette} setColorPalette={setReplacePalette} colorPalettePercentage={[]}
+                            onPaletteColorClick={onPaletteColorClick}
+                            selectedColor={selectedColor} enableAdd={false} enableDelete={false} />
+                        <CheckBox label='Enable Replace Color Palette' checked={enableReplacePalette} onChange={() => setEnableReplacePalette(!enableReplacePalette)} />
+                    </ToggleComponent>
                     {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} highlightColor={hoveringColor} />}
 
                 </div>

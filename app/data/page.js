@@ -68,7 +68,7 @@ export default function DataPage() {
       {enlargingPalette &&
         <EnlargePaletteDisplay imageURL={enlargingPalette.imageURL} maskImageURL={enlargingPalette.maskImageURL}
           colorPalette={enlargingPalette.palette} ignorePalette={enlargingPalette.ignorePalette} percentage={enlargingPalette.colorPalettePercentage}
-          setSelectedColor={setSelectedColor}
+          selectedColor={selectedColor} setSelectedColor={setSelectedColor}
           onClose={()=>setEnlargeIndex(-1)}
         />
       }
