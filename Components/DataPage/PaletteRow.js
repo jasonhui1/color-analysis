@@ -14,6 +14,7 @@ import { deletePaletteClient } from '@/lib/clientApis/palette';
 import CheckBox from '../General/CheckBox';
 import useCanvas from '@/hooks/useCanvas';
 import { useColorPaletteInteractivity } from '@/hooks/useColorPalette';
+import Extras from './Extra';
 
 export const PaletteRow = ({ paletteData,
 
@@ -30,6 +31,8 @@ export const PaletteRow = ({ paletteData,
     const [maskImage, setMaskImage] = useState(null);
     const [selected, setSelected] = useState(false)
     const [hoveringColor, setHoveringColor] = useState(null)
+
+    const [isDeleted, setIsDeleted] = useState(false)
 
     const { palette: sorted_palette, percentage: sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
     const { ref, inView, entry } = useInView({
@@ -63,37 +66,42 @@ export const PaletteRow = ({ paletteData,
     const { onPaletteColorHover, onPaletteColorUnHover } = useColorPaletteInteractivity({ setHoveringColor })
 
     return (
-        <div ref={ref} className='flex gap-4 items-center ' style={{ minHeight: inView ? 'auto' : '100px' }}>
-            {inView && (
-                <>
-                    <div className='flex flex-col gap-1 relative  h-fit justify-center cursor-pointer ' style={{ width: maxSize + 'px', minHeight: maxSize + 'px' }} >
-                        <div className='relative self-center' style={{ width: image?.width ?? maxSize + 'px', height: image?.height ?? maxSize + 'px' }} onClick={setEnlargeIndex && setEnlargeIndex} >
-                            {/* {imageURL && <Image ref={imageRef} src={imageURL} alt={imageURL} width={250} height={250} />} */}
-                            <CanvasNoMask canvasRef={canvasRef} image={image} maxSize={maxSize} />
-                            <MaskedCanvas canvasRef={maskCanvasRef} image={image} maskImage={maskImage} initialColor='rgb(0,0,0,0)' />
-                            <HighlightHoveringColorCanvas canvasRef={canvasHLRef} imageCanvas={canvasRef?.current} maskCanvas={maskCanvasRef?.current} onlyInMask={true}
-                                color={hoveringColor} colorPalette={palette} ignorePalette={ignorePalette}
-                                reset={highlightReset}
-                            />
+        <>
+            {!isDeleted &&
+                <div ref={ref} className='flex gap-4 items-center ' style={{ minHeight: inView ? 'auto' : '100px' }}>
+                    {inView && (
+                        <>
+                            <div className='flex flex-col gap-1 relative  h-fit justify-center cursor-pointer ' style={{ width: maxSize + 'px', minHeight: maxSize + 'px' }} >
+                                <div className='relative self-center' style={{ width: image?.width ?? maxSize + 'px', height: image?.height ?? maxSize + 'px' }} onClick={setEnlargeIndex && setEnlargeIndex} >
+                                    {/* {imageURL && <Image ref={imageRef} src={imageURL} alt={imageURL} width={250} height={250} />} */}
+                                    <CanvasNoMask canvasRef={canvasRef} image={image} maxSize={maxSize} />
+                                    <MaskedCanvas canvasRef={maskCanvasRef} image={image} maskImage={maskImage} initialColor='rgb(0,0,0,0)' />
+                                    <HighlightHoveringColorCanvas canvasRef={canvasHLRef} imageCanvas={canvasRef?.current} maskCanvas={maskCanvasRef?.current} onlyInMask={true}
+                                        color={hoveringColor} colorPalette={palette} ignorePalette={ignorePalette}
+                                        reset={highlightReset}
+                                    />
 
-                        </div>
-                        {showTags && <ImageTagsDisplay tags={tags} onClickTag={onClickTag} />}
-                    </div>
-                    {/* <MdOutlineZoomOutMap className='cursor-pointer' onClick={setEnlargeIndex} size={36}/> */}
+                                </div>
+                                {showTags && <ImageTagsDisplay tags={tags} onClickTag={onClickTag} />}
+                            </div>
+                            {/* <MdOutlineZoomOutMap className='cursor-pointer' onClick={setEnlargeIndex} size={36}/> */}
 
-                    <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} highlightColor={hoveringColor} />
-                    {showPalette && <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false} colorPalettePercentage={sorted_percentage}
-                        onPaletteColorHover={onPaletteColorHover}
-                        onPaletteColorUnHover={onPaletteColorUnHover}
-                        onPaletteColorClick={onPaletteColorClick}
-                    />}
+                            <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} highlightColor={hoveringColor} />
+                            {showPalette && <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false} colorPalettePercentage={sorted_percentage}
+                                onPaletteColorHover={onPaletteColorHover}
+                                onPaletteColorUnHover={onPaletteColorUnHover}
+                                onPaletteColorClick={onPaletteColorClick}
+                            />}
 
-                    {/* Need more safety steps before deploy */}
-                    {/* <button onClick={() => deletePaletteClient({ paletteId })}>X</button> */}
-                    {showSelect && <CheckBox checked={selected} onChange={onSelect} label='' />}
-                </>)
+                            {/* Need more safety steps before deploy */}
+                            {showSelect && <CheckBox checked={selected} onChange={onSelect} label='' />}
+                            <Extras paletteId={paletteId} onDelete={() => setIsDeleted(true)} />
+                        </>)
+                    }
+                </div>
             }
-        </div>
+        </>
+
 
     )
 }
