@@ -13,6 +13,7 @@ export const loadImage = (src) => {
     return new Promise((resolve) => {
         const img = new Image();
         img.src = src;
+        img.crossOrigin = 'anonymous';
         img.onload = () => {
             resolve(img);
         };

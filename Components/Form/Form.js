@@ -17,13 +17,14 @@ export function Form({ canvas, image, maskCanvas, invertMask,
     selectedColor, setSelectedColor,
     hoveringColor, setHoveringColor,
     onlyHighlightMask, setOnlyHighlightMask,
-    formReset
+    formReset,
+    paletteData = {},
 }) {
 
     const [tags, setTags] = useState([]);
     const [percentage, setPercentage] = useState([]);
     const [paletteCount, setPaletteCount] = useState(12);
-    const [percentageIsAccurate, setPercentageIsAccurate] = useState(false);
+    const [percentageIsAccurate, setPercentageIsAccurate] = useState(true);
 
     const { onPaletteColorHover,
         onPaletteColorUnHover,
@@ -41,6 +42,17 @@ export function Form({ canvas, image, maskCanvas, invertMask,
         setTags([]);
         setIgnorePalette([]);
     }, [formReset]);
+
+    useEffect(() => {
+
+        if (paletteData) {
+
+            setTags(paletteData.tags);
+            setImageSourceURL(paletteData.imageSourceURL);
+            setPercentage(paletteData.percentage);
+        }
+
+    }, [paletteData])
 
 
     const removePercentage = (index) => {

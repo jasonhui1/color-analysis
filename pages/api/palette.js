@@ -30,17 +30,18 @@ async function POSTHandler(req, res) {
 }
 
 async function GETHandler(req, res) {
-    const { limit, userId, withTags, searchTags, imageMaxWidth, imageMaxHeight } = req.query;
+    const { limit, userId, withTags, searchTags, paletteId = null } = req.query;
 
     if (!userId) {
         return res.status(400).json({ error: 'Not login' });
     }
 
     const options = {
+        id: paletteId,
         limit: limit ? parseInt(limit) : Infinity,
         userId,
         withTags: withTags === 'true',
-        searchTags: searchTags?.split(',').map(tag => tag.trim()) ?? []
+        searchTags: searchTags?.split(',').map(tag => tag.trim()) ?? [],
     };
 
     try {
@@ -91,8 +92,8 @@ async function DELETEHandler(req, res) {
     try {
         const paletteData = await getPalette({ userId, id: paletteId });
         // DELETE link from cloundinary
-        await deleteImage(paletteData[0]?.imageURL);
-        await deleteImage(paletteData[0]?.maskImageURL);
+        await deleteImage(paletteData.imageURL);
+        await deleteImage(paletteData.maskImageURL);
         const data = await deletePalette({ userId, paletteId });
         res.status(200).json(data);
 

@@ -14,7 +14,7 @@ export default function DataPage() {
   const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
 
   const maxImageSize = 250
-  const { data, loading, error } = useFetchPalettesData({ searchToggle, setSearchToggle, searchTags, maxSize: maxImageSize })
+  const { data, loading, error } = useFetchPalettesData({ searchToggle, setSearchToggle, searchTags})
 
   const [enlargeIndex, setEnlargeIndex] = useState(-1)
   const [comparing, setComparing] = useState(false)

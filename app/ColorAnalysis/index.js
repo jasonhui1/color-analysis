@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
-
+import { useSearchParams } from 'next/navigation'
 import GoogleLogin from "../../Components/Auth/GoogleLogin";
 
 import { Form } from "../../Components/Form/Form";
@@ -8,6 +8,8 @@ import { ColorPicker } from "@/Components/Color/picker";
 
 import ImageEditor from "@/Components/ImageEditor";
 import Link from "@/node_modules/next/link";
+import { useFetchPalettesData } from "@/hooks/useFetchPalettesData";
+import { loadImage } from "@/utils/image";
 
 
 const ColorAnalysis = () => {
@@ -30,11 +32,27 @@ const ColorAnalysis = () => {
     const [invertMask, setInvertMask] = useState(false);
     const [onlyHighlightMask, setOnlyHighlightMask] = useState(true);
 
+    const searchParams = useSearchParams()
+    const paletteId = searchParams.get('paletteId')
+    const { data: paletteData, loading, error } = useFetchPalettesData({ paletteId, performSearch: paletteId !== null })
 
     const resetForm = (img, file, url) => {
         setFormResetToggle(state => !state);
         setImageSourceURL(url || '');
     }
+
+    useEffect(() => {
+        const loadData = async () => {
+
+            if (paletteData) {
+                setColorPalette(paletteData.palette);
+                setIgnorePalette(paletteData.ignorePalette);
+                setImage(await loadImage(paletteData.imageURL));
+                if (paletteData.maskImageURL) setMaskImage(await loadImage(paletteData.maskImageURL));
+            }
+        }
+        loadData()
+    }, [paletteData]);
 
     return (
         <div className="p-4 ">
@@ -65,6 +83,7 @@ const ColorAnalysis = () => {
                     ignorePalette={ignorePalette} setIgnorePalette={setIgnorePalette}
                     onlyHighlightMask={onlyHighlightMask} setOnlyHighlightMask={setOnlyHighlightMask}
                     formReset={formResetToggle}
+                    paletteData={paletteData}
                 />
             </div>
 
