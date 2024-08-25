@@ -18,7 +18,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
     hoveringColor, setHoveringColor,
     onlyHighlightMask, setOnlyHighlightMask,
     formReset,
-    paletteData = {},
+    paletteData = null,
 }) {
 
     const [tags, setTags] = useState([]);
@@ -36,7 +36,6 @@ export function Form({ canvas, image, maskCanvas, invertMask,
         onPaletteColorDelete: onIgnorePaletteColorDelete,
     } = useColorPaletteInteractivity({ setPalette: setIgnorePalette, setSelectedColor, setHoveringColor });
 
-
     useEffect(() => {
         setPercentage([]);
         setTags([]);
@@ -44,9 +43,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
     }, [formReset]);
 
     useEffect(() => {
-
         if (paletteData) {
-
             setTags(paletteData.tags);
             setImageSourceURL(paletteData.imageSourceURL);
             setPercentage(paletteData.percentage);
@@ -125,7 +122,9 @@ export function Form({ canvas, image, maskCanvas, invertMask,
             } */}
 
             <UploadButton colorPalette={colorPalette} canvas={canvas} image={image} tags={tags} invertMask={invertMask}
-                percentage={percentage} ignorePalette={ignorePalette} imageSourceURL={imageSourceURL} maskCanvas={maskCanvas} />
+                percentage={percentage} ignorePalette={ignorePalette} imageSourceURL={imageSourceURL} maskCanvas={maskCanvas}
+                isEditing={paletteData !== null} paletteId={paletteData && paletteData.id}
+            />
 
         </div>
     );

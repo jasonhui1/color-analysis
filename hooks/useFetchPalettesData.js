@@ -18,6 +18,7 @@ export function useFetchPalettesData({ searchToggle = true, setSearchToggle = (b
             }
             setData(data)
         } catch (error) {
+            console.log('error :>> ', error);
             setError(error)
         } finally {
             setLoading(false)
