@@ -88,7 +88,7 @@ const getBoundingBox = (canvas, isInverted = false, cropTransparent = true) => {
 
 
 // Function to create a canvas with the desired content
-const createResultCanvas = (sourceCanvas, sourceBounds, targetWidth, targetHeight) => {
+const createResultCanvas = ({ sourceCanvas, sourceBounds, targetWidth, targetHeight, maskCanvas = null, invertMask = false }) => {
     const resultCanvas = document.createElement('canvas');
     const resultCtx = resultCanvas.getContext('2d');
 
@@ -99,13 +99,21 @@ const createResultCanvas = (sourceCanvas, sourceBounds, targetWidth, targetHeigh
         sourceBounds.x, sourceBounds.y, sourceBounds.width, sourceBounds.height,
         0, 0, targetWidth, targetHeight
     );
+    
+    if (!maskCanvas) return resultCanvas;
+    if (invertMask) {
+        resultCtx.globalCompositeOperation = 'destination-in';
+    } else {
+        resultCtx.globalCompositeOperation = 'destination-out';
+    }
 
+    resultCtx.drawImage(maskCanvas, 0, 0);
     return resultCanvas;
 };
 
 
 // Main function to process and crop the image
-export const processCanvas = ({ canvas, image, useCurrentCanvas = true, isInverted = false, cropTransparent = false, toBlob = false }) => {
+export const processCanvas = ({ canvas, maskCanvas = null, image, useCurrentCanvas = true, isInverted = false, cropTransparent = false, toBlob = false, toURL = true }) => {
     const bounds = getBoundingBox(canvas, isInverted, cropTransparent);
     const scale = image.width / canvas.width;
     const targetWidth = Math.ceil(bounds.width * scale);
@@ -119,16 +127,19 @@ export const processCanvas = ({ canvas, image, useCurrentCanvas = true, isInvert
         height: targetHeight
     };
 
-    const resultCanvas = createResultCanvas(sourceCanvas, sourceBounds, targetWidth, targetHeight);
+    if (maskCanvas) maskCanvas = processCanvas({ canvas: maskCanvas, image, isInverted, cropTransparent, useCurrentCanvas: true, toURL: false, toBlob: false });
+
+    const resultCanvas = createResultCanvas({ sourceCanvas, maskCanvas, sourceBounds, targetWidth, targetHeight });
+
     if (toBlob) {
         return new Promise((resolve) => {
             resultCanvas.toBlob((blob) => {
                 resolve(blob);
             }, 'image/png');
         });
-    } else {
-        return resultCanvas.toDataURL('image/png');
     }
+    if (toURL) return resultCanvas.toDataURL('image/png');
+    return resultCanvas
 };
 
 export const invertImageAlpha = async (image, returnCanvas = false) => {
@@ -191,9 +202,9 @@ export const replaceCanvasColor = (canvas, palette1, palette2) => {
         const colorIndex = palette1.indexOf(nearestColor);
         if (requireReplace[colorIndex]) {
             const replaceColor = palette2[colorIndex];
-            data [i] = replaceColor[0];
-            data [i + 1] = replaceColor[1];
-            data [i + 2] = replaceColor[2];
+            data[i] = replaceColor[0];
+            data[i + 1] = replaceColor[1];
+            data[i + 2] = replaceColor[2];
         }
     });
     ctx.putImageData(imageData, 0, 0);

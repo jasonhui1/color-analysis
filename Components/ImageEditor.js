@@ -42,6 +42,8 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
     const [enableSobel, setEnableSobel] = useState(false);
     const [sobelColorSpace, setSobelColorSpace] = useState('rgb');
 
+    const [exportUseMask, setExportUseMask] = useState(false);
+
 
     useEffect(() => {
         if (drawingComplete) updateSobelCanvas()
@@ -63,11 +65,11 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         }
     }
 
-    const exportAndOpenImage = async () => {
+    const exportAndOpenImage = async (useMask = false) => {
         const canvas = canvasRef.current;
         if (canvas) {
             // Convert canvas to blob
-            const blob = await processCanvas({ canvas: canvasRef?.current, image, cropTransparent: true, useCurrentCanvas: false, toBlob: true });
+            const blob = await processCanvas({ canvas: canvasRef?.current, maskCanvas: maskedCanvasRef?.current, image, cropTransparent: true, useCurrentCanvas: false, toBlob: true });
             const url = URL.createObjectURL(blob);
 
             // Open the URL in a new tab
@@ -167,8 +169,8 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                 </div>
             </ToggleComponent>
             <ToggleComponent label="Export image" >
-
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={exportAndOpenImage}>Export and Open Image</button>
+                <CheckBox checked={exportUseMask} onChange={() => setExportUseMask(!exportUseMask)} label="Use Mask" />
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => exportAndOpenImage(exportUseMask)}>Export and Open Image</button>
             </ToggleComponent>
 
         </div>
