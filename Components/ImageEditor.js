@@ -2,7 +2,6 @@ import useCanvas from "@/hooks/useCanvas";
 import { useMaskUI } from "@/hooks/useMaskUI";
 import useSAM from "@/hooks/useSAM";
 import { useEffect, useRef, useState } from "react";
-import { invertImageAlpha, processCanvas } from "@/utils/canvas";
 import { loadImage } from "@/utils/image";
 import { MaskEnableButton, MaskUI } from "./Canvas/MaskUI";
 import Canvas from "./Canvas/Canvas";
@@ -14,25 +13,37 @@ import CheckBox from "./General/CheckBox";
 import ToggleComponent from "./General/ToggleComponent";
 import SAMUI from "./Canvas/SAMUI";
 import SobelCanvas from "./Canvas/SobelCanvas";
+import { useImageContext } from "@/context/image";
+import { useMainCanvasContext } from "@/context/mainCanvas";
+import { useColorContext } from "@/context/color";
+import { exportCanvasImage, processCanvas } from "@/utils/canvas";
 
-const ImageEditor = ({ canvasRef, maskedCanvasRef,
-    image, setImage, maskImage, setMaskImage, onImageSelected,
-    hoveringColor, setSelectedColor, colorPalette, ignorePalette,
+const ImageEditor = ({
+    onImageSelected,
+    setSelectedColor,
     invertMask, setInvertMask,
-    onlyHighlightMask
+    onlyHighlightMask,
+    maxSize = 640
 }) => {
 
+    const { canvasRef, maskCanvasRef } = useMainCanvasContext();
+    const [canvas, maskCanvas] = [canvasRef.current, maskCanvasRef.current];
+    
     const { reset: canvasReset, drawingComplete, setDrawingComplete, update: updateCanvas } = useCanvas()
     const { reset: maskReset, drawingComplete: maskDrawingComplete, setDrawingComplete: setMaskDrawingComplete, update: updateMaskCanvas } = useCanvas()
     const { ref: highlightCanvasRef, reset: highlightReset, drawingComplete: HighlightDrawingComplete, setDrawingComplete: setHighlightDrawingComplete, update: updateHighlightCanvas } = useCanvas()
     const { ref: SAMCanvasRef, reset: SAMReset, update: updateSAMCanvas } = useCanvas()
     const { ref: sobelCanvasRef, reset: sobelReset, update: updateSobelCanvas } = useCanvas()
 
+    const { colorPalette, ignorePalette, hoveringColor } = useColorContext();
+
+    const { image, setImage, maskImage, setMaskImage } = useImageContext();
+
     const fileDropRef = useRef(null);
     const { enableMask, setEnableMask, maskMode, setMaskMode, reset: resetMaskUI } = useMaskUI();
 
     const { resetSAM, SAMImages,
-        SAMEnableIndex, setSAMEnableIndex,
+        SAMEnableIndex, onChangeSAMIndex,
         SAMPositions, setSAMPositions,
         SAMIgnorePositions, setSAMIgnorePositions,
         SAMMode, setSAMMode,
@@ -54,10 +65,9 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
     }, [maskDrawingComplete]);
 
     const onClickSAMIndex = async (index) => {
-        setSAMEnableIndex(index);
-        const maskSAMImage = await invertImageAlpha(SAMImages[index]);
+        const SAMMask = await onChangeSAMIndex(index)
 
-        setMaskImage(maskSAMImage);
+        setMaskImage(SAMMask);
         updateMaskCanvas();
         setEnableMask(true);
         if (!SAMMode) {
@@ -66,22 +76,17 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
     }
 
     const exportAndOpenImage = async (useMask = false) => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-            // Convert canvas to blob
-            const blob = await processCanvas({ canvas: canvasRef?.current, maskCanvas: maskedCanvasRef?.current, image, cropTransparent: true, useCurrentCanvas: false, toBlob: true });
-            const url = URL.createObjectURL(blob);
+        const url = await exportCanvasImage({ canvas: canvas, maskCanvas: maskCanvas, image, useMask });
 
-            // Open the URL in a new tab
-            window.open(url, '_blank');
-            // Clean up the URL object after a delay
-            setTimeout(() => URL.revokeObjectURL(url), 60000);
-        };
+        // Open the URL in a new tab
+        window.open(url, '_blank');
+        // Clean up the URL object after a delay
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
     };
 
     const onApplyMask = async () => {
-        const url = processCanvas({ canvas: canvasRef?.current, image, cropTransparent: true, useCurrentCanvas: false });
-        const maskUrl = processCanvas({ canvas: maskedCanvasRef?.current, image, cropTransparent: true, useCurrentCanvas: true, isInverted: !invertMask });
+        const url = processCanvas({ canvas: canvas, image, cropTransparent: true, useCurrentCanvas: false });
+        const maskUrl = processCanvas({ canvas: maskCanvas, image, cropTransparent: true, useCurrentCanvas: true, isInverted: !invertMask });
 
         const [croppedImage, croppedMaskImage] = await Promise.all([
             loadImage(url),
@@ -116,15 +121,11 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
         updateSobelCanvas()
     }
 
-    const maxSize = 640
-
-
-
     return (
         <div className="flex flex-col gap-3 min-w-fit">
             <div className="mb-4 relative  " ref={fileDropRef}  >
                 {/* Drag and drop within the same dimension as canvas */}
-                <div className={`${image ? 'absolute inset-0  pointer-events-none ' : ''} `} style={{ width: canvasRef?.current?.width ?? maxSize + 'px', height: canvasRef?.current?.height ?? maxSize + 'px' }}>
+                <div className={`${image ? 'absolute inset-0  pointer-events-none ' : ''} `} style={{ width: canvas?.width ?? maxSize + 'px', height: canvas?.height ?? maxSize + 'px' }}>
                     <FileUpload onImageSelected={handleImageSelection} imageSelected={image !== null} fileDropRef={fileDropRef} />
                 </div>
 
@@ -132,19 +133,19 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                 {image &&
                     <>
                         <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={canvasReset}
-                            maskedImage={maskedCanvasRef.current} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
+                            maskedImage={maskCanvas} maskMode={maskMode} enableMask={enableMask} invertMask={invertMask}
                             setSelectedColor={setSelectedColor}
                         />
-                        <SobelCanvas canvasRef={sobelCanvasRef} reset={sobelReset} imageCanvas={canvasRef?.current} enabled={enableSobel} colorSpace={sobelColorSpace} />
-                        <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} maskImage={maskImage} reset={maskReset} maskMode={maskMode}
+                        <SobelCanvas canvasRef={sobelCanvasRef} reset={sobelReset} imageCanvas={canvas} enabled={enableSobel} colorSpace={sobelColorSpace} />
+                        <MaskedCanvas canvasRef={maskCanvasRef} image={canvas} maskImage={maskImage} reset={maskReset} maskMode={maskMode}
                             setDrawingComplete={setMaskDrawingComplete}
                         />
-                        <SAMCanvas canvasRef={SAMCanvasRef} image={canvasRef?.current} reset={SAMReset} maskMode={SAMMode}
+                        <SAMCanvas canvasRef={SAMCanvasRef} image={canvas} reset={SAMReset} maskMode={SAMMode}
                             SAMPositions={SAMPositions} setSAMPositions={setSAMPositions}
                             SAMIgnorePositions={SAMIgnorePositions} setSAMIgnorePositions={setSAMIgnorePositions}
                             SAMImages={SAMImages} SAMEnableIndex={SAMEnableIndex}
                         />
-                        <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current} onlyInMask={onlyHighlightMask}
+                        <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvas} maskCanvas={maskCanvas} onlyInMask={onlyHighlightMask}
                             reset={highlightReset}
                             color={hoveringColor} colorPalette={colorPalette} ignorePalette={ignorePalette} />
 
@@ -159,7 +160,7 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
 
             <ToggleComponent label="SAM" >
                 <SAMUI SAMMode={SAMMode} setSAMMode={setSAMMode} SAMImages={SAMImages}
-                    processSAM={() => processSAM(canvasRef?.current)} onClickSAMIndex={onClickSAMIndex}
+                    processSAM={() => processSAM(canvas)} onClickSAMIndex={onClickSAMIndex}
 
                 />
             </ToggleComponent>
@@ -169,8 +170,10 @@ const ImageEditor = ({ canvasRef, maskedCanvasRef,
                 </div>
             </ToggleComponent>
             <ToggleComponent label="Export image" >
-                <CheckBox checked={exportUseMask} onChange={() => setExportUseMask(!exportUseMask)} label="Use Mask" />
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => exportAndOpenImage(exportUseMask)}>Export and Open Image</button>
+                <>
+                    <CheckBox checked={exportUseMask} onChange={() => setExportUseMask(!exportUseMask)} label="Use Mask" />
+                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => exportAndOpenImage(exportUseMask)}>Export and Open Image</button>
+                </>
             </ToggleComponent>
 
         </div>

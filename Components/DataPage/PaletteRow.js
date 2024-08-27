@@ -5,7 +5,6 @@ import HighlightHoveringColorCanvas from '../../Components/Canvas/FilterCanvas';
 import { CanvasNoMask } from '../../Components/Canvas/Canvas';
 import { sortPaletteAndPercentage } from '../../utils/color';
 import { useInView } from 'react-intersection-observer';
-import { createImageFromUrl } from '../../utils/canvas';
 import MaskedCanvas from '../../Components/Canvas/MaskedCanvas';
 import { ImageTagsDisplay } from './ImageTagsDisplay';
 import { setImageURL } from '@/lib/cloudinary/utils';
@@ -15,6 +14,7 @@ import CheckBox from '../General/CheckBox';
 import useCanvas from '@/hooks/useCanvas';
 import { useColorPaletteInteractivity } from '@/hooks/useColorPalette';
 import Extras from './Extra';
+import { loadImage } from '@/utils/image';
 
 export const PaletteRow = ({ paletteData,
 
@@ -45,7 +45,7 @@ export const PaletteRow = ({ paletteData,
         if (inView) {
             const loadResizedImage = async (url, setF) => {
                 const resized_url = setImageURL(url, maxSize, maxSize)
-                const img = await createImageFromUrl(resized_url);
+                const img = await loadImage(resized_url);
                 setF(img);
 
             };

@@ -1,3 +1,4 @@
+import { invertImageAlpha } from "@/utils/canvas";
 import { dataURLtoFile, loadBase64Image } from "@/utils/image";
 import { useEffect, useState } from "react";
 
@@ -75,8 +76,17 @@ export default function useSAM() {
         }
     }
 
+
+    const onChangeSAMIndex = async (index) => {
+        setSAMEnableIndex(index);
+        // store as inverted in database
+        const image = await invertImageAlpha(SAMImages[index]);
+        return image
+    }
+
+
     return {
-        resetSAM, SAMImages, setSAMImages, SAMEnableIndex, setSAMEnableIndex, SAMPositions, setSAMPositions, SAMIgnorePositions, setSAMIgnorePositions, SAMMode, setSAMMode,
+        resetSAM, SAMImages, setSAMImages, SAMEnableIndex, onChangeSAMIndex, SAMPositions, setSAMPositions, SAMIgnorePositions, setSAMIgnorePositions, SAMMode, setSAMMode,
         processSAM, reconnectSAM, SAMconnected
     };
 }

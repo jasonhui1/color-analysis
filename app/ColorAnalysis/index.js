@@ -10,27 +10,22 @@ import ImageEditor from "@/Components/ImageEditor";
 import Link from "@/node_modules/next/link";
 import { useFetchPalettesData } from "@/hooks/useFetchPalettesData";
 import { loadImage } from "@/utils/image";
+import { ColorProvider, useColorContext } from "@/context/color";
+import { useImageContext } from "@/context/image";
 
 
 const ColorAnalysis = () => {
-    const canvasRef = useRef(null);
-    const maskCanvasRef = useRef(null);
-
-    const [image, setImage] = useState(null);
-    const [maskImage, setMaskImage] = useState(null);
-
+    const { setImage, setMaskImage } = useImageContext();
     const [imageSourceURL, setImageSourceURL] = useState('');
 
-    //Resets, use canvas hook
-    const [formResetToggle, setFormResetToggle] = useState(false);
-
-    const [colorPalette, setColorPalette] = useState([]);
-    const [ignorePalette, setIgnorePalette] = useState([]);
     const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
-    const [hoveringColor, setHoveringColor] = useState();
+    const { setColorPalette, setIgnorePalette, } = useColorContext();
 
     const [invertMask, setInvertMask] = useState(false);
     const [onlyHighlightMask, setOnlyHighlightMask] = useState(true);
+
+    //Resets, use canvas hook
+    const [formResetToggle, setFormResetToggle] = useState(false);
 
     const searchParams = useSearchParams()
     const paletteId = searchParams.get('paletteId')
@@ -43,7 +38,6 @@ const ColorAnalysis = () => {
 
     useEffect(() => {
         const loadData = async () => {
-
             if (paletteData) {
                 setColorPalette(paletteData.palette);
                 setIgnorePalette(paletteData.ignorePalette);
@@ -59,33 +53,29 @@ const ColorAnalysis = () => {
 
             <Header />
 
-            {/* {image && ( */}
-            <div className="flex flex-row gap-6 relative mb-3 " >
-                <ImageEditor canvasRef={canvasRef} maskedCanvasRef={maskCanvasRef}
-                    image={image} setImage={setImage}
-                    maskImage={maskImage} setMaskImage={setMaskImage}
-                    onImageSelected={resetForm}
-                    hoveringColor={hoveringColor} setSelectedColor={setSelectedColor}
-                    colorPalette={colorPalette} ignorePalette={ignorePalette}
-                    invertMask={invertMask} setInvertMask={setInvertMask}
-                    onlyHighlightMask={onlyHighlightMask}
-                />
+            <ColorProvider>
+                {/* {image && ( */}
+                <div className="flex flex-row gap-6 relative mb-3 " >
+                    <ImageEditor
+                        onImageSelected={resetForm}
+                        invertMask={invertMask} setInvertMask={setInvertMask}
+                        setSelectedColor={setSelectedColor}
+                        onlyHighlightMask={onlyHighlightMask}
+                    />
 
-                <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} />
+                    <ColorPicker selectedColor={{ r: selectedColor[0], g: selectedColor[1], b: selectedColor[2] }} isRGBSpace={true} />
 
-                {/* Use Context */}
-                <Form
-                    canvas={canvasRef?.current} maskCanvas={maskCanvasRef?.current} image={image} invertMask={invertMask}
-                    hoveringColor={hoveringColor} setHoveringColor={setHoveringColor}
-                    selectedColor={selectedColor} setSelectedColor={setSelectedColor}
-                    imageSourceURL={imageSourceURL} setImageSourceURL={setImageSourceURL}
-                    colorPalette={colorPalette} setColorPalette={setColorPalette}
-                    ignorePalette={ignorePalette} setIgnorePalette={setIgnorePalette}
-                    onlyHighlightMask={onlyHighlightMask} setOnlyHighlightMask={setOnlyHighlightMask}
-                    formReset={formResetToggle}
-                    paletteData={paletteData}
-                />
-            </div>
+                    {/* Use Context */}
+                    <Form paletteData={paletteData}
+                        imageSourceURL={imageSourceURL} setImageSourceURL={setImageSourceURL}
+                        selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+                        invertMask={invertMask}
+                        onlyHighlightMask={onlyHighlightMask} setOnlyHighlightMask={setOnlyHighlightMask}
+                        formReset={formResetToggle}
+                    />
+                </div>
+            </ColorProvider>
+
 
         </div>
     );

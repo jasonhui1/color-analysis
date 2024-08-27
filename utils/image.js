@@ -10,13 +10,14 @@ export const loadBase64Image = (base64image) => {
 };
 
 export const loadImage = (src) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const img = new Image();
         img.src = src;
         img.crossOrigin = 'anonymous';
         img.onload = () => {
             resolve(img);
         };
+        img.onerror = reject;
     });
 };
 
@@ -31,5 +32,3 @@ export const dataURLtoFile = (dataurl, filename) => {
     }
     return new File([u8arr], filename, { type: mime });
 };
-
-

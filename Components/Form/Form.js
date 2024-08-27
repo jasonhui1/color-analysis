@@ -9,22 +9,31 @@ import CheckBox from "../General/CheckBox";
 import TagInput from "./TagInput";
 import { AnalysisColorButton } from "./AnalysisColorButton";
 import { CalulatePercentageButton } from "./CalulatePercentageButton";
+import { useColorContext } from "@/context/color";
+import { useMainCanvasContext } from "@/context/mainCanvas";
 
-export function Form({ canvas, image, maskCanvas, invertMask,
+export function Form({ invertMask,
     imageSourceURL, setImageSourceURL,
-    colorPalette, setColorPalette,
-    ignorePalette, setIgnorePalette,
     selectedColor, setSelectedColor,
-    hoveringColor, setHoveringColor,
     onlyHighlightMask, setOnlyHighlightMask,
     formReset,
     paletteData = null,
 }) {
 
+    const { canvasRef } = useMainCanvasContext();
+    const canvas = canvasRef.current
+    
     const [tags, setTags] = useState([]);
     const [percentage, setPercentage] = useState([]);
     const [paletteCount, setPaletteCount] = useState(12);
     const [percentageIsAccurate, setPercentageIsAccurate] = useState(true);
+
+    const {
+        colorPalette, setColorPalette,
+        ignorePalette, setIgnorePalette,
+        hoveringColor, setHoveringColor
+    } = useColorContext();
+
 
     const { onPaletteColorHover,
         onPaletteColorUnHover,
@@ -42,6 +51,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
         setIgnorePalette([]);
     }, [formReset]);
 
+    // Initial set if editing
     useEffect(() => {
         if (paletteData) {
             setTags(paletteData.tags);
@@ -81,7 +91,7 @@ export function Form({ canvas, image, maskCanvas, invertMask,
 
             <CheckBox label="Highlight only mask" checked={onlyHighlightMask} onChange={() => setOnlyHighlightMask(!onlyHighlightMask)} />
 
-
+            {/* TODO: Next */}
             <PaletteDisplay
                 colorPalette={colorPalette} setColorPalette={setColorPalette} colorPalettePercentage={percentage}
                 onPaletteColorHover={onPaletteColorHover}
@@ -110,20 +120,10 @@ export function Form({ canvas, image, maskCanvas, invertMask,
             <TagInput tags={tags} setTags={setTags} />
             <TextInput text={imageSourceURL} setText={setImageSourceURL} label='Source' classname="min-w-96" />
 
-
-            {/* {maskDataUrl &&
-                <NextImage
-                    src={maskDataUrl} alt="Masked Image"
-                    width={0}
-                    height={0}
-                    sizes="100vw"
-                    style={{ width: 'auto', height: 'auto' }} // optional
-                />
-            } */}
-
-            <UploadButton colorPalette={colorPalette} canvas={canvas} image={image} tags={tags} invertMask={invertMask}
-                percentage={percentage} ignorePalette={ignorePalette} imageSourceURL={imageSourceURL} maskCanvas={maskCanvas}
-                isEditing={paletteData !== null} paletteId={paletteData && paletteData.id}
+            <UploadButton
+                tags={tags} invertMask={invertMask}
+                percentage={percentage} imageSourceURL={imageSourceURL}
+                paletteId={paletteData && paletteData.id}
             />
 
         </div>

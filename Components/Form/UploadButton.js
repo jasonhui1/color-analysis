@@ -3,16 +3,29 @@ import { useEffect, useState } from "react";
 import { uploadImageClient } from "../../lib/clientApis/image";
 import { updatePaletteClient, uploadPaletteClient } from "../../lib/clientApis/palette";
 import { invertImageAlpha, processCanvas, } from "../../utils/canvas";
+import { useImageContext } from "@/context/image";
+import { useMainCanvasContext } from "@/context/mainCanvas";
+import { useColorContext } from "@/context/color";
 
-export function UploadButton({ colorPalette, canvas, image, tags, percentage, ignorePalette, imageSourceURL, maskCanvas, invertMask = false, isEditing = false, paletteId = null }) {
+export function UploadButton({ tags, percentage, imageSourceURL, invertMask = false, paletteId = null }) {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadSuccess, setUploadSuccess] = useState(false);
     const [error, setError] = useState(null);
 
+    const { image, maskImage } = useImageContext();
+    const { canvasRef, maskCanvasRef } = useMainCanvasContext();
+    let [canvas, maskCanvas] = [canvasRef.current, maskCanvasRef.current];
+    const { colorPalette, ignorePalette } = useColorContext();
+
+    const isEditing = paletteId !== null;
+
+    // Reset success state when fields are changed
     useEffect(() => {
         setUploadSuccess(false);
     }, [colorPalette, image, tags, percentage, ignorePalette, imageSourceURL, maskCanvas]);
 
+
+    // Main function
     const handleUpload = async (event) => {
         if (!image) throw Error('No image uploaded');
         if (!colorPalette) throw Error('No colorPalette uploaded');
@@ -48,7 +61,7 @@ export function UploadButton({ colorPalette, canvas, image, tags, percentage, ig
     return (
         <div className="flex flex-col">
             <button onClick={handleUpload}
-                // disabled={isUploading} 
+                disabled={isUploading}
                 className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                 {isUploading ? isEditing ? 'Editing...' : 'Uploading...' : isEditing ? 'Edit ' : 'Upload '}
 

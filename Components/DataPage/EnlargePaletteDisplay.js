@@ -1,17 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 
-import { Form } from "../../Components/Form/Form";
 import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
 
-import ImageEditor from "@/Components/ImageEditor";
 import ImageDisplay from "../ImageDisplay";
 import { useColorPaletteInteractivity } from "@/hooks/useColorPalette";
 import PaletteDisplay, { PaletteDisplaySimpleV2 } from "../Color/PaletteDisplay";
-import { createImageFromUrl } from "@/utils/canvas";
 import { setImageURL } from "@/lib/cloudinary/utils";
 import { IoMdClose } from "react-icons/io";
 import ToggleComponent from "../General/ToggleComponent";
 import CheckBox from "../General/CheckBox";
+import { loadImage } from "@/utils/image";
 
 
 const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePalette, percentage, maxSize = 640, selectedColor, setSelectedColor, onClose }) => {
@@ -35,7 +33,7 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
     useEffect(() => {
         const loadResizedImage = async (url, setF) => {
             const resized_url = setImageURL(url, maxSize, maxSize)
-            const img = await createImageFromUrl(resized_url);
+            const img = await loadImage(resized_url);
             setF(img);
 
         };

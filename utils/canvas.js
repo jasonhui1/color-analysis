@@ -1,5 +1,6 @@
 import { processImageColors } from "@/Components/Canvas/FilterCanvas";
 import { isColorEqual } from "./color";
+import { loadImage } from "./image";
 
 export const calculateCanvasSize = (image, maxSize) => {
     // Calculate new dimensions
@@ -99,7 +100,7 @@ const createResultCanvas = ({ sourceCanvas, sourceBounds, targetWidth, targetHei
         sourceBounds.x, sourceBounds.y, sourceBounds.width, sourceBounds.height,
         0, 0, targetWidth, targetHeight
     );
-    
+
     if (!maskCanvas) return resultCanvas;
     if (invertMask) {
         resultCtx.globalCompositeOperation = 'destination-in';
@@ -174,20 +175,9 @@ export const invertImageAlpha = async (image, returnCanvas = false) => {
     if (returnCanvas) return canvas
 
     // Create a new Image object and wait for it to load
-    const resultImage = await createImageFromUrl(canvas.toDataURL());
+    const resultImage = await loadImage(canvas.toDataURL());
     return resultImage;
 }
-
-// Helper function to create an Image from a canvas
-export const createImageFromUrl = (url) => {
-    return new Promise((resolve, reject) => {
-        const image = new Image();
-        image.src = url;
-        image.setAttribute('crossOrigin', '');
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-    });
-};
 
 export const replaceCanvasColor = (canvas, palette1, palette2) => {
     const requireReplace = palette1.map((color, index) => !isColorEqual(color, palette2[index]));
@@ -209,3 +199,17 @@ export const replaceCanvasColor = (canvas, palette1, palette2) => {
     });
     ctx.putImageData(imageData, 0, 0);
 }
+
+export const exportCanvasImage = async ({ canvas, maskCanvas = null, image, useMask = false }) => {
+    if (!canvas) return
+
+    // Convert canvas to blob
+    const blob = await processCanvas({
+        canvas, maskCanvas: useMask ? maskCanvas : null, image,
+        cropTransparent: true, useCurrentCanvas: false
+        , toBlob: true
+    });
+    const url = URL.createObjectURL(blob);
+
+    return url
+};
