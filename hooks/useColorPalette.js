@@ -1,34 +1,46 @@
 import { isColorEqual } from "@/utils/color";
 import { useState } from "react";
 
-export function useColorPaletteInteractivity({ setPalette = null, setHoveringColor = null, setSelectedColor = null, onHover = () => { }, onUnhover = () => { }, onDelete = () => { }, onClick = () => { } } = {}) {
+export function useColorPaletteInteractivity({ setPalette = null, setHoveringColor = null, setSelectedColor = null,
+    onHover = (color, index) => { }, onUnhover = () => { }, onDelete = (color, index) => { }, onClick = (color, index) => { },
+    updateHoverCondition = true, updateUnhoverCondition = true } = {}
+) {
 
-    const onPaletteColorHover = (color) => {
-        if (setHoveringColor) setHoveringColor(color);
-        onHover()
+    const [hoveringIndex, setHoveringIndex] = useState(-1);
+
+    const onPaletteColorHover = (color, index = -1) => {
+        if (setHoveringColor) {
+            setHoveringColor(color);
+            if (updateHoverCondition) setHoveringIndex(index);
+        }
+        onHover(color, index)
     };
 
     const onPaletteColorUnHover = () => {
         if (setHoveringColor) setHoveringColor(null);
+        if (updateUnhoverCondition) setHoveringIndex(-1);
         onUnhover()
     };
 
-    const onPaletteColorDelete = (color) => {
-        setPalette(palette => palette.filter((c) => !isColorEqual(c, color)));
+    const onPaletteColorDelete = (color, index) => {
+        if (setPalette) setPalette(palette => palette.filter((c) => !isColorEqual(c, color)));
         if (setHoveringColor) setHoveringColor(null);
-        onDelete()
+
+        setHoveringIndex(-1);
+        onDelete(color, index)
     };
 
-    const onPaletteColorClick = (color) => {
+    const onPaletteColorClick = (color, index) => {
         if (setSelectedColor) setSelectedColor(color);
-        onClick()
+        onClick(color, index)
     };
 
     return {
+        hoveringIndex, setHoveringIndex,
         onPaletteColorHover,
         onPaletteColorUnHover,
         onPaletteColorDelete,
-        onPaletteColorClick
+        onPaletteColorClick,
     };
 
 }

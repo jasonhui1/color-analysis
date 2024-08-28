@@ -22,7 +22,7 @@ export function Form({ invertMask,
 
     const { canvasRef } = useMainCanvasContext();
     const canvas = canvasRef.current
-    
+
     const [tags, setTags] = useState([]);
     const [percentage, setPercentage] = useState([]);
     const [paletteCount, setPaletteCount] = useState(12);
@@ -33,17 +33,6 @@ export function Form({ invertMask,
         ignorePalette, setIgnorePalette,
         hoveringColor, setHoveringColor
     } = useColorContext();
-
-
-    const { onPaletteColorHover,
-        onPaletteColorUnHover,
-        onPaletteColorDelete,
-        onPaletteColorClick
-    } = useColorPaletteInteractivity({ setPalette: setColorPalette, setSelectedColor, setHoveringColor, });
-
-    const {
-        onPaletteColorDelete: onIgnorePaletteColorDelete,
-    } = useColorPaletteInteractivity({ setPalette: setIgnorePalette, setSelectedColor, setHoveringColor });
 
     useEffect(() => {
         setPercentage([]);
@@ -62,21 +51,11 @@ export function Form({ invertMask,
     }, [paletteData])
 
 
-    const removePercentage = (index) => {
+    const removePercentage = (_, index) => {
         setPercentage(percentage.filter((_, i) => i !== index));
         setPercentageIsAccurate(false);
     }
 
-    const onDeletePaletteColor = (color, index) => {
-        onPaletteColorDelete(color)
-        removePercentage(index)
-    };
-
-    const onDeleteIgnorePaletteColor = (color, index) => {
-        onIgnorePaletteColorDelete(color)
-        removePercentage(index)
-
-    };
 
     return (
         <div className="flex flex-col gap-4 flex-wrap">
@@ -91,28 +70,26 @@ export function Form({ invertMask,
 
             <CheckBox label="Highlight only mask" checked={onlyHighlightMask} onChange={() => setOnlyHighlightMask(!onlyHighlightMask)} />
 
-            {/* TODO: Next */}
             <PaletteDisplay
                 colorPalette={colorPalette} setColorPalette={setColorPalette} colorPalettePercentage={percentage}
-                onPaletteColorHover={onPaletteColorHover}
-                onPaletteColorUnHover={onPaletteColorUnHover}
-                onPaletteColorDelete={onDeletePaletteColor}
-                onPaletteColorClick={onPaletteColorClick}
-                onPaletteColorEdit={() => setPercentageIsAccurate(false)}
+                
+                handleDelete={removePercentage}
+                handleEdit={() => setPercentageIsAccurate(false)}
+                
                 selectedColor={selectedColor}
+                setSelectedColor={setSelectedColor} setHoveringColor={setHoveringColor}
             />
 
             <ToggleComponent label={"Ignore Palette"}>
                 <PaletteDisplay
+                    title="Ignore Palette"
                     colorPalette={ignorePalette} setColorPalette={setIgnorePalette}
-                    onPaletteColorHover={onPaletteColorHover}
-                    onPaletteColorUnHover={onPaletteColorUnHover}
-                    onPaletteColorDelete={onDeleteIgnorePaletteColor}
-                    onPaletteColorClick={onPaletteColorClick}
-                    onPaletteColorEdit={() => setPercentageIsAccurate(false)}
+
+                    handleDelete={removePercentage}
+                    handleEdit={() => setPercentageIsAccurate(false)}
 
                     selectedColor={selectedColor}
-                    title="Ignore Palette"
+                    setSelectedColor={setSelectedColor} setHoveringColor={setHoveringColor}
                 />
             </ToggleComponent>
             {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} highlightColor={hoveringColor} />}
