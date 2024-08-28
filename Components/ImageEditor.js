@@ -28,7 +28,7 @@ const ImageEditor = ({
 
     const { canvasRef, maskCanvasRef } = useMainCanvasContext();
     const [canvas, maskCanvas] = [canvasRef.current, maskCanvasRef.current];
-    
+
     const { reset: canvasReset, drawingComplete, setDrawingComplete, update: updateCanvas } = useCanvas()
     const { reset: maskReset, drawingComplete: maskDrawingComplete, setDrawingComplete: setMaskDrawingComplete, update: updateMaskCanvas } = useCanvas()
     const { ref: highlightCanvasRef, reset: highlightReset, drawingComplete: HighlightDrawingComplete, setDrawingComplete: setHighlightDrawingComplete, update: updateHighlightCanvas } = useCanvas()
@@ -42,13 +42,7 @@ const ImageEditor = ({
     const fileDropRef = useRef(null);
     const { enableMask, setEnableMask, maskMode, setMaskMode, reset: resetMaskUI } = useMaskUI();
 
-    const { resetSAM, SAMImages,
-        SAMEnableIndex, onChangeSAMIndex,
-        SAMPositions, setSAMPositions,
-        SAMIgnorePositions, setSAMIgnorePositions,
-        SAMMode, setSAMMode,
-        reconnectSAM, SAMconnected, processSAM
-    } = useSAM();
+    const SAM = useSAM();
 
     const [enableSobel, setEnableSobel] = useState(false);
     const [sobelColorSpace, setSobelColorSpace] = useState('rgb');
@@ -65,12 +59,12 @@ const ImageEditor = ({
     }, [maskDrawingComplete]);
 
     const onClickSAMIndex = async (index) => {
-        const SAMMask = await onChangeSAMIndex(index)
+        const SAMMask = await SAM.onChangeIndex(index)
 
         setMaskImage(SAMMask);
         updateMaskCanvas();
         setEnableMask(true);
-        if (!SAMMode) {
+        if (!SAM.mode) {
             updateCanvas()
         }
     }
@@ -97,7 +91,7 @@ const ImageEditor = ({
         setMaskImage(croppedMaskImage);
 
         resetAllCanvas()
-        resetSAM()
+        SAM.resetSAM()
         setEnableMask(false)
         setEnableSobel(false)
 
@@ -109,7 +103,7 @@ const ImageEditor = ({
 
         resetAllCanvas()
         resetMaskUI()
-        resetSAM()
+        SAM.resetSAM()
 
         onImageSelected(img, file, url)
     }
@@ -140,14 +134,11 @@ const ImageEditor = ({
                         <MaskedCanvas canvasRef={maskCanvasRef} image={canvas} maskImage={maskImage} reset={maskReset} maskMode={maskMode}
                             setDrawingComplete={setMaskDrawingComplete}
                         />
-                        <SAMCanvas canvasRef={SAMCanvasRef} image={canvas} reset={SAMReset} maskMode={SAMMode}
-                            SAMPositions={SAMPositions} setSAMPositions={setSAMPositions}
-                            SAMIgnorePositions={SAMIgnorePositions} setSAMIgnorePositions={setSAMIgnorePositions}
-                            SAMImages={SAMImages} SAMEnableIndex={SAMEnableIndex}
+                        <SAMCanvas canvasRef={SAMCanvasRef} image={canvas} reset={SAMReset} SAM={SAM} />
+                        <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvas} maskCanvas={maskCanvas} reset={highlightReset}
+                            color={hoveringColor} colorPalette={colorPalette} ignorePalette={ignorePalette}
+                            onlyInMask={onlyHighlightMask}
                         />
-                        <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvas} maskCanvas={maskCanvas} onlyInMask={onlyHighlightMask}
-                            reset={highlightReset}
-                            color={hoveringColor} colorPalette={colorPalette} ignorePalette={ignorePalette} />
 
                     </>
                 }
@@ -159,11 +150,9 @@ const ImageEditor = ({
                 onApplyMask={onApplyMask} />
 
             <ToggleComponent label="SAM" >
-                <SAMUI SAMMode={SAMMode} setSAMMode={setSAMMode} SAMImages={SAMImages}
-                    processSAM={() => processSAM(canvas)} onClickSAMIndex={onClickSAMIndex}
-
-                />
+                <SAMUI canvas={canvas} SAM={SAM} onClickIndex={onClickSAMIndex} />
             </ToggleComponent>
+
             <ToggleComponent label="Filter" >
                 <div className="flex flex-row gap-3">
                     <MaskEnableButton enableMask={enableSobel} setEnableMask={setEnableSobel} />

@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { calculateCanvasSize } from '../../utils/canvas';
 import { CircleIndicator } from '../Color/PositionIndicators';
 
-const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
-    SAMImages = [], SAMEnableIndex = -1, SAMPositions, setSAMPositions, SAMIgnorePositions, setSAMIgnorePositions,
+const SAMCanvas = ({ canvasRef, image, reset, SAM,
     displayRadius = 20, maxSize = 640,
 }) => {
+
+    const {mode: maskMode, images = [], enableIndex = -1, positions, setPositions, ignorePositions, setIgnorePositions, } = SAM
 
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const mousePositionRef = useRef(null);
@@ -15,10 +16,10 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
     }, [mousePosition])
 
     useEffect(() => {
-        if (SAMEnableIndex === -1 || (SAMImages && SAMImages.length) === 0) return
+        if (enableIndex === -1 || (images && images.length) === 0) return
 
         if (canvasRef.current) {
-            const image = SAMImages[SAMEnableIndex]
+            const image = images[enableIndex]
 
             const canvas = canvasRef.current;
             let ctx = canvas.getContext("2d");
@@ -31,7 +32,7 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
             ctx.drawImage(image, 0, 0, width, height);
             // setDrawingComplete(true)
         }
-    }, [SAMEnableIndex])
+    }, [enableIndex])
 
     useEffect(() => {
         if (image && canvasRef.current) {
@@ -58,9 +59,9 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
 
         // SAM 0 and 1 (include/ exclude)
         if (positive) {
-            setSAMPositions(positions => [...positions, [x, y]])
+            setPositions(positions => [...positions, [x, y]])
         } else {
-            setSAMIgnorePositions(positions => [...positions, [x, y]])
+            setIgnorePositions(positions => [...positions, [x, y]])
         }
     }
 
@@ -70,8 +71,8 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
         const distance = (x1, y1, x2, y2) => Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
         const checkFilter = (position) => distance(x, y, position[0], position[1]) < displayRadius
 
-        setSAMPositions(positions => positions.filter(position => !checkFilter(position)))
-        setSAMIgnorePositions(positions => positions.filter(position => !checkFilter(position)))
+        setPositions(positions => positions.filter(position => !checkFilter(position)))
+        setIgnorePositions(positions => positions.filter(position => !checkFilter(position)))
     }
 
     const onLeftClick = (e) => {
@@ -139,8 +140,8 @@ const SAMCanvas = ({ canvasRef, image, reset, maskMode = true,
             />
             {maskMode &&
                 <>
-                    {SAMPositions && SAMPositions.map((position, index) => <CircleIndicator key={index} position={{ x: position[0], y: position[1] }} diameter={displayRadius} color={'green'} />)}
-                    {SAMIgnorePositions && SAMIgnorePositions.map((position, index) => <CircleIndicator key={index} position={{ x: position[0], y: position[1] }} diameter={displayRadius} color={'red'} />)}
+                    {positions && positions.map((position, index) => <CircleIndicator key={index} position={{ x: position[0], y: position[1] }} diameter={displayRadius} color={'green'} />)}
+                    {ignorePositions && ignorePositions.map((position, index) => <CircleIndicator key={index} position={{ x: position[0], y: position[1] }} diameter={displayRadius} color={'red'} />)}
                 </>
             }
 
