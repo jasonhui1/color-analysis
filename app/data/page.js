@@ -25,9 +25,6 @@ export default function DataPage() {
     if (searchTags.includes(tag)) return
     setSearchTags([...searchTags, tag])
   }
-  const onPaletteColorClick = (color) => {
-    setSelectedColor(color)
-  }
 
   const onPaletteSelect = (paletteId, selected) => {
     if (selected) {
@@ -36,7 +33,7 @@ export default function DataPage() {
       setSelectedPalettes(selectedPalettes.filter(id => id != paletteId))
     }
   }
-
+  
   const onClickCompareButton = () => {
     setComparing(true)
   }
@@ -84,7 +81,7 @@ export default function DataPage() {
             paletteData={paletteData}
             onClickTag={onClickTag}
             setEnlargeIndex={() => setEnlargeIndex(index)}
-            onPaletteColorClick={onPaletteColorClick}
+            setSelectedColor={setSelectedColor}
             onPaletteSelect={onPaletteSelect}
           />
         )

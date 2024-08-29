@@ -59,7 +59,7 @@ const ImageEditor = ({
 
         updateAllCanvas()
         resetMaskUI()
-        SAM.resetSAM()
+        SAM.reset()
 
         onImageSelected(img, file, url)
     }

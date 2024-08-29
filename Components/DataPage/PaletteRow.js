@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { PaletteDisplaySimpleV2 } from '../../Components/Color/PaletteDisplay';
+import PaletteDisplay, { PaletteDisplaySimpleV2 } from '../../Components/Color/PaletteDisplay';
 import { TriangularColorPickerDisplayColors } from '../../Components/Color/picker';
 import HighlightHoveringColorCanvas from '../../Components/Canvas/FilterCanvas';
 import { CanvasNoMask } from '../../Components/Canvas/Canvas';
@@ -18,9 +18,8 @@ import { loadImage } from '@/utils/image';
 
 export const PaletteRow = ({ paletteData,
 
-
     showTags = true, showPalette = true, showSelect = true,
-    onClickTag = null, onPaletteColorClick = null, onPaletteSelect = null, setEnlargeIndex = null, maxSize = 250
+    onClickTag = null, setSelectedColor, onPaletteSelect = null, setEnlargeIndex = null, maxSize = 250
 }) => {
 
     const { id: paletteId, palette, ignorePalette = [], tags, percentage, imageURL, maskImageURL, imageSourceURL } = paletteData
@@ -63,7 +62,6 @@ export const PaletteRow = ({ paletteData,
     const { ref: maskCanvasRef } = useCanvas()
     const { ref: canvasHLRef, reset: highlightReset, update: updateHighlightCanvas } = useCanvas()
 
-    const { onPaletteColorHover, onPaletteColorUnHover } = useColorPaletteInteractivity({ setHoveringColor })
 
     return (
         <>
@@ -87,11 +85,16 @@ export const PaletteRow = ({ paletteData,
                             {/* <MdOutlineZoomOutMap className='cursor-pointer' onClick={setEnlargeIndex} size={36}/> */}
 
                             <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} highlightColor={hoveringColor} />
-                            {showPalette && <PaletteDisplaySimpleV2 colorPalette={sorted_palette} showHeading={false} colorPalettePercentage={sorted_percentage}
-                                onPaletteColorHover={onPaletteColorHover}
-                                onPaletteColorUnHover={onPaletteColorUnHover}
-                                onPaletteColorClick={onPaletteColorClick}
-                            />}
+                            {showPalette &&
+                                <PaletteDisplay title={''}
+                                    colorPalette={sorted_palette} colorPalettePercentage={sorted_percentage}
+                                    setSelectedColor={setSelectedColor}
+                                    setHoveringColor={setHoveringColor}
+                                    enableAdd={false} enableDelete={false} enableEdit={false}
+                                />
+
+
+                            }
 
                             {/* Need more safety steps before deploy */}
                             {showSelect && <CheckBox checked={selected} onChange={onSelect} label='' />}

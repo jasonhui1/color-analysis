@@ -6,13 +6,14 @@ import { TbPencilCancel } from "react-icons/tb";
 import { IoMdAdd } from "react-icons/io";
 import { useColorPaletteInteractivity } from "@/hooks/useColorPalette";
 
-export default function PaletteDisplay({ 
-    colorPalette, setColorPalette, 
+export default function PaletteDisplay({
+    colorPalette,
+    setColorPalette = (newPalette) => { },
     colorPalettePercentage = [],
     title = "Color Palette",
-    selectedColor,
+    selectedColor = null,
     setSelectedColor = null, setHoveringColor = null,
-    
+
     handleHover = (color) => { },
     handleUnhover = (color) => { },
     handleDelete = (color, index) => { },
@@ -114,45 +115,45 @@ const PercentageText = ({ color, percentage }) => {
 
 
 
-export function PaletteDisplaySimple({ colorPalette, }) {
-    return (
-        <div className="mt-4">
-            <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
-            <div className="flex gap-4">
+// export function PaletteDisplaySimple({ colorPalette, }) {
+//     return (
+//         <div className="mt-4">
+//             <h2 className="text-xl font-semibold mb-2">Color Palette</h2>
+//             <div className="flex gap-4">
 
-                {colorPalette.map((color, index) => (
-                    <div
-                        key={index}
-                        className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
-                        style={{ backgroundColor: `rgb(${color.join(",")})` }}
-                    >
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
+//                 {colorPalette.map((color, index) => (
+//                     <div
+//                         key={index}
+//                         className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
+//                         style={{ backgroundColor: `rgb(${color.join(",")})` }}
+//                     >
+//                     </div>
+//                 ))}
+//             </div>
+//         </div>
+//     );
+// }
 
 
-export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPaletteColorUnHover, onPaletteColorClick, colorPalettePercentage = [], showHeading = true }) {
+// export function PaletteDisplaySimpleV2({ colorPalette, onPaletteColorHover, onPaletteColorUnHover, onPaletteColorClick, colorPalettePercentage = [], showHeading = true }) {
 
-    return (
-        <div>
-            {showHeading && <h2 className="text-xl font-semibold mb-2">Color Palette</h2>}
-            <div className="flex gap-4">
-                {colorPalette.map((color, index) => (
-                    <div key={index} onMouseEnter={() => onPaletteColorHover(color)} onMouseLeave={() => onPaletteColorUnHover()} onClick={() => onPaletteColorClick(color)}    >
-                        <div
+//     return (
+//         <div>
+//             {showHeading && <h2 className="text-xl font-semibold mb-2">Color Palette</h2>}
+//             <div className="flex gap-4">
+//                 {colorPalette.map((color, index) => (
+//                     <div key={index} onMouseEnter={() => onPaletteColorHover(color)} onMouseLeave={() => onPaletteColorUnHover()} onClick={() => onPaletteColorClick(color)}    >
+//                         <div
 
-                            className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
-                            style={{ backgroundColor: `rgb(${color.join(",")})` }}
-                        >
-                            {colorPalettePercentage.length > 0 && <PercentageText color={color} percentage={colorPalettePercentage[index]} />}
-                        </div>
+//                             className="w-16 h-16  rounded-2xl cursor-pointer shadow-md flex items-center justify-center relative  "
+//                             style={{ backgroundColor: `rgb(${color.join(",")})` }}
+//                         >
+//                             {colorPalettePercentage.length > 0 && <PercentageText color={color} percentage={colorPalettePercentage[index]} />}
+//                         </div>
 
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
+//                     </div>
+//                 ))}
+//             </div>
+//         </div>
+//     );
+// }

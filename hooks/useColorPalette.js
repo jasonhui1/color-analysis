@@ -9,10 +9,8 @@ export function useColorPaletteInteractivity({ setPalette = null, setHoveringCol
     const [hoveringIndex, setHoveringIndex] = useState(-1);
 
     const onPaletteColorHover = (color, index = -1) => {
-        if (setHoveringColor) {
-            setHoveringColor(color);
-            if (updateHoverCondition) setHoveringIndex(index);
-        }
+        if (setHoveringColor) setHoveringColor(color);
+        if (updateHoverCondition) setHoveringIndex(index);
         onHover(color, index)
     };
 

@@ -20,11 +20,6 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
     const [hoveringColor, setHoveringColor] = useState();
     const [onlyHighlightMask, setOnlyHighlightMask] = useState(true);
 
-    const { onPaletteColorHover,
-        onPaletteColorUnHover,
-        onPaletteColorClick
-    } = useColorPaletteInteractivity({ setSelectedColor, setHoveringColor, });
-
     const [image, setImage] = useState(null);
     const [maskImage, setMaskImage] = useState(null);
     const [replacePalette, setReplacePalette] = useState([]);
@@ -61,13 +56,13 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
                 />
 
                 <div className=" flex flex-col gap-4">
-                    <CheckBox label='Only highlight mask' checked={onlyHighlightMask} onChange={() => setOnlyHighlightMask  (!onlyHighlightMask)} />
+                    <CheckBox label='Only highlight mask' checked={onlyHighlightMask} onChange={() => setOnlyHighlightMask(!onlyHighlightMask)} />
 
-                    <PaletteDisplaySimpleV2
+                    <PaletteDisplay
                         colorPalette={colorPalette} colorPalettePercentage={percentage}
-                        onPaletteColorHover={onPaletteColorHover}
-                        onPaletteColorUnHover={onPaletteColorUnHover}
-                        onPaletteColorClick={onPaletteColorClick}
+                        setSelectedColor={setSelectedColor}
+                        setHoveringColor={setHoveringColor}
+                        enableAdd={false} enableDelete={false} enableEdit={false}
                     />
 
                     <ToggleComponent label='Replace Color Palette'  >
@@ -75,8 +70,9 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
                         <PaletteDisplay
                             title='Replace Color Palette'
                             colorPalette={replacePalette} setColorPalette={setReplacePalette} colorPalettePercentage={[]}
-                            onPaletteColorClick={onPaletteColorClick}
-                            selectedColor={selectedColor} enableAdd={false} enableDelete={false} />
+                            setSelectedColor={setSelectedColor} setHoveringColor={setHoveringColor}
+                            selectedColor={selectedColor} enableAdd={false} enableDelete={false}
+                        />
                         <CheckBox label='Enable Replace Color Palette' checked={enableReplacePalette} onChange={() => setEnableReplacePalette(!enableReplacePalette)} />
                     </ToggleComponent>
                     {colorPalette.length > 0 && <TriangularColorPickerDisplayColors colors={colorPalette} highlightColor={hoveringColor} />}
