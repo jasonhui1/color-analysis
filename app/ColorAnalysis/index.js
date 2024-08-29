@@ -19,7 +19,6 @@ const ColorAnalysis = () => {
     const [imageSourceURL, setImageSourceURL] = useState('');
 
     const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
-    const { setColorPalette, setIgnorePalette, } = useColorContext();
 
     const [invertMask, setInvertMask] = useState(false);
     const [onlyHighlightMask, setOnlyHighlightMask] = useState(true);
@@ -39,8 +38,6 @@ const ColorAnalysis = () => {
     useEffect(() => {
         const loadData = async () => {
             if (paletteData) {
-                setColorPalette(paletteData.palette);
-                setIgnorePalette(paletteData.ignorePalette);
                 setImage(await loadImage(paletteData.imageURL));
                 if (paletteData.maskImageURL) setMaskImage(await loadImage(paletteData.maskImageURL));
             }

@@ -36,7 +36,6 @@ export default function SobelCanvas({ canvasRef, imageCanvas, reset, enabled = t
         const imageData = ctx.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
 
         let sobelData;
-        console.log('colorSpace calculating :>> ', colorSpace);
 
         // if (colorSpace === 'rgb') {
         //     sobelData = sobelFilterRGB(imageData);

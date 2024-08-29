@@ -43,6 +43,8 @@ export function Form({ invertMask,
     // Initial set if editing
     useEffect(() => {
         if (paletteData) {
+            setColorPalette(paletteData.palette);
+            setIgnorePalette(paletteData.ignorePalette);
             setTags(paletteData.tags);
             setImageSourceURL(paletteData.imageSourceURL);
             setPercentage(paletteData.percentage);

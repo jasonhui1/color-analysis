@@ -2,21 +2,16 @@ import useCanvas from "@/hooks/useCanvas";
 import { useMaskUI } from "@/hooks/useMaskUI";
 import useSAM from "@/hooks/useSAM";
 import { useEffect, useRef, useState } from "react";
-import { loadImage } from "@/utils/image";
-import { MaskEnableButton, MaskUI } from "./Canvas/MaskUI";
 import Canvas from "./Canvas/Canvas";
 import HighlightHoveringColorCanvas from "./Canvas/FilterCanvas";
 import MaskedCanvas from "./Canvas/MaskedCanvas";
 import SAMCanvas from "./Canvas/SAMCanvas";
 import FileUpload from "./Form/FileUpload";
-import CheckBox from "./General/CheckBox";
-import ToggleComponent from "./General/ToggleComponent";
-import SAMUI from "./Canvas/SAMUI";
 import SobelCanvas from "./Canvas/SobelCanvas";
 import { useImageContext } from "@/context/image";
 import { useMainCanvasContext } from "@/context/mainCanvas";
 import { useColorContext } from "@/context/color";
-import { exportCanvasImage, processCanvas } from "@/utils/canvas";
+import ImageEditorUI from "./ImageEditorUI";
 
 const ImageEditor = ({
     onImageSelected,
@@ -41,13 +36,11 @@ const ImageEditor = ({
 
     const fileDropRef = useRef(null);
     const { enableMask, setEnableMask, maskMode, setMaskMode, reset: resetMaskUI } = useMaskUI();
+    const [enableSobel, setEnableSobel] = useState(false);
 
     const SAM = useSAM();
 
-    const [enableSobel, setEnableSobel] = useState(false);
     const [sobelColorSpace, setSobelColorSpace] = useState('rgb');
-
-    const [exportUseMask, setExportUseMask] = useState(false);
 
 
     useEffect(() => {
@@ -58,62 +51,26 @@ const ImageEditor = ({
         if (maskDrawingComplete && enableMask) updateCanvas()
     }, [maskDrawingComplete]);
 
-    const onClickSAMIndex = async (index) => {
-        const SAMMask = await SAM.onChangeIndex(index)
 
-        setMaskImage(SAMMask);
-        updateMaskCanvas();
-        setEnableMask(true);
-        if (!SAM.mode) {
-            updateCanvas()
-        }
-    }
-
-    const exportAndOpenImage = async (useMask = false) => {
-        const url = await exportCanvasImage({ canvas: canvas, maskCanvas: maskCanvas, image, useMask });
-
-        // Open the URL in a new tab
-        window.open(url, '_blank');
-        // Clean up the URL object after a delay
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
-    };
-
-    const onApplyMask = async () => {
-        const url = processCanvas({ canvas: canvas, image, cropTransparent: true, useCurrentCanvas: false });
-        const maskUrl = processCanvas({ canvas: maskCanvas, image, cropTransparent: true, useCurrentCanvas: true, isInverted: !invertMask });
-
-        const [croppedImage, croppedMaskImage] = await Promise.all([
-            loadImage(url),
-            loadImage(maskUrl)
-        ]);
-
-        setImage(croppedImage);
-        setMaskImage(croppedMaskImage);
-
-        resetAllCanvas()
-        SAM.resetSAM()
-        setEnableMask(false)
-        setEnableSobel(false)
-
-    }
 
     const handleImageSelection = (img, file, url) => {
         setImage(img);
         setMaskImage(null);
 
-        resetAllCanvas()
+        updateAllCanvas()
         resetMaskUI()
         SAM.resetSAM()
 
         onImageSelected(img, file, url)
     }
 
-    const resetAllCanvas = () => {
+    const updateAllCanvas = () => {
         updateCanvas();
         updateMaskCanvas()
         updateSAMCanvas()
         updateSobelCanvas()
     }
+
 
     return (
         <div className="flex flex-col gap-3 min-w-fit">
@@ -143,30 +100,21 @@ const ImageEditor = ({
                     </>
                 }
             </div>
-            {/* Use Context later? */}
-            <MaskUI maskMode={maskMode} setMaskMode={setMaskMode}
-                enableMask={enableMask} setEnableMask={setEnableMask}
+
+            <ImageEditorUI
+                enableMask={enableMask}
                 invertMask={invertMask} setInvertMask={setInvertMask}
-                onApplyMask={onApplyMask} />
-
-            <ToggleComponent label="SAM" >
-                <SAMUI canvas={canvas} SAM={SAM} onClickIndex={onClickSAMIndex} />
-            </ToggleComponent>
-
-            <ToggleComponent label="Filter" >
-                <div className="flex flex-row gap-3">
-                    <MaskEnableButton enableMask={enableSobel} setEnableMask={setEnableSobel} />
-                </div>
-            </ToggleComponent>
-            <ToggleComponent label="Export image" >
-                <>
-                    <CheckBox checked={exportUseMask} onChange={() => setExportUseMask(!exportUseMask)} label="Use Mask" />
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => exportAndOpenImage(exportUseMask)}>Export and Open Image</button>
-                </>
-            </ToggleComponent>
+                maskMode={maskMode} setMaskMode={setMaskMode}
+                SAM={SAM}
+                setEnableMask={setEnableMask}
+                enableSobel={enableSobel} setEnableSobel={setEnableSobel}
+                updateCanvas={updateCanvas} updateMaskCanvas={updateMaskCanvas} updateAllCanvas={updateAllCanvas}
+            />
 
         </div>
     )
 }
 
 export default ImageEditor
+
+
