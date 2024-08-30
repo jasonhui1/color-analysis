@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 
 import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Color/picker";
 
-import ImageDisplay from "../ImageDisplay";
+import ImageDisplay from "../../ImageDisplay";
 import { useColorPaletteInteractivity } from "@/hooks/useColorPalette";
-import PaletteDisplay, { PaletteDisplaySimpleV2 } from "../Color/PaletteDisplay";
+import PaletteDisplay, { PaletteDisplaySimpleV2 } from "../../Color/PaletteDisplay";
 import { loadCloudinaryImage } from "@/lib/cloudinary/utils";
 import { IoMdClose } from "react-icons/io";
-import ToggleComponent from "../General/ToggleComponent";
-import CheckBox from "../General/CheckBox";
+import ToggleComponent from "../../General/ToggleComponent";
+import CheckBox from "../../General/CheckBox";
 import { loadImage } from "@/utils/image";
 
 

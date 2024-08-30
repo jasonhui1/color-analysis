@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import PaletteRow from "./PaletteRow";
 import { IoMdClose } from "react-icons/io";
 import Image from "@/node_modules/next/image";
 import { setImageURL } from "@/lib/cloudinary/utils";
+import PaletteRow from "./PaletteRow";
 
 export default function ComparePalette({ paletteData, onClose }) {
 
@@ -34,7 +34,7 @@ export default function ComparePalette({ paletteData, onClose }) {
                     {paletteData.map((data, index) =>
                         <div className="relative cursor-pointer min-w-[150px] h-[200px]" key={data.id} onClick={() => { setVisibleIndex(index) }} >
                             <Image src={setImageURL(data.imageURL, 150, 150)} alt={'image'} layout="fill" objectFit="contain" />
-                            <div className={`absolute inset-0 bg-black w-full h-full bg-opacity-50  ${(index === visibleIndex) ? 'opacity-0' :''}`}/>
+                            <div className={`absolute inset-0 bg-black w-full h-full bg-opacity-50  ${(index === visibleIndex) ? 'opacity-0' : ''}`} />
                         </div>
                     )}
 

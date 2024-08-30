@@ -1,11 +1,13 @@
 "use client"
 import React, { createRef, useEffect, useState } from 'react'
 import { ColorPicker } from '../../Components/Color/picker';
-import PaletteRow from '@/Components/DataPage/PaletteRow';
+import PaletteRow from '@/Components/DataPage/Row/PaletteRow';
 import { Header } from '@/Components/DataPage/Header';
 import { useFetchPalettesData } from '@/hooks/useFetchPalettesData';
-import EnlargePaletteDisplay from '@/Components/DataPage/EnlargePaletteDisplay';
-import ComparePalette from '@/Components/DataPage/ComparePalette';
+import ComparePalette from '@/Components/DataPage/Row/ComparePalette';
+import EnlargePaletteDisplay from '@/Components/DataPage/Row/EnlargePaletteDisplay';
+import { ColorProvider } from '@/context/color';
+import { ImageProvider } from '@/context/image';
 
 export default function DataPage() {
 
@@ -14,7 +16,7 @@ export default function DataPage() {
   const [selectedColor, setSelectedColor] = useState([0, 0, 0]);
 
   const maxImageSize = 250
-  const { data, loading, error } = useFetchPalettesData({ searchToggle, setSearchToggle, searchTags})
+  const { data, loading, error } = useFetchPalettesData({ searchToggle, setSearchToggle, searchTags })
 
   const [enlargeIndex, setEnlargeIndex] = useState(-1)
   const [comparing, setComparing] = useState(false)
@@ -33,7 +35,7 @@ export default function DataPage() {
       setSelectedPalettes(selectedPalettes.filter(id => id != paletteId))
     }
   }
-  
+
   const onClickCompareButton = () => {
     setComparing(true)
   }
@@ -57,7 +59,7 @@ export default function DataPage() {
       {comparing &&
         <ComparePalette
           paletteData={selectedPalettes.map(paletteId => data.find(palette => palette.id == paletteId))}
-          onClose={()=>setComparing(false)}
+          onClose={() => setComparing(false)}
         />
       }
 
@@ -66,7 +68,7 @@ export default function DataPage() {
         <EnlargePaletteDisplay imageURL={enlargingPalette.imageURL} maskImageURL={enlargingPalette.maskImageURL}
           colorPalette={enlargingPalette.palette} ignorePalette={enlargingPalette.ignorePalette} percentage={enlargingPalette.colorPalettePercentage}
           selectedColor={selectedColor} setSelectedColor={setSelectedColor}
-          onClose={()=>setEnlargeIndex(-1)}
+          onClose={() => setEnlargeIndex(-1)}
         />
       }
 
@@ -77,13 +79,18 @@ export default function DataPage() {
         const id = paletteData.id
 
         return (
-          <PaletteRow key={paletteData.id}
-            paletteData={paletteData}
-            onClickTag={onClickTag}
-            setEnlargeIndex={() => setEnlargeIndex(index)}
-            setSelectedColor={setSelectedColor}
-            onPaletteSelect={onPaletteSelect}
-          />
+          <ColorProvider>
+            <ImageProvider>
+              <PaletteRow key={paletteData.id}
+                paletteData={paletteData}
+                onClickTag={onClickTag}
+                setEnlargeIndex={() => setEnlargeIndex(index)}
+                setSelectedColor={setSelectedColor}
+                onPaletteSelect={onPaletteSelect}
+              />
+            </ImageProvider>
+          </ColorProvider>
+
         )
       })}
 
