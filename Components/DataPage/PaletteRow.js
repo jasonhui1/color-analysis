@@ -7,7 +7,7 @@ import { sortPaletteAndPercentage } from '../../utils/color';
 import { useInView } from 'react-intersection-observer';
 import MaskedCanvas from '../../Components/Canvas/MaskedCanvas';
 import { ImageTagsDisplay } from './ImageTagsDisplay';
-import { setImageURL } from '@/lib/cloudinary/utils';
+import { loadCloudinaryImage, setImageURL } from '@/lib/cloudinary/utils';
 import { MdOutlineZoomOutMap } from "react-icons/md";
 import { deletePaletteClient } from '@/lib/clientApis/palette';
 import CheckBox from '../General/CheckBox';
@@ -17,23 +17,21 @@ import Extras from './Extra';
 import { loadImage } from '@/utils/image';
 
 export const PaletteRow = ({ paletteData,
-
+    onClickTag = null, setSelectedColor, onPaletteSelect = null, setEnlargeIndex = null,
     showTags = true, showPalette = true, showSelect = true,
-    onClickTag = null, setSelectedColor, onPaletteSelect = null, setEnlargeIndex = null, maxSize = 250
+    maxSize = 250,
 }) => {
 
-    const { id: paletteId, palette, ignorePalette = [], tags, percentage, imageURL, maskImageURL, imageSourceURL } = paletteData
+    const { palette, ignorePalette = [], tags, imageURL, maskImageURL } = paletteData
     // console.log(cloudinary.url(imageURL, { width: 100, height: 150, crop: "fill", fetch_format: "auto" }))
     // console.log('imageURL, maskImageURL :>> ', imageURL, maskImageURL);
 
     const [image, setImage] = useState(null);
     const [maskImage, setMaskImage] = useState(null);
-    const [selected, setSelected] = useState(false)
     const [hoveringColor, setHoveringColor] = useState(null)
 
     const [isDeleted, setIsDeleted] = useState(false)
 
-    const { palette: sorted_palette, percentage: sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
     const { ref, inView, entry } = useInView({
         /* Optional options */
         triggerOnce: true,
@@ -41,22 +39,16 @@ export const PaletteRow = ({ paletteData,
     });
 
     useEffect(() => {
-        if (inView) {
-            const loadResizedImage = async (url, setF) => {
-                const resized_url = setImageURL(url, maxSize, maxSize)
-                const img = await loadImage(resized_url);
-                setF(img);
+        if (!inView) return
+        const loadImages = async () => {
+            if (imageURL) setImage(await loadCloudinaryImage(imageURL, maxSize))
+            if (maskImageURL) setMaskImage(await loadCloudinaryImage(maskImageURL, maxSize))
+        };
 
-            };
-            if (imageURL) loadResizedImage(imageURL, setImage);
-            if (maskImageURL) loadResizedImage(maskImageURL, setMaskImage);
-        }
+        loadImages()
     }, [inView, imageURL]);
 
-    const onSelect = () => {
-        setSelected(!selected)
-        onPaletteSelect(paletteId, !selected)
-    }
+
 
     const { ref: canvasRef } = useCanvas()
     const { ref: maskCanvasRef } = useCanvas()
@@ -84,21 +76,16 @@ export const PaletteRow = ({ paletteData,
                             </div>
                             {/* <MdOutlineZoomOutMap className='cursor-pointer' onClick={setEnlargeIndex} size={36}/> */}
 
-                            <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} highlightColor={hoveringColor} />
-                            {showPalette &&
-                                <PaletteDisplay title={''}
-                                    colorPalette={sorted_palette} colorPalettePercentage={sorted_percentage}
-                                    setSelectedColor={setSelectedColor}
-                                    setHoveringColor={setHoveringColor}
-                                    enableAdd={false} enableDelete={false} enableEdit={false}
-                                />
 
+                            <DataDisplay
+                                hoveringColor={hoveringColor} setHoveringColor={setHoveringColor} setSelectedColor={setSelectedColor}
+                                paletteData={paletteData}
+                                onPaletteSelect={onPaletteSelect}
+                                setIsDeleted={setIsDeleted}
+                                showPalette={showPalette} showSelect={showSelect}
+                                maxSize={maxSize}
+                            />
 
-                            }
-
-                            {/* Need more safety steps before deploy */}
-                            {showSelect && <CheckBox checked={selected} onChange={onSelect} label='' />}
-                            <Extras paletteId={paletteId} onDelete={() => setIsDeleted(true)} />
                         </>)
                     }
                 </div>
@@ -109,4 +96,42 @@ export const PaletteRow = ({ paletteData,
     )
 }
 
+
 export default PaletteRow;
+
+function DataDisplay({ hoveringColor, setHoveringColor, setSelectedColor,
+    paletteData,
+    onPaletteSelect,
+    setIsDeleted,
+    showPalette = true, showSelect = true,
+    maxSize,
+}) {
+
+    const [selected, setSelected] = useState(false)
+    const { id: paletteId, palette, percentage } = paletteData
+    const { palette: sorted_palette, percentage: sorted_percentage } = sortPaletteAndPercentage(palette, percentage)
+
+    const onSelect = () => {
+        setSelected(!selected)
+        onPaletteSelect(paletteId, !selected)
+    }
+
+    return (
+        <>
+            <TriangularColorPickerDisplayColors colors={palette} size={maxSize * 0.8} highlightColor={hoveringColor} />
+            {showPalette &&
+                <PaletteDisplay title={''}
+                    colorPalette={sorted_palette} colorPalettePercentage={sorted_percentage}
+                    setSelectedColor={setSelectedColor}
+                    setHoveringColor={setHoveringColor}
+                    enableAdd={false} enableDelete={false} enableEdit={false}
+                />
+
+
+            }
+
+            {showSelect && <CheckBox checked={selected} onChange={onSelect} label='' />}
+            <Extras paletteId={paletteId} onDelete={() => setIsDeleted(true)} />
+        </>
+    );
+}

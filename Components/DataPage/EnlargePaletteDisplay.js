@@ -5,7 +5,7 @@ import { ColorPicker, TriangularColorPickerDisplayColors } from "@/Components/Co
 import ImageDisplay from "../ImageDisplay";
 import { useColorPaletteInteractivity } from "@/hooks/useColorPalette";
 import PaletteDisplay, { PaletteDisplaySimpleV2 } from "../Color/PaletteDisplay";
-import { setImageURL } from "@/lib/cloudinary/utils";
+import { loadCloudinaryImage } from "@/lib/cloudinary/utils";
 import { IoMdClose } from "react-icons/io";
 import ToggleComponent from "../General/ToggleComponent";
 import CheckBox from "../General/CheckBox";
@@ -26,18 +26,16 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
     const [enableReplacePalette, setEnableReplacePalette] = useState(false);
 
     useEffect(() => {
-        const loadResizedImage = async (url, setF) => {
-            const resized_url = setImageURL(url, maxSize, maxSize)
-            const img = await loadImage(resized_url);
-            setF(img);
-
+        const loadImages = async () => {
+            if (imageURL) setImage(await loadCloudinaryImage(imageURL, maxSize))
+            if (maskImageURL) setMaskImage(await loadCloudinaryImage(maskImageURL, maxSize))
         };
-        if (imageURL) loadResizedImage(imageURL, setImage);
-        if (maskImageURL) loadResizedImage(maskImageURL, setMaskImage);
 
+        loadImages()
         setReplacePalette(colorPalette)
     }, []);
 
+    // Disable scrolling
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => {
