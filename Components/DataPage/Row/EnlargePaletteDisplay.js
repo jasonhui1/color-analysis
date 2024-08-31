@@ -10,11 +10,14 @@ import { IoMdClose } from "react-icons/io";
 import ToggleComponent from "../../General/ToggleComponent";
 import CheckBox from "../../General/CheckBox";
 import { loadImage } from "@/utils/image";
+import { sortPaletteAndPercentage } from "@/utils/color";
 
 
-const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePalette, percentage, maxSize = 640, selectedColor, setSelectedColor, onClose }) => {
+const EnlargePaletteDisplay = ({ paletteData, maxSize = 640, selectedColor, setSelectedColor, onClose }) => {
     const canvasRef = useRef(null);
     const maskCanvasRef = useRef(null);
+    const { imageURL, maskImageURL, palette: colorPalette, ignorePalette, percentage } = paletteData
+    const { palette: sorted_palette, percentage: sorted_percentage } = sortPaletteAndPercentage(colorPalette, percentage)
 
     //Resets, use canvas hook
     const [hoveringColor, setHoveringColor] = useState();
@@ -32,7 +35,7 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
         };
 
         loadImages()
-        setReplacePalette(colorPalette)
+        setReplacePalette(sorted_palette)
     }, []);
 
     // Disable scrolling
@@ -57,7 +60,7 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
                     <CheckBox label='Only highlight mask' checked={onlyHighlightMask} onChange={() => setOnlyHighlightMask(!onlyHighlightMask)} />
 
                     <PaletteDisplay
-                        colorPalette={colorPalette} colorPalettePercentage={percentage}
+                        colorPalette={sorted_palette} colorPalettePercentage={sorted_percentage}
                         setSelectedColor={setSelectedColor}
                         setHoveringColor={setHoveringColor}
                         enableAdd={false} enableDelete={false} enableEdit={false}
@@ -68,7 +71,7 @@ const EnlargePaletteDisplay = ({ imageURL, maskImageURL, colorPalette, ignorePal
                         <PaletteDisplay
                             title='Replace Color Palette'
                             colorPalette={replacePalette} setColorPalette={setReplacePalette} colorPalettePercentage={[]}
-                            setSelectedColor={setSelectedColor} setHoveringColor={setHoveringColor}
+                            setSelectedColor={setSelectedColor}
                             selectedColor={selectedColor} enableAdd={false} enableDelete={false}
                         />
                         <CheckBox label='Enable Replace Color Palette' checked={enableReplacePalette} onChange={() => setEnableReplacePalette(!enableReplacePalette)} />
