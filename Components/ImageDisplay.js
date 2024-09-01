@@ -1,71 +1,49 @@
 import useCanvas from "@/hooks/useCanvas";
 import { useMaskUI } from "@/hooks/useMaskUI";
 import { useEffect, useState } from "react";
-import { MaskEnableButton, MaskUI } from "./Canvas/MaskUI";
-import Canvas from "./Canvas/Canvas";
-import HighlightHoveringColorCanvas from "./Canvas/FilterCanvas";
-import MaskedCanvas from "./Canvas/MaskedCanvas";
-import SobelCanvas from "./Canvas/SobelCanvas";
-import ToggleComponent from "./General/ToggleComponent";
+import { MaskEnableButton } from "./Canvas/MaskUI";
 import { replaceCanvasColor } from "@/utils/canvas";
+import CanvasArea from "./Canvas/CanvasArea";
+import { useColorContext } from "@/context/color";
 
-const ImageDisplay = ({ canvasRef, maskedCanvasRef,
-    image, maskImage,
-    hoveringColor, setSelectedColor,
-    colorPalette, ignorePalette, replacePalette = null, enableReplacePalette = false,
-    onlyHighlightMask,
+const ImageDisplay = ({ setSelectedColor,
+    replacePalette = null, enableReplacePalette = false, onlyHighlightMask = true,
     maxSize = 640
 }) => {
 
-    const { reset: canvasReset, drawingComplete, setDrawingComplete, update: updateCanvas } = useCanvas()
-    const { reset: maskReset, drawingComplete: maskDrawingComplete, setDrawingComplete: setMaskDrawingComplete, update: updateMaskCanvas } = useCanvas()
-    const { ref: highlightCanvasRef, reset: highlightReset, drawingComplete: HighlightDrawingComplete, setDrawingComplete: setHighlightDrawingComplete, update: updateHighlightCanvas } = useCanvas()
-    const { ref: sobelCanvasRef, reset: sobelReset, update: updateSobelCanvas } = useCanvas()
+    const BaseCanvas = useCanvas()
+    const MaskCanvas = useCanvas()
+    const HLCanvas = useCanvas()
+    const SobelCanvas = useCanvas()
 
     const { enableMask, setEnableMask } = useMaskUI();
     const [enableSobel, setEnableSobel] = useState(false);
 
-    useEffect(() => {
-        if (maskDrawingComplete && enableMask) updateCanvas()
-    }, [maskDrawingComplete]);
+    const { colorPalette } = useColorContext();
+
 
     useEffect(() => {
-        updateCanvas()
+        if (MaskCanvas.drawingComplete && enableMask) BaseCanvas.update()
+    }, [MaskCanvas.drawingComplete]);
+
+    useEffect(() => {
+        BaseCanvas.update()
     }, [replacePalette, enableReplacePalette]);
-
-
-    useEffect(() => {
-        if (drawingComplete) updateSobelCanvas()
-    }, [drawingComplete]);
 
     const extraDrawing = () => {
         if (!enableReplacePalette) return
-        replaceCanvasColor(canvasRef?.current, colorPalette, replacePalette)
+        replaceCanvasColor(BaseCanvas.ref.current, colorPalette, replacePalette)
     }
 
     return (
         <div className="flex flex-col gap-3 min-w-fit">
             <div className="mb-4 relative  ">
-                {/* Canvas Area */}
-                {image &&
-                    <>
-                        <Canvas canvasRef={canvasRef} image={image} setDrawingComplete={setDrawingComplete} reset={canvasReset}
-                            maskedImage={maskedCanvasRef.current} enableMask={enableMask}
-                            setSelectedColor={setSelectedColor}
-                            maxSize={maxSize}
-                            extraDrawing={extraDrawing}
-                        />
-
-                        <SobelCanvas canvasRef={sobelCanvasRef} reset={sobelReset} imageCanvas={canvasRef?.current} enabled={enableSobel} colorSpace={'rgb'} />
-
-                        <MaskedCanvas canvasRef={maskedCanvasRef} image={canvasRef?.current} maskImage={maskImage} reset={maskReset}
-                            setDrawingComplete={setMaskDrawingComplete}
-                        />
-                        <HighlightHoveringColorCanvas canvasRef={highlightCanvasRef} imageCanvas={canvasRef?.current} maskCanvas={maskedCanvasRef?.current} onlyInMask={onlyHighlightMask}
-                            reset={highlightReset}
-                            color={hoveringColor} colorPalette={colorPalette} ignorePalette={ignorePalette} />
-                    </>
-                }
+                <CanvasArea Canvas_={BaseCanvas} MaskCanvas={MaskCanvas} HLCanvas={HLCanvas} SobelCanvas_={SobelCanvas}
+                    enableMask={enableMask} enableSobel={enableSobel} onlyHighlightMask={onlyHighlightMask}
+                    setSelectedColor={setSelectedColor} 
+                    maxSize={maxSize}
+                    extraDrawing={extraDrawing}
+                />
             </div>
             <div className="flex gap-4 items-center">
                 <span> Mask</span><MaskEnableButton enableMask={enableMask} setEnableMask={setEnableMask} />

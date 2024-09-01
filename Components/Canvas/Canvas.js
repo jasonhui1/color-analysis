@@ -4,7 +4,7 @@ import { calculateCanvasSize } from "../../utils/canvas";
 
 export default function Canvas({ canvasRef, image, setDrawingComplete, reset, maskedImage,
     maskMode = false, enableMask, invertMask = false,
-    setSelectedColor,
+    setSelectedColor = null,
     maxSize = 640,
     extraDrawing = (ctx) => { },
 }) {
@@ -77,7 +77,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
     }
 
     useEffect(() => {
-        if (!maskMode) {
+        if (!maskMode && setSelectedColor) {
             const canvas = canvasRef.current;
             canvas.addEventListener('mousedown', startSelecting);
             canvas.addEventListener('mouseup', stopSelecting);
@@ -94,7 +94,7 @@ export default function Canvas({ canvasRef, image, setDrawingComplete, reset, ma
         }
     }, [maskMode, canvasRef, image]);
 
-    return (<canvas ref={canvasRef} className="max-w-full h-auto cursor-crosshair" />);
+    return (<canvas ref={canvasRef} className={`max-w-full h-auto ${setSelectedColor ? 'cursor-crosshair' : ''}`} />);
 }
 
 

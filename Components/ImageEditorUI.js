@@ -45,7 +45,7 @@ export default function ImageEditorUI({
         setMaskImage(croppedMaskImage);
 
         updateAllCanvas()
-        SAM.resetSAM()
+        SAM.reset()
         setEnableMask(false)
         setEnableSobel(false)
     }

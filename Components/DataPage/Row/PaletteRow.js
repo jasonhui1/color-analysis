@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useInView } from 'react-intersection-observer';
 import { loadCloudinaryImage } from '@/lib/cloudinary/utils';
-import { ColorProvider } from '@/context/color';
+import { ColorProvider, useColorContext } from '@/context/color';
 import { ImageProvider, useImageContext } from '@/context/image';
 import DataDisplay from './ColorDataDisplay';
 import ImageDataDisplay from './ImageDataDisplay';
@@ -17,6 +17,7 @@ const PaletteRow = ({ paletteData,
 
     const { id: paletteId, imageURL, maskImageURL } = paletteData
     const { setImage, setMaskImage } = useImageContext()
+    const { setColorPalette, setIgnorePalette } = useColorContext()
 
     const [selected, setSelected] = useState(false)
     const [isDeleted, setIsDeleted] = useState(false)
@@ -35,6 +36,9 @@ const PaletteRow = ({ paletteData,
         };
 
         loadImages()
+        
+        setColorPalette(paletteData.palette)
+        setIgnorePalette(paletteData.ignorePalette)
     }, [inView, imageURL]);
 
     const onSelect = () => {

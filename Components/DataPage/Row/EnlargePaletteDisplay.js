@@ -11,20 +11,30 @@ import ToggleComponent from "../../General/ToggleComponent";
 import CheckBox from "../../General/CheckBox";
 import { loadImage } from "@/utils/image";
 import { sortPaletteAndPercentage } from "@/utils/color";
-
+import { ImageProvider, useImageContext } from "@/context/image";
+import { ColorProvider, useColorContext } from "@/context/color";
 
 const EnlargePaletteDisplay = ({ paletteData, maxSize = 640, selectedColor, setSelectedColor, onClose }) => {
-    const canvasRef = useRef(null);
-    const maskCanvasRef = useRef(null);
+    const { palette, ignorePalette } = paletteData
+
+    return (
+        <ColorProvider colorPalette_={palette} ignorePalette_={ignorePalette}>
+            <ImageProvider>
+                <EnlargePaletteDisplay_ paletteData={paletteData} maxSize={maxSize} selectedColor={selectedColor} setSelectedColor={setSelectedColor} onClose={onClose} />
+            </ImageProvider>
+        </ColorProvider>
+    )
+}
+
+const EnlargePaletteDisplay_ = ({ paletteData, maxSize = 640, selectedColor, setSelectedColor, onClose }) => {
     const { imageURL, maskImageURL, palette: colorPalette, ignorePalette, percentage } = paletteData
     const { palette: sorted_palette, percentage: sorted_percentage } = sortPaletteAndPercentage(colorPalette, percentage)
 
-    //Resets, use canvas hook
-    const [hoveringColor, setHoveringColor] = useState();
     const [onlyHighlightMask, setOnlyHighlightMask] = useState(true);
 
-    const [image, setImage] = useState(null);
-    const [maskImage, setMaskImage] = useState(null);
+    const { hoveringColor, setHoveringColor } = useColorContext()
+    const { setImage, setMaskImage } = useImageContext()
+
     const [replacePalette, setReplacePalette] = useState([]);
     const [enableReplacePalette, setEnableReplacePalette] = useState(false);
 
@@ -49,10 +59,8 @@ const EnlargePaletteDisplay = ({ paletteData, maxSize = 640, selectedColor, setS
     return (
         <div className='flex items-center justify-center fixed inset-0 vh-100 w-full z-10 bg-red-50 '>
             <div className="flex flex-row gap-6 relative mb-3 p-4 " >
-                <ImageDisplay canvasRef={canvasRef} maskedCanvasRef={maskCanvasRef}
-                    image={image} maskImage={maskImage}
-                    hoveringColor={hoveringColor} setSelectedColor={setSelectedColor}
-                    colorPalette={colorPalette} ignorePalette={ignorePalette} replacePalette={replacePalette} enableReplacePalette={enableReplacePalette}
+                <ImageDisplay setSelectedColor={setSelectedColor}
+                    replacePalette={replacePalette} enableReplacePalette={enableReplacePalette}
                     onlyHighlightMask={onlyHighlightMask}
                 />
 

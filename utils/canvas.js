@@ -23,15 +23,6 @@ export const calculateCanvasSize = (image, maxSize) => {
 
 }
 
-export const resizeImage = (image, newWidth, newHeight) => {
-    const croppedCanvas = document.createElement('canvas');
-    croppedCanvas.width = newWidth;
-    croppedCanvas.height = newHeight;
-
-    const croppedCtx = croppedCanvas.getContext('2d');
-    croppedCtx.drawImage(image, 0, 0, newWidth, newHeight);
-
-}
 
 // Utility function to calculate the bounding box of non-transparent pixels
 const calculateNonTransparentBoundingBox = (imageData, width, height, isInverted = false) => {
@@ -181,7 +172,6 @@ export const invertImageAlpha = async (image, returnCanvas = false) => {
 
 export const replaceCanvasColor = (canvas, palette1, palette2) => {
     const requireReplace = palette1.map((color, index) => !isColorEqual(color, palette2[index]));
-    console.log('requireReplace :>> ', requireReplace);
     if (!requireReplace.includes(true)) return
 
     const ctx = canvas.getContext('2d');
@@ -206,7 +196,7 @@ export const exportCanvasImage = async ({ canvas, maskCanvas = null, image, useM
     // Convert canvas to blob
     const blob = await processCanvas({
         canvas, maskCanvas: useMask ? maskCanvas : null, image,
-        cropTransparent: true, useCurrentCanvas: false
+        cropTransparent: false, useCurrentCanvas: false
         , toBlob: true
     });
     const url = URL.createObjectURL(blob);

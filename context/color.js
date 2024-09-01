@@ -2,10 +2,10 @@ import { createContext, useContext, useState } from 'react';
 
 const ColorContext = createContext(null);
 
-export const ColorProvider = ({ children }) => {
-  const [colorPalette, setColorPalette] = useState([]);
-  const [ignorePalette, setIgnorePalette] = useState([]);
-  const [hoveringColor, setHoveringColor] = useState();
+export const ColorProvider = ({ colorPalette_ = [], ignorePalette_ = [], hoveringColor_ = null, children }) => {
+  const [colorPalette, setColorPalette] = useState(colorPalette_);
+  const [ignorePalette, setIgnorePalette] = useState(ignorePalette_);
+  const [hoveringColor, setHoveringColor] = useState(hoveringColor_);
 
   const value = {
     colorPalette,
