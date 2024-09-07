@@ -2,7 +2,7 @@ import { extractDroppedFileUrl } from "@/utils/file";
 import { useState, useRef, useEffect } from "react";
 import { LuUpload } from "react-icons/lu";
 
-export default function FileUpload({ onImageSelected, imageSelected, fileDropRef}) {
+export default function FileUpload({ onImageSelected, imageSelected, fileDropRef }) {
 
     const [isUploading, setIsUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -66,10 +66,18 @@ export default function FileUpload({ onImageSelected, imageSelected, fileDropRef
         }
     }, [fileDropRef,]);
 
-    let className = 'w-full h-full border-2 rounded-lg flex items-center justify-center mb-4'
-    if (!imageSelected) className += '  border-dashed cursor-pointer border-gray-300 hover:border-green-500 hover:bg-green-50';
-    if (isDragging) className += ' border-green-500 bg-green-100'
-    if (isUploading) className += ' opacity-50 cursor-not-allowed'
+    const classNames = []
+    classNames.push('absolute inset-0 w-full h-full rounded-lg flex items-center justify-center')
+    
+    if (imageSelected) classNames.push('pointer-events-none');
+    if (!imageSelected || isDragging) {
+        classNames.push('border-2 border-dashed cursor-pointer border-gray-300 hover:border-green-500 hover:bg-green-50')
+    }
+    
+    if (isDragging) classNames.push(' border-green-500 bg-green-100 z-50')
+    if (isUploading) classNames.push(' opacity-50 cursor-not-allowed')
+
+    const className = classNames.join(' ')
 
     return (
         <div

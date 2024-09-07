@@ -71,9 +71,6 @@ export default function DataPage() {
         />
       }
 
-      {error && <div>Error: {error}</div>}
-      {loading && <div>Loading...</div>}
-
       {data && data.map((paletteData, index) => {
         const id = paletteData.id
 
@@ -93,6 +90,8 @@ export default function DataPage() {
         )
       })}
 
+      {error && <div>Error: {error}</div>}
+      {loading && <div>Loading...</div>}
       {!loading && !data && <div>You have not added any data</div>}
     </div>
   )

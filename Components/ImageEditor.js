@@ -58,11 +58,9 @@ const ImageEditor = ({
 
     return (
         <div className="flex flex-col gap-3 min-w-fit">
-            <div className="mb-4 relative  " ref={fileDropRef}  >
+            <div className="mb-4 relative" ref={fileDropRef} style={{ width: (canvas?.width ?? maxSize) +'px', height: (canvas?.height ?? maxSize) + 'px' }} >
                 {/* Drag and drop within the same dimension as canvas */}
-                <div className={`${image ? 'absolute inset-0  pointer-events-none ' : ''} `} style={{ width: canvas?.width ?? maxSize + 'px', height: canvas?.height ?? maxSize + 'px' }}>
-                    <FileUpload onImageSelected={handleImageSelection} imageSelected={image !== null} fileDropRef={fileDropRef} />
-                </div>
+                <FileUpload onImageSelected={handleImageSelection} imageSelected={image !== null} fileDropRef={fileDropRef} />
 
                 <CanvasArea Canvas_={BaseCanvas} MaskCanvas={MaskCanvas} HLCanvas={HLCanvas} SobelCanvas_={SobelCanvas} sobelColorSpace={sobelColorSpace}
                     enableMask={enableMask} enableSobel={enableSobel} onlyHighlightMask={onlyHighlightMask}
