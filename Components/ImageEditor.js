@@ -63,6 +63,7 @@ const ImageEditor = ({
                 <FileUpload onImageSelected={handleImageSelection} imageSelected={image !== null} fileDropRef={fileDropRef} />
 
                 <CanvasArea Canvas_={BaseCanvas} MaskCanvas={MaskCanvas} HLCanvas={HLCanvas} SobelCanvas_={SobelCanvas} sobelColorSpace={sobelColorSpace}
+                    SAMCanvas_={SAMCanvas} SAM={SAM}
                     enableMask={enableMask} enableSobel={enableSobel} onlyHighlightMask={onlyHighlightMask}
                     inMaskMode={maskMode} invertMask={invertMask}
                     setSelectedColor={setSelectedColor}
