@@ -36,11 +36,15 @@ export function useTagSuggestion({ input, setInput, all_tags, currentTags, setCu
 
     const onKeyDown = (e) => {
         if (e.key === 'Enter') {
-            if (suggestions[selectedIndex]) {
+            if (show && suggestions[selectedIndex]) {
                 addTag(suggestions[selectedIndex])
             } else {
                 if (enableNewTag) addTag(input)
             }
+        }
+
+        if(e.key === 'Escape') {
+            setShow(false)
         }
 
         if (e.key === 'ArrowDown') {
