@@ -11,7 +11,7 @@ export function useTagSuggestion({ input, setInput, all_tags, currentTags, setCu
 
         let filtered = all_tags.filter(tag =>
             tag.toLowerCase().includes(value.toLowerCase()) && !currentTags.includes(tag)
-        );
+        ).sort((a, b) => a.length - b.length);
 
         setSuggestions(filtered);
         setSelectedIndex(0)
@@ -43,7 +43,7 @@ export function useTagSuggestion({ input, setInput, all_tags, currentTags, setCu
             }
         }
 
-        if(e.key === 'Escape') {
+        if (e.key === 'Escape') {
             setShow(false)
         }
 
