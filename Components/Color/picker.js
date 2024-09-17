@@ -173,18 +173,18 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
 
             {SVPosition.map(({ x, y, highlight }, index,) => (
                 <div key={index} className={highlight ? 'z-10' : ''}>
-                    <CircleIndicator position={{ x, y }} diameter={10} color="white" border_width={2} />
-                    {highlight && <CircleIndicator position={{ x, y }} diameter={11} color="green" border_width={2} />}
-                    <CircleIndicator position={{ x, y }} diameter={12} color="black" />
+                    <CircleIndicator position={{ x, y }} diameter={10*ratio} color="white" border_width={2} />
+                    {highlight && <CircleIndicator position={{ x, y }} diameter={11*ratio} color="green" border_width={2} />}
+                    <CircleIndicator position={{ x, y }} diameter={12*ratio} color="black" />
                 </div>
             ))}
 
             {HuePosition.map(({ x, y, highlight }, index) => (
                 <div key={index} className={highlight ? 'z-10' : ''}>
-                    <RectIndicator position={{ x, y }} width={10} height={22} color="white" border_width={2} rotation={colors[index].h + 90 + defaultHueShift} />
-                    {highlight && <RectIndicator position={{ x, y }} width={11} height={23} color="green" border_width={2} rotation={colors[index].h + 90 + defaultHueShift} />}
+                    <RectIndicator position={{ x, y }} width={10*ratio} height={22*ratio} color="white" border_width={2} rotation={colors[index].h + 90 + defaultHueShift} />
+                    {highlight && <RectIndicator position={{ x, y }} width={11*ratio} height={23*ratio} color="green" border_width={2} rotation={colors[index].h + 90 + defaultHueShift} />}
 
-                    <RectIndicator position={{ x, y }} width={12} height={24} color="black" rotation={colors[index].h + 90 + defaultHueShift} />
+                    <RectIndicator position={{ x, y }} width={12*ratio} height={24*ratio} color="black" rotation={colors[index].h + 90 + defaultHueShift} />
                 </div>
             ))}
         </div>

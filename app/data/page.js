@@ -75,8 +75,6 @@ export default function DataPage() {
         const id = paletteData.id
 
         return (
-          <ColorProvider>
-            <ImageProvider>
               <PaletteRow key={paletteData.id}
                 paletteData={paletteData}
                 onClickTag={onClickTag}
@@ -84,9 +82,6 @@ export default function DataPage() {
                 setSelectedColor={setSelectedColor}
                 onPaletteSelect={onPaletteSelect}
               />
-            </ImageProvider>
-          </ColorProvider>
-
         )
       })}
 

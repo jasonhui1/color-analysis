@@ -9,7 +9,16 @@ import ColorDataDisplay from './ColorDataDisplay';
 import CheckBox from '@/Components/General/CheckBox';
 import Extras from '../Extra';
 
-const PaletteRow = ({ paletteData,
+const withProviders = (WrappedComponent) => (props) => (
+    <ColorProvider>
+      <ImageProvider>
+        <WrappedComponent {...props} />
+      </ImageProvider>
+    </ColorProvider>
+  );
+
+
+export const PaletteRow = withProviders(({ paletteData,
     onClickTag = null, setSelectedColor, onPaletteSelect = null, setEnlargeIndex = null,
     showTags = true, showPalette = true, showSelect = true,
     maxSize = 250,
@@ -36,7 +45,7 @@ const PaletteRow = ({ paletteData,
         };
 
         loadImages()
-        
+
         setColorPalette(paletteData.palette)
         setIgnorePalette(paletteData.ignorePalette)
     }, [inView, imageURL]);
@@ -79,7 +88,7 @@ const PaletteRow = ({ paletteData,
 
 
     )
-}
+})
 
 export default PaletteRow;
 
