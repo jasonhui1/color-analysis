@@ -8,9 +8,9 @@ const useTags = () => {
     useEffect(() => {
         const getTags = async () => {
             setLoading(true)
-            const data  = await getTagsClient()
+            const data = await getTagsClient()
 
-            const tags = data.map(tag => tag.tag)
+            const tags = (data ?? []).map(tag => tag.tag)
             setLoading(false)
             setTags(tags)
         }

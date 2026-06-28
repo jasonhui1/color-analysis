@@ -1,4 +1,5 @@
 import { googleSignIn } from "../../lib/clientApis/supabaseClient";
+import { useEffect, useState } from "react";
 
 async function handleSignInWithGoogle(response) {
     const { data, error } = googleSignIn(response.credential)
@@ -10,6 +11,14 @@ if (typeof window !== "undefined") {
 }
 
 const GoogleLogin = () => {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
+
     return (
         <>
             <div id="g_id_onload"
