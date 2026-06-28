@@ -83,13 +83,21 @@ export default ColorAnalysis;
 
 function Header() {
     return (
-        <div className="flex justify-between mb-2">
-            <h1 className="text-2xl font-bold mb-4">
-                Color Analysis
-            </h1>
-            <div className="flex gap-2 items-center">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", marginBottom: "12px" }}>
+            {/* Left — title */}
+            <h1 className="text-2xl font-bold">Color Analysis</h1>
 
-                <Link href="/data" className="text-blue-500 hover:text-blue-700 bg-gray-200 px-2 py-1 rounded-md">View Data</Link>
+            {/* Centre — View Data */}
+            <Link
+                href="/data"
+                className="text-blue-500 hover:text-blue-700 bg-gray-200 px-3 py-1.5 rounded-md font-medium text-sm"
+                style={{ justifySelf: "center" }}
+            >
+                View Data
+            </Link>
+
+            {/* Right — auth */}
+            <div style={{ justifySelf: "end" }}>
                 <GoogleLogin />
             </div>
         </div>

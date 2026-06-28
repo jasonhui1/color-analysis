@@ -1,15 +1,45 @@
-
 {
   "compilerOptions": {
-    "module": "ES6",
+    // Target modern JS environments (Next.js handles transpilation)
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["dom", "dom.iterable", "esnext"],
+
+    // JSX handled by Next.js (preserve for React 17+ transform)
     "jsx": "preserve",
-    //Type checks, useful for checking before pushing
+
+    // Enable JS type checking via JSDoc / inference
     "checkJs": true,
+    "allowJs": true,
+
+    // Stricter checks for catching real bugs
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+
+    // Interop
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+
+    // Path aliases
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
-    }
+      "@/*": ["./*"],
+      "@/components/*": ["./Components/*"],
+      "@/app/*": ["./app/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/utils/*": ["./utils/*"],
+      "@/context/*": ["./context/*"]
+    },
+
+    // Don't emit — Next.js handles compilation
+    "noEmit": true
   },
-  
-   "exclude": ["node_modules", "**/node_modules/*",]
+  "include": ["**/*.js", "**/*.jsx", "**/*.mjs", "next-env.d.ts"],
+  "exclude": ["node_modules", ".next", "out", "dist"]
 }

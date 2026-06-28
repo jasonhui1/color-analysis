@@ -1,3 +1,28 @@
 {
-  "extends": ["next/babel","next/core-web-vitals"]
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    // ── React ──────────────────────────────────────────────────────────
+    // Next.js 14 with new JSX transform — no need to import React
+    "react/react-in-jsx-scope": "off",
+    // Allow prop spreading (common in Next.js component patterns)
+    "react/jsx-props-no-spreading": "off",
+    // Don't require explicit return types / propTypes in JS projects
+    "react/prop-types": "off",
+    // Allow anonymous default exports (common in Next.js pages)
+    "import/no-anonymous-default-export": "off",
+
+    // ── React Hooks ────────────────────────────────────────────────────
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+
+    // ── General JS ────────────────────────────────────────────────────
+    // Warn on unused vars but ignore underscore-prefixed ones
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    // Allow console.log during development (change to "warn" before prod)
+    "no-console": "off",
+    // Prefer const but don't error on let
+    "prefer-const": "warn",
+    // Don't enforce semicolons (adjust to "error" if you prefer them)
+    "semi": "off"
+  }
 }
