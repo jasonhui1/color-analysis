@@ -18,6 +18,10 @@ export default function DataPage() {
   const maxImageSize = 250
   const { data, loading, error } = useFetchPalettesData({ searchToggle, setSearchToggle, searchTags })
 
+  useEffect(() => {
+    setSearchToggle(true);
+  }, [searchTags]);
+
   const [enlargeIndex, setEnlargeIndex] = useState(-1)
   const [comparing, setComparing] = useState(false)
 

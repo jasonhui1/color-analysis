@@ -9,16 +9,20 @@ import ColorDataDisplay from './ColorDataDisplay';
 import CheckBox from '@/Components/General/CheckBox';
 import Extras from '../Extra';
 
-const withProviders = (WrappedComponent) => (props) => (
-    <ColorProvider>
-      <ImageProvider>
-        <WrappedComponent {...props} />
-      </ImageProvider>
-    </ColorProvider>
-  );
+const withProviders = (WrappedComponent) => {
+    const ComponentWithProviders = (props) => (
+        <ColorProvider>
+            <ImageProvider>
+                <WrappedComponent {...props} />
+            </ImageProvider>
+        </ColorProvider>
+    );
+    ComponentWithProviders.displayName = `WithProviders(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+    return ComponentWithProviders;
+};
 
 
-export const PaletteRow = withProviders(({ paletteData,
+const PaletteRowBase = ({ paletteData,
     onClickTag = null, setSelectedColor, onPaletteSelect = null, setEnlargeIndex = null,
     showTags = true, showPalette = true, showSelect = true,
     maxSize = 250,
@@ -88,7 +92,12 @@ export const PaletteRow = withProviders(({ paletteData,
 
 
     )
-})
+};
+
+PaletteRowBase.displayName = 'PaletteRowBase';
+
+export const PaletteRow = withProviders(PaletteRowBase);
+PaletteRow.displayName = 'PaletteRow';
 
 export default PaletteRow;
 

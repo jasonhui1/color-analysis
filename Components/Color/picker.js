@@ -191,3 +191,5 @@ export const TriangularColorPickerDisplayColors = memo(({ hue = 30, size = 300, 
 
     );
 });
+
+TriangularColorPickerDisplayColors.displayName = 'TriangularColorPickerDisplayColors';
